@@ -1,0 +1,43 @@
+{
+  "name": "variant-form3-pro",
+  "version": "3.1.1",
+  "private": false,
+  "scripts": {
+    "serve": "vite",
+    "build": "vite build",
+    "lib": "vite build --config vite-lib.config.js",
+    "lib-render": "vite build --config vite-lib-render.config.js",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^0.2.4",
+    "axios": "^0.24.0",
+    "clipboard": "^2.0.8",
+    "core-js": "^3.6.5",
+    "element-plus": "^2.0.4",
+    "file-saver": "^2.0.5",
+    "mitt": "^3.0.0",
+    "sortablejs": "1.14.0",
+    "vue": "^3.2.26",
+    "vue3-quill": "^0.2.6"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@types/node": "^17.0.0",
+    "@vitejs/plugin-vue": "^2.0.0",
+    "@vitejs/plugin-vue-jsx": "^1.3.3",
+    "ace-builds": "^1.4.12",
+    "babel-eslint": "^10.1.0",
+    "mvdir": "^1.0.21",
+    "rollup-plugin-external-globals": "^0.6.1",
+    "rollup-plugin-visualizer": "^5.5.2",
+    "sass": "^1.45.0",
+    "vite": "2.7.3",
+    "vite-plugin-svg-icons": "^1.0.5"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

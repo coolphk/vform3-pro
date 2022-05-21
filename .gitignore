@@ -1,0 +1,17 @@
+node_modules
+.DS_Store
+/dist
+dist-ssr
+*.local
+/.idea/
+/.vscode/
+/stats.html
+*.iml
+/package-lock.json
+stats.html
+/index2_bak.html
+/index2.html
+/release-zip
+/*.zip
+/vform3_pro_3.0.5_lib/
+/lib/vuedraggable/dist_bak/
