@@ -3,6 +3,7 @@ export default {
     widgetLabel: {
       card: '卡片',
       alert: '提示',
+      'edit-table':'编辑表格'
     },
 
     setting: {
