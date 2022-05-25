@@ -7,7 +7,6 @@ export const editTableSchema = {
     name: '',
     label: 'edit-table',
     hidden: false,
-    folded: false,
     customClass: '',
     dataTarget: '',
     tableColumns: [

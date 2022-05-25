@@ -1,6 +1,12 @@
 <template>
   <el-form-item :label="i18nt('designer.setting.dataTarget')">
-        <el-input  type="text" v-model="optionModel.dataTarget" @click="showDataTargetDialog=true"></el-input>
+    <!--    <el-input type="text" v-model="optionModel.dataTarget" @click="showDataTargetDialog=true"></el-input>-->
+    <el-button @click="showDataTargetDialog=true">选择</el-button>
+    <div style="max-height: 300px;overflow: auto">
+      <el-tag round closable v-for="(tag,index) in selectedData" :key="tag.id">
+        {{ tag.name_ }}
+      </el-tag>
+    </div>
 
     <el-drawer v-if="showDataTargetDialog" v-model="showDataTargetDialog" title="选择需要匹配的数据" show-close
                style="width: 30vw">
@@ -35,10 +41,10 @@ export default {
       children: 'children',
       isLeaf: 'isLeaf',
     }
-
+    let selectedData = ref("")
 
     function loadNode(node, resolve) {
-      if (node.level == 0) {
+      if (node.level === 0) {
         resolve(getDataListByPid('00000'))
       } else {
         resolve(getDataListByPid(node.data.id))
@@ -46,17 +52,19 @@ export default {
     }
 
     function checkNode(data, {checkedNodes, checkedKeys}) {
-      // console.log('checkedKeys', checkedKeys.join(','));
-      props.optionModel.dataTarget = checkedKeys.join(',')
-      console.log(checkedNodes);
+      console.log('checkedNodes', checkedNodes);
+      selectedData.value = checkedNodes
+      // props.optionModel.dataTarget = checkedNodes.join(',')
+      // console.log(checkedNodes);
       // options.value =
     }
 
     return {
       showDataTargetDialog,
-      checkNode,
+      selectedData,
       treeProps,
-      loadNode
+      checkNode,
+      loadNode,
     }
   },
   props: {
