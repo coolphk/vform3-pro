@@ -1,4 +1,3 @@
-
 export const containers = [
   {
     type: 'grid',
@@ -136,17 +135,17 @@ export const containers = [
       tableColumns: [ //表格列信息
         {columnId: 1, prop:'name', label:'姓名', width:'100', show:true, align:'left', fixed:'left', sortable:true},
         {columnId: 2, prop:'date', label:'日期1', width:'160', show:true, align:'left', formatS:'d1'},
-        {columnId: 3, prop:'date2', label:'日期2',width:'160',show:true,align:'left',formatS:'d4'},
-        {columnId: 4, prop:'date3', label:'日期3',width:'160',show:true,align:'left',formatS:'d5'},
-        {columnId: 5, prop:'f1', label:'基金',width:'150',show:true,align:'right',sortable:true,formatS:'n1'},
-        {columnId: 6, prop:'f2',label:'股票',width:'150',show:true,align:'right',sortable:true,formatS:'n2'},
-        {columnId: 7, prop:'f3',label:'存款',width:'150',show:true,align:'right',sortable:true,formatS:'n3'},
+        {columnId: 3, prop: 'date2', label: '日期2', width: '160', show: true, align: 'left', formatS: 'd4'},
+        {columnId: 4, prop: 'date3', label: '日期3', width: '160', show: true, align: 'left', formatS: 'd5'},
+        {columnId: 5, prop: 'f1', label: '基金', width: '150', show: true, align: 'right', sortable: true, formatS: 'n1'},
+        {columnId: 6, prop: 'f2', label: '股票', width: '150', show: true, align: 'right', sortable: true, formatS: 'n2'},
+        {columnId: 7, prop: 'f3', label: '存款', width: '150', show: true, align: 'right', sortable: true, formatS: 'n3'},
         {columnId: 8, prop:'f4',label:'基金2',width:'150',show:true,align:'right',sortable:true,formatS:'n4'},
         {columnId: 9, prop:'f5',label:'股票2',width:'150',show:true,align:'right',sortable:true,formatS:'n5'},
         {columnId: 10, prop:'f6',label:'存款2',width:'150',show:true,align:'right',sortable:true,formatS:'n6'},
         {columnId: 11, prop:'f7',label:'成功率',width:'140',show:true,align:'right',sortable:true,formatS:'n7'},
-        {columnId: 12, prop:'add',label:'地址',width:'250',show:true},
-        {columnId: 13, prop:'ss',label:'秘密',width:'100',show:false},
+        {columnId: 12, prop: 'add', label: '地址', width: '250', show: true},
+        {columnId: 13, prop: 'ss', label: '秘密', width: '100', show: false},
       ],
       showButtonsColumn: false, // 是否显示操作列
       buttonsColumnTitle: '操作',
@@ -260,12 +259,14 @@ export const containers = [
 
 ]
 
+
 export const basicFields = [
   {
     type: 'input',
     icon: 'text-field',
     formItemFlag: true,
     options: {
+      dataTarget: '',
       name: '',
       label: '',
       labelAlign: '',
@@ -483,6 +484,7 @@ export const basicFields = [
     icon: 'select-field',
     formItemFlag: true,
     options: {
+      dataTarget: '',
       name: '',
       label: '',
       labelAlign: '',
@@ -1096,9 +1098,7 @@ export const advancedFields = [
 
 ]
 
-export const customFields = [
-
-]
+export const customFields = []
 
 export function addContainerWidgetSchema(containerSchema) {
   containers.push(containerSchema)

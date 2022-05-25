@@ -2,39 +2,53 @@
   <div class="toolbar-container">
     <div class="left-toolbar">
       <el-button type="text" :disabled="undoDisabled" :title="i18nt('designer.toolbar.undoHint')" @click="undoHistory">
-        <svg-icon icon-class="undo" /></el-button>
+        <svg-icon icon-class="undo"/>
+      </el-button>
       <el-button type="text" :disabled="redoDisabled" :title="i18nt('designer.toolbar.redoHint')" @click="redoHistory">
-        <svg-icon icon-class="redo" /></el-button>
+        <svg-icon icon-class="redo"/>
+      </el-button>
       <el-button-group style="margin-left: 20px">
         <el-button :type="layoutType === 'PC' ? 'info': ''" @click="changeLayoutType('PC')">
-          {{i18nt('designer.toolbar.pcLayout')}}</el-button>
+          {{ i18nt('designer.toolbar.pcLayout') }}
+        </el-button>
         <el-button :type="layoutType === 'Pad' ? 'info': ''" @click="changeLayoutType('Pad')">
-          {{i18nt('designer.toolbar.padLayout')}}</el-button>
+          {{ i18nt('designer.toolbar.padLayout') }}
+        </el-button>
         <el-button :type="layoutType === 'H5' ? 'info': ''" @click="changeLayoutType('H5')">
-          {{i18nt('designer.toolbar.mobileLayout')}}</el-button>
+          {{ i18nt('designer.toolbar.mobileLayout') }}
+        </el-button>
       </el-button-group>
       <el-button style="margin-left: 20px" :title="i18nt('designer.toolbar.nodeTreeHint')" @click="showNodeTreeDrawer">
-        <svg-icon icon-class="node-tree" /></el-button>
+        <svg-icon icon-class="node-tree"/>
+      </el-button>
     </div>
 
-    <el-drawer :title="i18nt('designer.toolbar.nodeTreeTitle')" direction="ltr" v-model="showNodeTreeDrawerFlag" :modal="true" :size="280"
+    <el-drawer :title="i18nt('designer.toolbar.nodeTreeTitle')" direction="ltr" v-model="showNodeTreeDrawerFlag"
+               :modal="true" :size="280"
                :destroy-on-close="true" custom-class="node-tree-drawer">
       <el-tree ref="nodeTree" :data="nodeTreeData" node-key="id" default-expand-all highlight-current class="node-tree"
                icon-class="el-icon-arrow-right" @node-click="onNodeTreeClick"></el-tree>
     </el-drawer>
 
-    <div class="right-toolbar" >
+    <div class="right-toolbar">
       <div class="right-toolbar-con">
         <el-button v-if="showToolButton('clearDesignerButton')" type="text" @click="clearFormWidget">
-          <svg-icon icon-class="el-delete" />{{i18nt('designer.toolbar.clear')}}</el-button>
+          <svg-icon icon-class="el-delete"/>
+          {{ i18nt('designer.toolbar.clear') }}
+        </el-button>
         <el-button v-if="showToolButton('previewFormButton')" type="text" @click="previewForm">
-          <svg-icon icon-class="el-view" />{{i18nt('designer.toolbar.preview')}}</el-button>
+          <svg-icon icon-class="el-view"/>
+          {{ i18nt('designer.toolbar.preview') }}
+        </el-button>
         <el-button v-if="showToolButton('importJsonButton')" type="text" @click="importJson">
-          {{i18nt('designer.toolbar.importJson')}}</el-button>
+          {{ i18nt('designer.toolbar.importJson') }}
+        </el-button>
         <el-button v-if="showToolButton('exportJsonButton')" type="text" @click="exportJson">
-          {{i18nt('designer.toolbar.exportJson')}}</el-button>
+          {{ i18nt('designer.toolbar.exportJson') }}
+        </el-button>
         <el-button v-if="showToolButton('exportCodeButton')" type="text" @click="exportCode">
-          {{i18nt('designer.toolbar.exportCode')}}</el-button>
+          {{ i18nt('designer.toolbar.exportCode') }}
+        </el-button>
         <el-button v-if="showToolButton('generateSFCButton')" type="text" @click="generateSFC">
           <svg-icon icon-class="vue-sfc"/>
           {{ i18nt('designer.toolbar.generateSFC') }}
@@ -55,7 +69,8 @@
                  :destroy-on-close="true" custom-class="drag-dialog small-padding-dialog" width="75%"
                  :fullscreen="(layoutType === 'H5') || (layoutType === 'Pad')">
         <div>
-          <div class="form-render-wrapper" :class="[layoutType === 'H5' ? 'h5-layout' : (layoutType === 'Pad' ? 'pad-layout' : '')]">
+          <div class="form-render-wrapper"
+               :class="[layoutType === 'H5' ? 'h5-layout' : (layoutType === 'Pad' ? 'pad-layout' : '')]">
             <VFormRender ref="preForm" :form-json="formJson" :form-data="testFormData" :preview-state="true"
                          :option-data="testOptionData" :global-dsv="designerDsv"
                          @appendButtonClick="testOnAppendButtonClick" @buttonClick="testOnButtonClick"
@@ -65,19 +80,21 @@
         </div>
         <template #footer>
           <div class="dialog-footer">
-            <el-button type="primary" @click="getFormData">{{i18nt('designer.hint.getFormData')}}</el-button>
-            <el-button type="primary" @click="resetForm">{{i18nt('designer.hint.resetForm')}}</el-button>
-            <el-button type="primary" @click="setFormDisabled">{{i18nt('designer.hint.disableForm')}}</el-button>
-            <el-button type="primary" @click="setFormEnabled">{{i18nt('designer.hint.enableForm')}}</el-button>
-            <el-button type="primary" plain @click="switchReadMode">{{i18nt('designer.hint.switchReadMode')}}</el-button>
-            <el-button @click="showPreviewDialogFlag = false">{{i18nt('designer.hint.closePreview')}}</el-button>
+            <el-button type="primary" @click="getFormData">{{ i18nt('designer.hint.getFormData') }}</el-button>
+            <el-button type="primary" @click="resetForm">{{ i18nt('designer.hint.resetForm') }}</el-button>
+            <el-button type="primary" @click="setFormDisabled">{{ i18nt('designer.hint.disableForm') }}</el-button>
+            <el-button type="primary" @click="setFormEnabled">{{ i18nt('designer.hint.enableForm') }}</el-button>
+            <el-button type="primary" plain @click="switchReadMode">{{ i18nt('designer.hint.switchReadMode') }}
+            </el-button>
+            <el-button @click="showPreviewDialogFlag = false">{{ i18nt('designer.hint.closePreview') }}</el-button>
             <el-button v-if="false" @click="testSetFormJson">setFormJson</el-button>
           </div>
         </template>
       </el-dialog>
     </div>
 
-    <div v-if="showImportJsonDialogFlag" class="" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
+    <div v-if="showImportJsonDialogFlag" class=""
+         v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
       <el-dialog :title="i18nt('designer.toolbar.importJson')" v-model="showImportJsonDialogFlag"
                  :show-close="true" custom-class="drag-dialog small-padding-dialog" :append-to-body="true" center
                  :close-on-click-modal="false" :close-on-press-escape="false" :destroy-on-close="true">
@@ -86,15 +103,18 @@
         <template #footer>
           <div class="dialog-footer">
             <el-button type="primary" @click="doJsonImport">
-              {{i18nt('designer.hint.import')}}</el-button>
+              {{ i18nt('designer.hint.import') }}
+            </el-button>
             <el-button @click="showImportJsonDialogFlag = false">
-              {{i18nt('designer.hint.cancel')}}</el-button>
+              {{ i18nt('designer.hint.cancel') }}
+            </el-button>
           </div>
         </template>
       </el-dialog>
     </div>
 
-    <div v-if="showExportJsonDialogFlag" class="" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
+    <div v-if="showExportJsonDialogFlag" class=""
+         v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
       <el-dialog :title="i18nt('designer.toolbar.exportJson')" v-model="showExportJsonDialogFlag"
                  :show-close="true" custom-class="drag-dialog small-padding-dialog" center
                  :close-on-click-modal="false" :close-on-press-escape="false" :destroy-on-close="true">
@@ -102,16 +122,19 @@
         <template #footer>
           <div class="dialog-footer">
             <el-button type="primary" class="copy-json-btn" :data-clipboard-text="jsonRawContent" @click="copyFormJson">
-              {{i18nt('designer.hint.copyJson')}}</el-button>
-            <el-button @click="saveFormJson">{{i18nt('designer.hint.saveFormJson')}}</el-button>
+              {{ i18nt('designer.hint.copyJson') }}
+            </el-button>
+            <el-button @click="saveFormJson">{{ i18nt('designer.hint.saveFormJson') }}</el-button>
             <el-button @click="showExportJsonDialogFlag = false">
-              {{i18nt('designer.hint.closePreview')}}</el-button>
+              {{ i18nt('designer.hint.closePreview') }}
+            </el-button>
           </div>
         </template>
       </el-dialog>
     </div>
 
-    <div v-if="showExportCodeDialogFlag" class="" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
+    <div v-if="showExportCodeDialogFlag" class=""
+         v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
       <el-dialog :title="i18nt('designer.toolbar.exportCode')" v-model="showExportCodeDialogFlag"
                  :show-close="true" custom-class="drag-dialog small-padding-dialog" center
                  width="65%" :close-on-click-modal="false" :close-on-press-escape="false" :destroy-on-close="true">
@@ -126,19 +149,23 @@
         <template #footer>
           <div class="dialog-footer">
             <el-button type="primary" class="copy-vue-btn" :data-clipboard-text="vueCode" @click="copyVueCode">
-              {{i18nt('designer.hint.copyVueCode')}}</el-button>
+              {{ i18nt('designer.hint.copyVueCode') }}
+            </el-button>
             <el-button type="primary" class="copy-html-btn" :data-clipboard-text="htmlCode" @click="copyHtmlCode">
-              {{i18nt('designer.hint.copyHtmlCode')}}</el-button>
-            <el-button @click="saveVueCode">{{i18nt('designer.hint.saveVueCode')}}</el-button>
-            <el-button @click="saveHtmlCode">{{i18nt('designer.hint.saveHtmlCode')}}</el-button>
+              {{ i18nt('designer.hint.copyHtmlCode') }}
+            </el-button>
+            <el-button @click="saveVueCode">{{ i18nt('designer.hint.saveVueCode') }}</el-button>
+            <el-button @click="saveHtmlCode">{{ i18nt('designer.hint.saveHtmlCode') }}</el-button>
             <el-button @click="showExportCodeDialogFlag = false">
-              {{i18nt('designer.hint.closePreview')}}</el-button>
+              {{ i18nt('designer.hint.closePreview') }}
+            </el-button>
           </div>
         </template>
       </el-dialog>
     </div>
 
-    <div v-if="showFormDataDialogFlag" class="" v-drag="['.nested-drag-dialog.el-dialog', '.nested-drag-dialog .el-dialog__header']">
+    <div v-if="showFormDataDialogFlag" class=""
+         v-drag="['.nested-drag-dialog.el-dialog', '.nested-drag-dialog .el-dialog__header']">
       <el-dialog :title="i18nt('designer.hint.exportFormData')" v-model="showFormDataDialogFlag"
                  :show-close="true" custom-class="nested-drag-dialog dialog-title-light-bg" center
                  :close-on-click-modal="false" :close-on-press-escape="false" :destroy-on-close="true"
@@ -148,11 +175,15 @@
         </div>
         <template #footer>
           <div class="dialog-footer">
-            <el-button type="primary" class="copy-form-data-json-btn" :data-clipboard-text="formDataRawJson" @click="copyFormDataJson">
-              {{i18nt('designer.hint.copyFormData')}}</el-button>
-            <el-button @click="saveFormData">{{i18nt('designer.hint.saveFormData')}}</el-button>
+            <el-button type="primary" class="copy-form-data-json-btn" :data-clipboard-text="formDataRawJson"
+                       @click="copyFormDataJson">
+              {{ i18nt('designer.hint.copyFormData') }}
+            </el-button>
+            <el-button @click="generateSubmitData">生成提交数据</el-button>
+            <el-button @click="saveFormData">{{ i18nt('designer.hint.saveFormData') }}</el-button>
             <el-button @click="showFormDataDialogFlag = false">
-              {{i18nt('designer.hint.closePreview')}}</el-button>
+              {{ i18nt('designer.hint.closePreview') }}
+            </el-button>
           </div>
         </template>
       </el-dialog>
@@ -160,7 +191,8 @@
 
     <div v-if="showExportSFCDialogFlag" class="" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
       <el-dialog :title="i18nt('designer.toolbar.generateSFC')" v-model="showExportSFCDialogFlag"
-                 v-if="showExportSFCDialogFlag" :show-close="true" custom-class="drag-dialog small-padding-dialog" center
+                 v-if="showExportSFCDialogFlag" :show-close="true" custom-class="drag-dialog small-padding-dialog"
+                 center
                  width="65%" :close-on-click-modal="false" :close-on-press-escape="false" :destroy-on-close="true">
         <el-tabs type="border-card" class="no-box-shadow no-padding" v-model="activeSFCTab">
           <el-tab-pane label="Vue2" name="vue2">
@@ -173,13 +205,16 @@
         <template #footer>
           <div class="dialog-footer">
             <el-button type="primary" class="copy-vue2-sfc-btn" :data-clipboard-text="sfcCode" @click="copyV2SFC">
-              {{i18nt('designer.hint.copyVue2SFC')}}</el-button>
+              {{ i18nt('designer.hint.copyVue2SFC') }}
+            </el-button>
             <el-button type="primary" class="copy-vue3-sfc-btn" :data-clipboard-text="sfcCodeV3" @click="copyV3SFC">
-              {{i18nt('designer.hint.copyVue3SFC')}}</el-button>
-            <el-button @click="saveV2SFC">{{i18nt('designer.hint.saveVue2SFC')}}</el-button>
-            <el-button @click="saveV3SFC">{{i18nt('designer.hint.saveVue3SFC')}}</el-button>
+              {{ i18nt('designer.hint.copyVue3SFC') }}
+            </el-button>
+            <el-button @click="saveV2SFC">{{ i18nt('designer.hint.saveVue2SFC') }}</el-button>
+            <el-button @click="saveV3SFC">{{ i18nt('designer.hint.saveVue3SFC') }}</el-button>
             <el-button @click="showExportSFCDialogFlag = false">
-              {{i18nt('designer.hint.closePreview')}}</el-button>
+              {{ i18nt('designer.hint.closePreview') }}
+            </el-button>
           </div>
         </template>
       </el-dialog>
@@ -187,7 +222,7 @@
 
     <div class="">
       <el-dialog :title="i18nt('designer.toolbar.bindData')" v-model="showDataSourceDialogFlag"
-                  :show-close="true" custom-class="drag-dialog small-padding-dialog"
+                 :show-close="true" custom-class="drag-dialog small-padding-dialog"
                  fullscreen
                  :close-on-click-modal="false" :close-on-press-escape="false"
                  :destroy-on-close="true">
@@ -198,707 +233,787 @@
 </template>
 
 <script>
-  import VFormRender from '@/components/form-render/index'
-  import CodeEditor from '@/components/code-editor/index'
-  import Clipboard from 'clipboard'
-  import {
-    deepClone,
-    copyToClipboard,
-    generateId,
-    getQueryParam,
-    traverseAllWidgets, addWindowResizeHandler
-  } from "@/utils/util"
-  import i18n from '@/utils/i18n'
-  import {generateCode} from "@/utils/code-generator"
-  import {genSFC} from "@/utils/sfc-generator"
-  import loadBeautifier from "@/utils/beautifierLoader"
-  import { saveAs } from 'file-saver'
-import DatasourceDialog from "@/components/form-designer/toolbar-panel/datasource-dialog";
+import VFormRender from '@/components/form-render/index'
+import CodeEditor from '@/components/code-editor/index'
+import Clipboard from 'clipboard'
+import {
+  deepClone,
+  copyToClipboard,
+  generateId,
+  getQueryParam,
+  traverseAllWidgets, addWindowResizeHandler, traverseFieldWidgets
+} from "@/utils/util"
+import i18n from '@/utils/i18n'
+import {generateCode} from "@/utils/code-generator"
+import {genSFC} from "@/utils/sfc-generator"
+import loadBeautifier from "@/utils/beautifierLoader"
+import {saveAs} from 'file-saver'
+import DatasourceDialog from "@/components/form-designer/toolbar-panel/datasource-dialog.vue";
 
-  export default {
-    name: "ToolbarPanel",
-    mixins: [i18n],
-    components: {
+export default {
+  name: "ToolbarPanel",
+  mixins: [i18n],
+  components: {
     DatasourceDialog,
-      VFormRender,
-      CodeEditor,
-      Clipboard,
-    },
-    props: {
-      designer: Object,
-      globalDsv: {
-        type: Object,
-        default: () => {},
+    VFormRender,
+    CodeEditor,
+    Clipboard,
+  },
+  props: {
+    designer: Object,
+    globalDsv: {
+      type: Object,
+      default: () => {
       },
     },
-    inject: ['getDesignerConfig'],
-    data() {
-      return {
-        designerConfig: this.getDesignerConfig(),
+  },
+  inject: ['getDesignerConfig'],
+  data() {
+    return {
+      designerConfig: this.getDesignerConfig(),
 
-        toolbarWidth: 420,
-        showPreviewDialogFlag: false,
-        showImportJsonDialogFlag: false,
-        showExportJsonDialogFlag: false,
-        showExportCodeDialogFlag: false,
-        showFormDataDialogFlag: false,
-        showExportSFCDialogFlag: false,
-        showNodeTreeDrawerFlag: false,
+      toolbarWidth: 420,
+      showPreviewDialogFlag: false,
+      showImportJsonDialogFlag: false,
+      showExportJsonDialogFlag: false,
+      showExportCodeDialogFlag: false,
+      showFormDataDialogFlag: false,
+      showExportSFCDialogFlag: false,
+      showNodeTreeDrawerFlag: false,
       showDataSourceDialogFlag: false,
 
-        nodeTreeData: [],
-        formReadonlyFlag: false,
+      nodeTreeData: [],
+      formReadonlyFlag: false,
 
-        importTemplate: '',
-        jsonContent: '',
-        jsonRawContent: '',
+      importTemplate: '',
+      jsonContent: '',
+      jsonRawContent: '',
 
-        formDataJson: '',
-        formDataRawJson: '',
+      formDataJson: '',
+      formDataRawJson: '',
 
-        vueCode: '',
-        htmlCode: '',
+      vueCode: '',
+      htmlCode: '',
 
-        sfcCode: '',
-        sfcCodeV3: '',
+      sfcCode: '',
+      sfcCodeV3: '',
 
-        activeCodeTab: 'vue',
-        activeSFCTab: 'vue2',
+      activeCodeTab: 'vue',
+      activeSFCTab: 'vue2',
 
-        testFormData: {
-          // 'userName': '666888',
-          // 'productItems': [
-          //   {'pName': 'iPhone12', 'pNum': 10},
-          //   {'pName': 'P50', 'pNum': 16},
-          // ]
+      testFormData: {
+        // 'userName': '666888',
+        // 'productItems': [
+        //   {'pName': 'iPhone12', 'pNum': 10},
+        //   {'pName': 'P50', 'pNum': 16},
+        // ]
 
-          'select62173': 2,
-        },
-        testOptionData: {
-          'select62173': [
-            {label: '01', value: 1},
-            {label: '22', value: 2},
-            {label: '333', value: 3},
-          ]
-        },
+        'select62173': 2,
+      },
+      testOptionData: {
+        'select62173': [
+          {label: '01', value: 1},
+          {label: '22', value: 2},
+          {label: '333', value: 3},
+        ]
+      },
 
+    }
+  },
+  computed: {
+    formJson() {
+      return {
+        // widgetList: this.designer.widgetList,
+        // formConfig: this.designer.formConfig
+
+        widgetList: deepClone(this.designer.widgetList),
+        formConfig: deepClone(this.designer.formConfig)
       }
     },
-    computed: {
-      formJson() {
-        return {
-          // widgetList: this.designer.widgetList,
-          // formConfig: this.designer.formConfig
 
-          widgetList: deepClone(this.designer.widgetList),
-          formConfig: deepClone(this.designer.formConfig)
-        }
-      },
+    undoDisabled() {
+      return !this.designer.undoEnabled()
+    },
 
-      undoDisabled() {
-        return !this.designer.undoEnabled()
-      },
+    redoDisabled() {
+      return !this.designer.redoEnabled()
+    },
 
-      redoDisabled() {
-        return !this.designer.redoEnabled()
-      },
+    layoutType() {
+      return this.designer.getLayoutType()
+    },
 
-      layoutType() {
-        return this.designer.getLayoutType()
-      },
+    designerDsv() {
+      return this.globalDsv
+    }
 
-      designerDsv() {
-        return this.globalDsv
+  },
+  watch: {
+    'designer.widgetList': {
+      deep: true,
+      handler(val) {
+        //console.log('test-----', val)
+        //this.refreshNodeTree()
       }
-
     },
-    watch: {
-      'designer.widgetList': {
-        deep: true,
-        handler(val) {
-          //console.log('test-----', val)
-          //this.refreshNodeTree()
-        }
-      },
 
-    },
-    mounted() {
-      let maxTBWidth = this.designerConfig.toolbarMaxWidth || 420
-      let minTBWidth = this.designerConfig.toolbarMinWidth || 300
-      let newTBWidth = window.innerWidth - 260 - 300 - 320 - 80
-      this.toolbarWidth = newTBWidth >= maxTBWidth ? maxTBWidth : (newTBWidth <= minTBWidth ? minTBWidth : newTBWidth)
-      addWindowResizeHandler(() => {
-        this.$nextTick(() => {
-          let newTBWidth2 = window.innerWidth - 260 - 300 - 320 - 80
-          this.toolbarWidth = newTBWidth2 >= maxTBWidth ? maxTBWidth : (newTBWidth2 <= minTBWidth ? minTBWidth : newTBWidth2)
-        })
+  },
+  mounted() {
+    let maxTBWidth = this.designerConfig.toolbarMaxWidth || 420
+    let minTBWidth = this.designerConfig.toolbarMinWidth || 300
+    let newTBWidth = window.innerWidth - 260 - 300 - 320 - 80
+    this.toolbarWidth = newTBWidth >= maxTBWidth ? maxTBWidth : (newTBWidth <= minTBWidth ? minTBWidth : newTBWidth)
+    addWindowResizeHandler(() => {
+      this.$nextTick(() => {
+        let newTBWidth2 = window.innerWidth - 260 - 300 - 320 - 80
+        this.toolbarWidth = newTBWidth2 >= maxTBWidth ? maxTBWidth : (newTBWidth2 <= minTBWidth ? minTBWidth : newTBWidth2)
       })
-    },
-    methods: {
-      showToolButton(configName) {
-        if (this.designerConfig[configName] === undefined) {
-          return true
-        }
+    })
+  },
+  methods: {
+    showToolButton(configName) {
+      if (this.designerConfig[configName] === undefined) {
+        return true
+      }
 
-        return !!this.designerConfig[configName]
-      },
+      return !!this.designerConfig[configName]
+    },
     showDataSource() {
       console.log(111);
       this.showDataSourceDialogFlag = true
     },
-      buildTreeNodeOfWidget(widget, treeNode) {
-        let curNode = {
-          id: widget.id,
-          label: widget.options.label || widget.type,
-          //selectable: true,
-        }
-        treeNode.push(curNode)
+    buildTreeNodeOfWidget(widget, treeNode) {
+      let curNode = {
+        id: widget.id,
+        label: widget.options.label || widget.type,
+        //selectable: true,
+      }
+      treeNode.push(curNode)
 
-        if (widget.category === undefined) {
+      if (widget.category === undefined) {
+        return
+      }
+
+      curNode.children = []
+      if (widget.type === 'grid') {
+        widget.cols.map(col => {
+          let colNode = {
+            id: col.id,
+            label: col.options.name || widget.type,
+            children: []
+          }
+          curNode.children.push(colNode)
+          col.widgetList.map(wChild => {
+            this.buildTreeNodeOfWidget(wChild, colNode.children)
+          })
+        })
+      } else if (widget.type === 'table') {
+        //TODO: 需要考虑合并单元格！！
+        widget.rows.map(row => {
+          let rowNode = {
+            id: row.id,
+            label: 'table-row',
+            selectable: false,
+            children: [],
+          }
+          curNode.children.push(rowNode)
+
+          row.cols.map(cell => {
+            if (!!cell.merged) {  //跳过合并单元格！！
+              return
+            }
+
+            let rowChildren = rowNode.children
+            let cellNode = {
+              id: cell.id,
+              label: 'table-cell',
+              children: []
+            }
+            rowChildren.push(cellNode)
+
+            cell.widgetList.map(wChild => {
+              this.buildTreeNodeOfWidget(wChild, cellNode.children)
+            })
+          })
+        })
+      } else if (widget.type === 'tab') {
+        widget.tabs.map(tab => {
+          let tabNode = {
+            id: tab.id,
+            label: tab.options.name || widget.type,
+            selectable: false,
+            children: []
+          }
+          curNode.children.push(tabNode)
+          tab.widgetList.map(wChild => {
+            this.buildTreeNodeOfWidget(wChild, tabNode.children)
+          })
+        })
+      } else if (widget.type === 'sub-form') {
+        widget.widgetList.map(wChild => {
+          this.buildTreeNodeOfWidget(wChild, curNode.children)
+        })
+      } else if (widget.category === 'container') {  //自定义容器
+        widget.widgetList.map(wChild => {
+          this.buildTreeNodeOfWidget(wChild, curNode.children)
+        })
+      }
+    },
+
+    refreshNodeTree() {
+      this.nodeTreeData.length = 0
+      this.designer.widgetList.forEach(wItem => {
+        this.buildTreeNodeOfWidget(wItem, this.nodeTreeData)
+      })
+    },
+
+    showNodeTreeDrawer() {
+      this.refreshNodeTree()
+      this.showNodeTreeDrawerFlag = true
+      this.$nextTick(() => {
+        if (!!this.designer.selectedId) {  //同步当前选中组件到节点树！！！
+          this.$refs.nodeTree.setCurrentKey(this.designer.selectedId)
+        }
+      })
+    },
+
+    undoHistory() {
+      this.designer.undoHistoryStep()
+    },
+
+    redoHistory() {
+      this.designer.redoHistoryStep()
+    },
+
+    changeLayoutType(newType) {
+      this.designer.changeLayoutType(newType)
+    },
+
+    clearFormWidget() {
+      this.designer.clearDesigner()
+    },
+
+    previewForm() {
+      this.showPreviewDialogFlag = true
+    },
+
+    saveAsFile(fileContent, defaultFileName) {
+      this.$prompt(this.i18nt('designer.hint.fileNameForSave'), this.i18nt('designer.hint.saveFileTitle'), {
+        inputValue: defaultFileName,
+        closeOnClickModal: false,
+        inputPlaceholder: this.i18nt('designer.hint.fileNameInputPlaceholder')
+      }).then(({value}) => {
+        if (!value) {
+          value = defaultFileName
+        }
+
+        if (getQueryParam('vscode') == 1) {
+          this.vsSaveFile(value, fileContent)
           return
         }
 
-        curNode.children = []
-        if (widget.type === 'grid') {
-          widget.cols.map(col => {
-            let colNode = {
-              id: col.id,
-              label: col.options.name || widget.type,
-              children: []
-            }
-            curNode.children.push(colNode)
-            col.widgetList.map(wChild => {
-              this.buildTreeNodeOfWidget(wChild, colNode.children)
-            })
-          })
-        } else if (widget.type === 'table') {
-          //TODO: 需要考虑合并单元格！！
-          widget.rows.map(row => {
-            let rowNode = {
-              id: row.id,
-              label: 'table-row',
-              selectable: false,
-              children: [],
-            }
-            curNode.children.push(rowNode)
+        const fileBlob = new Blob([fileContent], {type: 'text/plain;charset=utf-8'})
+        saveAs(fileBlob, value)
+      }).catch(() => {
+        //
+      })
+    },
 
-            row.cols.map(cell => {
-              if (!!cell.merged) {  //跳过合并单元格！！
-                return
-              }
-
-              let rowChildren = rowNode.children
-              let cellNode = {
-                id: cell.id,
-                label: 'table-cell',
-                children: []
-              }
-              rowChildren.push(cellNode)
-
-              cell.widgetList.map(wChild => {
-                this.buildTreeNodeOfWidget(wChild, cellNode.children)
-              })
-            })
-          })
-        } else if (widget.type === 'tab') {
-          widget.tabs.map(tab => {
-            let tabNode = {
-              id: tab.id,
-              label: tab.options.name || widget.type,
-              selectable: false,
-              children: []
-            }
-            curNode.children.push(tabNode)
-            tab.widgetList.map(wChild => {
-              this.buildTreeNodeOfWidget(wChild, tabNode.children)
-            })
-          })
-        } else if (widget.type === 'sub-form') {
-          widget.widgetList.map(wChild => {
-            this.buildTreeNodeOfWidget(wChild, curNode.children)
-          })
-        } else if (widget.category === 'container') {  //自定义容器
-          widget.widgetList.map(wChild => {
-            this.buildTreeNodeOfWidget(wChild, curNode.children)
-          })
+    vsSaveFile(fileName, fileContent) {
+      const msgObj = {
+        cmd: 'writeFile',
+        data: {
+          fileName,
+          code: fileContent
         }
-      },
+      }
+      window.parent.postMessage(msgObj, '*')
+    },
 
-      refreshNodeTree() {
-        this.nodeTreeData.length = 0
-        this.designer.widgetList.forEach(wItem => {
-          this.buildTreeNodeOfWidget(wItem, this.nodeTreeData)
-        })
-      },
+    importJson() {
+      this.importTemplate = JSON.stringify(this.designer.getImportTemplate(), null, '  ')
+      this.showImportJsonDialogFlag = true
+    },
 
-      showNodeTreeDrawer() {
-        this.refreshNodeTree()
-        this.showNodeTreeDrawerFlag = true
-        this.$nextTick(() => {
-          if (!!this.designer.selectedId) {  //同步当前选中组件到节点树！！！
-            this.$refs.nodeTree.setCurrentKey(this.designer.selectedId)
-          }
-        })
-      },
-
-      undoHistory() {
-        this.designer.undoHistoryStep()
-      },
-
-      redoHistory() {
-        this.designer.redoHistoryStep()
-      },
-
-      changeLayoutType(newType) {
-        this.designer.changeLayoutType(newType)
-      },
-
-      clearFormWidget() {
-        this.designer.clearDesigner()
-      },
-
-      previewForm() {
-        this.showPreviewDialogFlag = true
-      },
-
-      saveAsFile(fileContent, defaultFileName) {
-        this.$prompt(this.i18nt('designer.hint.fileNameForSave'), this.i18nt('designer.hint.saveFileTitle'), {
-          inputValue: defaultFileName,
-          closeOnClickModal: false,
-          inputPlaceholder: this.i18nt('designer.hint.fileNameInputPlaceholder')
-        }).then(({ value }) => {
-          if (!value) {
-            value = defaultFileName
-          }
-
-          if (getQueryParam('vscode') == 1) {
-            this.vsSaveFile(value, fileContent)
-            return
-          }
-
-          const fileBlob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' })
-          saveAs(fileBlob ,value)
-        }).catch(() => {
-          //
-        })
-      },
-
-      vsSaveFile(fileName, fileContent) {
-        const msgObj = {
-          cmd: 'writeFile',
-          data: {
-            fileName,
-            code: fileContent
-          }
+    doJsonImport() {
+      try {
+        let importObj = JSON.parse(this.importTemplate)
+        //console.log('test import', this.importTemplate)
+        if (!importObj || !importObj.formConfig) {
+          throw new Error(this.i18nt('designer.hint.invalidJsonFormat'))
         }
-        window.parent.postMessage(msgObj, '*')
-      },
 
-      importJson() {
-        this.importTemplate = JSON.stringify(this.designer.getImportTemplate(), null, '  ')
-        this.showImportJsonDialogFlag = true
-      },
-
-      doJsonImport() {
-        try {
-          let importObj = JSON.parse(this.importTemplate)
-          //console.log('test import', this.importTemplate)
-          if (!importObj || !importObj.formConfig) {
-            throw new Error( this.i18nt('designer.hint.invalidJsonFormat') )
-          }
-
-          let fJsonVer = importObj.formConfig.jsonVersion
-          if (!fJsonVer || (fJsonVer !== 3)) {
-            throw new Error( this.i18nt('designer.hint.jsonVersionMismatch') )
-          }
-
-          this.designer.loadFormJson(importObj)
-
-          this.showImportJsonDialogFlag = false
-          this.$message.success(this.i18nt('designer.hint.importJsonSuccess'))
-
-          this.designer.emitHistoryChange()
-
-          this.designer.emitEvent('form-json-imported', [])
-        } catch(ex) {
-          this.$message.error(ex + '')
+        let fJsonVer = importObj.formConfig.jsonVersion
+        if (!fJsonVer || (fJsonVer !== 3)) {
+          throw new Error(this.i18nt('designer.hint.jsonVersionMismatch'))
         }
-      },
 
-      exportJson() {
-        let widgetList = deepClone(this.designer.widgetList)
-        let formConfig = deepClone(this.designer.formConfig)
-        this.jsonContent = JSON.stringify({widgetList, formConfig}, null, '  ')
-        this.jsonRawContent = JSON.stringify({widgetList, formConfig})
-        this.showExportJsonDialogFlag = true
-      },
+        this.designer.loadFormJson(importObj)
 
-      copyFormJson(e) {
-        copyToClipboard(this.jsonRawContent, e,
-            this.$message,
-            this.i18nt('designer.hint.copyJsonSuccess'),
-            this.i18nt('designer.hint.copyJsonFail')
-        )
-      },
+        this.showImportJsonDialogFlag = false
+        this.$message.success(this.i18nt('designer.hint.importJsonSuccess'))
 
-      saveFormJson() {
-        this.saveAsFile(this.jsonContent, `vform${generateId()}.json`)
-      },
+        this.designer.emitHistoryChange()
 
-      exportCode() {
-        this.vueCode = generateCode(this.formJson)
-        this.htmlCode = generateCode(this.formJson, 'html')
-        this.showExportCodeDialogFlag = true
-      },
+        this.designer.emitEvent('form-json-imported', [])
+      } catch (ex) {
+        this.$message.error(ex + '')
+      }
+    },
 
-      copyVueCode(e) {
-        copyToClipboard(this.vueCode, e,
-            this.$message,
-            this.i18nt('designer.hint.copyVueCodeSuccess'),
-            this.i18nt('designer.hint.copyVueCodeFail')
-        )
-      },
+    exportJson() {
+      let widgetList = deepClone(this.designer.widgetList)
+      let formConfig = deepClone(this.designer.formConfig)
+      this.jsonContent = JSON.stringify({widgetList, formConfig}, null, '  ')
+      this.jsonRawContent = JSON.stringify({widgetList, formConfig})
+      this.showExportJsonDialogFlag = true
+    },
 
-      copyHtmlCode(e) {
-        copyToClipboard(this.htmlCode, e,
-            this.$message,
-            this.i18nt('designer.hint.copyHtmlCodeSuccess'),
-            this.i18nt('designer.hint.copyHtmlCodeFail')
-        )
-      },
+    copyFormJson(e) {
+      copyToClipboard(this.jsonRawContent, e,
+          this.$message,
+          this.i18nt('designer.hint.copyJsonSuccess'),
+          this.i18nt('designer.hint.copyJsonFail')
+      )
+    },
 
-      saveVueCode() {
-        this.saveAsFile(this.vueCode, `vform${generateId()}.vue`)
-      },
+    saveFormJson() {
+      this.saveAsFile(this.jsonContent, `vform${generateId()}.json`)
+    },
 
-      saveHtmlCode() {
-        this.saveAsFile(this.htmlCode, `vform${generateId()}.html`)
-      },
+    exportCode() {
+      this.vueCode = generateCode(this.formJson)
+      this.htmlCode = generateCode(this.formJson, 'html')
+      this.showExportCodeDialogFlag = true
+    },
 
-      generateSFC() {
-        loadBeautifier(beautifier => {
-          this.sfcCode = genSFC(this.designer.formConfig, this.designer.widgetList, beautifier)
-          this.sfcCodeV3 = genSFC(this.designer.formConfig, this.designer.widgetList, beautifier, true)
-          this.showExportSFCDialogFlag = true
-        })
-      },
+    copyVueCode(e) {
+      copyToClipboard(this.vueCode, e,
+          this.$message,
+          this.i18nt('designer.hint.copyVueCodeSuccess'),
+          this.i18nt('designer.hint.copyVueCodeFail')
+      )
+    },
 
-      copyV2SFC(e) {
-        copyToClipboard(this.sfcCode, e,
-            this.$message,
-            this.i18nt('designer.hint.copySFCSuccess'),
-            this.i18nt('designer.hint.copySFCFail')
-        )
-      },
+    copyHtmlCode(e) {
+      copyToClipboard(this.htmlCode, e,
+          this.$message,
+          this.i18nt('designer.hint.copyHtmlCodeSuccess'),
+          this.i18nt('designer.hint.copyHtmlCodeFail')
+      )
+    },
 
-      copyV3SFC(e) {
-        copyToClipboard(this.sfcCodeV3, e,
-            this.$message,
-            this.i18nt('designer.hint.copySFCSuccess'),
-            this.i18nt('designer.hint.copySFCFail')
-        )
-      },
+    saveVueCode() {
+      this.saveAsFile(this.vueCode, `vform${generateId()}.vue`)
+    },
 
-      saveV2SFC() {
-        this.saveAsFile(this.sfcCode, `vformV2-${generateId()}.vue`)
-      },
+    saveHtmlCode() {
+      this.saveAsFile(this.htmlCode, `vform${generateId()}.html`)
+    },
 
-      saveV3SFC() {
-        this.saveAsFile(this.sfcCodeV3, `vformV3-${generateId()}.vue`)
-      },
+    generateSFC() {
+      loadBeautifier(beautifier => {
+        this.sfcCode = genSFC(this.designer.formConfig, this.designer.widgetList, beautifier)
+        this.sfcCodeV3 = genSFC(this.designer.formConfig, this.designer.widgetList, beautifier, true)
+        this.showExportSFCDialogFlag = true
+      })
+    },
 
-      getFormData() {
-        this.$refs['preForm'].getFormData().then(formData => {
-          this.formDataJson = JSON.stringify(formData, null, '  ')
-          this.formDataRawJson = JSON.stringify(formData)
+    copyV2SFC(e) {
+      copyToClipboard(this.sfcCode, e,
+          this.$message,
+          this.i18nt('designer.hint.copySFCSuccess'),
+          this.i18nt('designer.hint.copySFCFail')
+      )
+    },
 
-          this.showFormDataDialogFlag = true
-        }).catch(error => {
-          this.$message.error(error)
-        })
-      },
+    copyV3SFC(e) {
+      copyToClipboard(this.sfcCodeV3, e,
+          this.$message,
+          this.i18nt('designer.hint.copySFCSuccess'),
+          this.i18nt('designer.hint.copySFCFail')
+      )
+    },
 
-      copyFormDataJson(e) {
-        copyToClipboard(this.formDataRawJson, e,
-            this.$message,
-            this.i18nt('designer.hint.copyJsonSuccess'),
-            this.i18nt('designer.hint.copyJsonFail')
-        )
-      },
+    saveV2SFC() {
+      this.saveAsFile(this.sfcCode, `vformV2-${generateId()}.vue`)
+    },
 
-      saveFormData() {
-        this.saveAsFile(this.htmlCode, `formData${generateId()}.json`)
-      },
+    saveV3SFC() {
+      this.saveAsFile(this.sfcCodeV3, `vformV3-${generateId()}.vue`)
+    },
 
-      resetForm() {
-        this.$refs['preForm'].resetForm()
-      },
+    getFormData() {
+      this.$refs['preForm'].getFormData().then(formData => {
+        this.formDataJson = JSON.stringify(formData, null, '  ')
+        this.formDataRawJson = JSON.stringify(formData)
 
-      setFormDisabled() {
-        this.$refs['preForm'].disableForm()
-      },
+        this.showFormDataDialogFlag = true
+      }).catch(error => {
+        this.$message.error(error)
+      })
+    },
 
-      setFormEnabled() {
-        this.$refs['preForm'].enableForm()
-      },
+    copyFormDataJson(e) {
+      copyToClipboard(this.formDataRawJson, e,
+          this.$message,
+          this.i18nt('designer.hint.copyJsonSuccess'),
+          this.i18nt('designer.hint.copyJsonFail')
+      )
+    },
 
-      switchReadMode() {
-        this.formReadonlyFlag = !this.formReadonlyFlag
-        this.$refs['preForm'].setReadMode(this.formReadonlyFlag)
-      },
+    saveFormData() {
+      this.saveAsFile(this.htmlCode, `formData${generateId()}.json`)
+    },
 
-      testSetFormJson() {
-        //let newJson = {"widgetList":[{"key":106933,"type":"input","icon":"text-field","formItemFlag":true,"options":{"name":"input40302","label":"input-new","labelAlign":"","type":"text","defaultValue":"","placeholder":"","columnWidth":"200px","size":"","labelWidth":null,"labelHidden":false,"readonly":false,"disabled":false,"hidden":false,"clearable":true,"showPassword":false,"required":false,"validation":"","validationHint":"","customClass":[],"labelIconClass":null,"labelIconPosition":"rear","labelTooltip":null,"minLength":null,"maxLength":null,"showWordLimit":false,"prefixIcon":"","suffixIcon":"","appendButton":false,"appendButtonDisabled":false,"buttonIcon":"custom-search","onCreated":"","onMounted":"","onInput":"","onChange":"","onFocus":"","onBlur":"","onValidate":""},"id":"input40302"}],"formConfig":{"modelName":"formData","refName":"vForm","rulesName":"rules","labelWidth":120,"labelPosition":"left","size":"","labelAlign":"label-left-align","cssCode":"","customClass":[],"functions":"","layoutType":"PC","jsonVersion":3,"onFormCreated":"","onFormMounted":"","onFormDataChange":""}}
-        let newJson = {"widgetList":[{"key":75094,"type":"input","icon":"text-field","formItemFlag":true,"options":{"name":"input30696","label":"input","labelAlign":"","type":"text","defaultValue":"","placeholder":"","columnWidth":"200px","size":"","labelWidth":null,"labelHidden":false,"readonly":false,"disabled":false,"hidden":false,"clearable":true,"showPassword":false,"required":false,"validation":"","validationHint":"","customClass":[],"labelIconClass":null,"labelIconPosition":"rear","labelTooltip":null,"minLength":null,"maxLength":null,"showWordLimit":false,"prefixIcon":"","suffixIcon":"","appendButton":false,"appendButtonDisabled":false,"buttonIcon":"custom-search","onCreated":"","onMounted":"","onInput":"","onChange":"","onFocus":"","onBlur":"","onValidate":""},"id":"input30696"}],"formConfig":{"modelName":"formData","refName":"vForm","rulesName":"rules","labelWidth":120,"labelPosition":"left","size":"","labelAlign":"label-left-align","cssCode":"","customClass":"","functions":"","layoutType":"PC","jsonVersion":3,"onFormCreated":"","onFormMounted":"","onFormDataChange":""}}
-        //let newJson = {"widgetList":[{"key":70118,"type":"input","icon":"text-field","formItemFlag":true,"options":{"name":"input37241","label":"input","labelAlign":"","type":"text","defaultValue":"","placeholder":"","columnWidth":"200px","size":"","labelWidth":null,"labelHidden":false,"readonly":false,"disabled":false,"hidden":false,"clearable":true,"showPassword":false,"required":false,"validation":"","validationHint":"","customClass":[],"labelIconClass":null,"labelIconPosition":"rear","labelTooltip":null,"minLength":null,"maxLength":null,"showWordLimit":false,"prefixIcon":"","suffixIcon":"","appendButton":false,"appendButtonDisabled":false,"buttonIcon":"custom-search","onCreated":"","onMounted":"","onInput":"","onChange":"","onFocus":"","onBlur":"","onValidate":""},"id":"input37241"}],"formConfig":{"modelName":"formData","refName":"vForm","rulesName":"rules","labelWidth":150,"labelPosition":"left","size":"","labelAlign":"label-right-align","cssCode":"","customClass":"","functions":"","layoutType":"PC","jsonVersion":3,"onFormCreated":"","onFormMounted":"","onFormDataChange":""}}
-        this.$refs['preForm'].setFormJson(newJson)
-      },
+    resetForm() {
+      this.$refs['preForm'].resetForm()
+    },
 
-      handleFormChange(fieldName, newValue, oldValue, formModel) {
-        /*
-        console.log('---formChange start---')
-        console.log('fieldName', fieldName)
-        console.log('newValue', newValue)
-        console.log('oldValue', oldValue)
-        console.log('formModel', formModel)
-        console.log('---formChange end---')
-        */
-      },
+    setFormDisabled() {
+      this.$refs['preForm'].disableForm()
+    },
 
-      testOnAppendButtonClick(clickedWidget) {
-        console.log('test', clickedWidget)
-      },
+    setFormEnabled() {
+      this.$refs['preForm'].enableForm()
+    },
 
-      testOnButtonClick(button) {
-        console.log('test', button)
-      },
+    switchReadMode() {
+      this.formReadonlyFlag = !this.formReadonlyFlag
+      this.$refs['preForm'].setReadMode(this.formReadonlyFlag)
+    },
 
-      findWidgetById(wId) {
-        let foundW = null
-        traverseAllWidgets(this.designer.widgetList, (w) => {
-          if (w.id === wId) {
-            foundW = w
-          }
-        })
-
-        return foundW
-      },
-
-      onNodeTreeClick(nodeData, node, nodeEl) {
-        //console.log('test', JSON.stringify(nodeData))
-
-        if ((nodeData.selectable !== undefined) && !nodeData.selectable) {
-          this.$message.info(this.i18nt('designer.hint.currentNodeCannotBeSelected'))
-        } else {
-          const selectedId = nodeData.id
-          const foundW = this.findWidgetById(selectedId)
-          if (!!foundW) {
-            this.designer.setSelected(foundW)
-          }
+    testSetFormJson() {
+      //let newJson = {"widgetList":[{"key":106933,"type":"input","icon":"text-field","formItemFlag":true,"options":{"name":"input40302","label":"input-new","labelAlign":"","type":"text","defaultValue":"","placeholder":"","columnWidth":"200px","size":"","labelWidth":null,"labelHidden":false,"readonly":false,"disabled":false,"hidden":false,"clearable":true,"showPassword":false,"required":false,"validation":"","validationHint":"","customClass":[],"labelIconClass":null,"labelIconPosition":"rear","labelTooltip":null,"minLength":null,"maxLength":null,"showWordLimit":false,"prefixIcon":"","suffixIcon":"","appendButton":false,"appendButtonDisabled":false,"buttonIcon":"custom-search","onCreated":"","onMounted":"","onInput":"","onChange":"","onFocus":"","onBlur":"","onValidate":""},"id":"input40302"}],"formConfig":{"modelName":"formData","refName":"vForm","rulesName":"rules","labelWidth":120,"labelPosition":"left","size":"","labelAlign":"label-left-align","cssCode":"","customClass":[],"functions":"","layoutType":"PC","jsonVersion":3,"onFormCreated":"","onFormMounted":"","onFormDataChange":""}}
+      let newJson = {
+        "widgetList": [{
+          "key": 75094,
+          "type": "input",
+          "icon": "text-field",
+          "formItemFlag": true,
+          "options": {
+            "name": "input30696",
+            "label": "input",
+            "labelAlign": "",
+            "type": "text",
+            "defaultValue": "",
+            "placeholder": "",
+            "columnWidth": "200px",
+            "size": "",
+            "labelWidth": null,
+            "labelHidden": false,
+            "readonly": false,
+            "disabled": false,
+            "hidden": false,
+            "clearable": true,
+            "showPassword": false,
+            "required": false,
+            "validation": "",
+            "validationHint": "",
+            "customClass": [],
+            "labelIconClass": null,
+            "labelIconPosition": "rear",
+            "labelTooltip": null,
+            "minLength": null,
+            "maxLength": null,
+            "showWordLimit": false,
+            "prefixIcon": "",
+            "suffixIcon": "",
+            "appendButton": false,
+            "appendButtonDisabled": false,
+            "buttonIcon": "custom-search",
+            "onCreated": "",
+            "onMounted": "",
+            "onInput": "",
+            "onChange": "",
+            "onFocus": "",
+            "onBlur": "",
+            "onValidate": ""
+          },
+          "id": "input30696"
+        }],
+        "formConfig": {
+          "modelName": "formData",
+          "refName": "vForm",
+          "rulesName": "rules",
+          "labelWidth": 120,
+          "labelPosition": "left",
+          "size": "",
+          "labelAlign": "label-left-align",
+          "cssCode": "",
+          "customClass": "",
+          "functions": "",
+          "layoutType": "PC",
+          "jsonVersion": 3,
+          "onFormCreated": "",
+          "onFormMounted": "",
+          "onFormDataChange": ""
         }
-      },
+      }
+      //let newJson = {"widgetList":[{"key":70118,"type":"input","icon":"text-field","formItemFlag":true,"options":{"name":"input37241","label":"input","labelAlign":"","type":"text","defaultValue":"","placeholder":"","columnWidth":"200px","size":"","labelWidth":null,"labelHidden":false,"readonly":false,"disabled":false,"hidden":false,"clearable":true,"showPassword":false,"required":false,"validation":"","validationHint":"","customClass":[],"labelIconClass":null,"labelIconPosition":"rear","labelTooltip":null,"minLength":null,"maxLength":null,"showWordLimit":false,"prefixIcon":"","suffixIcon":"","appendButton":false,"appendButtonDisabled":false,"buttonIcon":"custom-search","onCreated":"","onMounted":"","onInput":"","onChange":"","onFocus":"","onBlur":"","onValidate":""},"id":"input37241"}],"formConfig":{"modelName":"formData","refName":"vForm","rulesName":"rules","labelWidth":150,"labelPosition":"left","size":"","labelAlign":"label-right-align","cssCode":"","customClass":"","functions":"","layoutType":"PC","jsonVersion":3,"onFormCreated":"","onFormMounted":"","onFormDataChange":""}}
+      this.$refs['preForm'].setFormJson(newJson)
+    },
 
+    handleFormChange(fieldName, newValue, oldValue, formModel) {
+      /*
+      console.log('---formChange start---')
+      console.log('fieldName', fieldName)
+      console.log('newValue', newValue)
+      console.log('oldValue', oldValue)
+      console.log('formModel', formModel)
+      console.log('---formChange end---')
+      */
+    },
+
+    testOnAppendButtonClick(clickedWidget) {
+      console.log('test', clickedWidget)
+    },
+
+    testOnButtonClick(button) {
+      console.log('test', button)
+    },
+
+    findWidgetById(wId) {
+      let foundW = null
+      traverseAllWidgets(this.designer.widgetList, (w) => {
+        if (w.id === wId) {
+          foundW = w
+        }
+      })
+
+      return foundW
+    },
+
+    onNodeTreeClick(nodeData, node, nodeEl) {
+      //console.log('test', JSON.stringify(nodeData))
+
+      if ((nodeData.selectable !== undefined) && !nodeData.selectable) {
+        this.$message.info(this.i18nt('designer.hint.currentNodeCannotBeSelected'))
+      } else {
+        const selectedId = nodeData.id
+        const foundW = this.findWidgetById(selectedId)
+        if (!!foundW) {
+          this.designer.setSelected(foundW)
+        }
+      }
+    },
+    generateSubmitData() {
+      /*this.$refs['preForm'].getFormData().then(formData => {
+        this.formDataJson = JSON.stringify(formData, null, '  ')
+        this.formDataRawJson = JSON.stringify(formData)
+        console.log(111, formData);
+        console.log('widgetList', this.designer.widgetList);
+        this.showFormDataDialogFlag = true
+      }).catch(error => {
+        this.$message.error(error)
+      })*/
+      console.log();
+      traverseFieldWidgets(this.designer.widgetList, (widget) => {
+        console.log(1,widget);
+      })
     }
   }
+}
 </script>
 
 <style lang="scss" scoped>
-  div.toolbar-container {
-    //min-width: 728px;  /* 解决工具按钮栏换行的问题！！ */
-    /* 上一行css有问题，当窗口宽度不足时会把按钮挤出到右边的属性设置区，弃之！ */
+div.toolbar-container {
+  //min-width: 728px;  /* 解决工具按钮栏换行的问题！！ */
+  /* 上一行css有问题，当窗口宽度不足时会把按钮挤出到右边的属性设置区，弃之！ */
+}
+
+.left-toolbar {
+  display: flex;
+  margin-top: 4px;
+  float: left;
+  font-size: 16px;
+}
+
+.right-toolbar {
+  display: flex;
+  margin-top: 5px;
+  float: right;
+  text-align: right;
+  overflow: hidden;
+
+  .right-toolbar-con {
+    text-align: left;
+    width: 600px;
   }
 
-  .left-toolbar {
-    display: flex;
-    margin-top: 4px;
-    float: left;
+  :deep(.el-button) {
+    margin-left: 10px;
+  }
+
+  :deep(.el-button--text) {
+    font-size: 14px !important;
+  }
+
+  :deep(.svg-icon) {
+    margin-left: 0;
+    margin-right: 0.05em;
+  }
+}
+
+.el-button i {
+  margin-right: 3px;
+}
+
+.small-padding-dialog {
+  :deep(.el-dialog__header) {
+    //padding-top: 3px;
+    //padding-bottom: 3px;
+    background: #f1f2f3;
+  }
+
+  :deep(.el-dialog__body) {
+    padding: 12px 15px 12px 15px;
+
+    .el-alert.alert-padding {
+      padding: 0 10px;
+    }
+  }
+
+  :deep(.ace-container) {
+    border: 1px solid #DCDFE6;
+  }
+}
+
+.dialog-title-light-bg {
+  :deep(.el-dialog__header) {
+    background: #f1f2f3;
+  }
+}
+
+.no-box-shadow {
+  box-shadow: none;
+}
+
+.no-padding.el-tabs--border-card {
+  :deep(.el-tabs__content) {
+    padding: 0;
+  }
+}
+
+.form-render-wrapper {
+  //height: calc(100vh - 142px);
+  //all: revert !important; /* 防止表单继承el-dialog等外部样式，未生效，原因不明？？ */
+}
+
+.form-render-wrapper.h5-layout {
+  margin: 0 auto;
+  width: 420px;
+  border-radius: 15px;
+  //border-width: 10px;
+  box-shadow: 0 0 1px 10px #495060;
+  height: calc(100vh - 175px);
+}
+
+.form-render-wrapper.pad-layout {
+  margin: 0 auto;
+  width: 960px;
+  border-radius: 15px;
+  //border-width: 10px;
+  box-shadow: 0 0 1px 10px #495060;
+  height: calc(100vh - 175px);
+}
+
+.node-tree-drawer {
+  :deep(.el-drawer) {
+    padding: 10px;
+    overflow: auto;
+  }
+
+  :deep(.el-drawer__header) {
+    margin-bottom: 12px;
+    padding: 5px 5px 0;
+  }
+
+  :deep(.el-drawer__body) {
+    padding-left: 5px;
+  }
+}
+
+/*.node-tree-scroll-bar {*/
+/*  height: 100%;*/
+/*  overflow: auto;*/
+/*}*/
+
+:deep(.node-tree) {
+  .el-tree > .el-tree-node:after {
+    border-top: none;
+  }
+
+  .el-tree-node {
+    position: relative;
+    padding-left: 12px;
+  }
+
+  .el-tree-node__content {
+    padding-left: 0 !important;
+  }
+
+  .el-tree-node__expand-icon.is-leaf {
+    display: none;
+  }
+
+  .el-tree-node__children {
+    padding-left: 12px;
+    overflow: visible !important; /* 加入此行让el-tree宽度自动撑开，超出宽度el-draw自动出现水平滚动条！ */
+  }
+
+  .el-tree-node :last-child:before {
+    height: 38px;
+  }
+
+  .el-tree > .el-tree-node:before {
+    border-left: none;
+  }
+
+  .el-tree > .el-tree-node:after {
+    border-top: none;
+  }
+
+  .el-tree-node:before {
+    content: "";
+    left: -4px;
+    position: absolute;
+    right: auto;
+    border-width: 1px;
+  }
+
+  .el-tree-node:after {
+    content: "";
+    left: -4px;
+    position: absolute;
+    right: auto;
+    border-width: 1px;
+  }
+
+  .el-tree-node:before {
+    border-left: 1px dashed #4386c6;
+    bottom: 0px;
+    height: 100%;
+    top: -10px;
+    width: 1px;
+  }
+
+  .el-tree-node:after {
+    border-top: 1px dashed #4386c6;
+    height: 20px;
+    top: 12px;
+    width: 16px;
+  }
+
+  .el-tree-node.is-current > .el-tree-node__content {
+    background: #c2d6ea !important;
+  }
+
+  .el-tree-node__expand-icon {
+    margin-left: -3px;
+    padding: 6px 6px 6px 0px;
     font-size: 16px;
   }
 
-  .right-toolbar {
-    display: flex;
-    margin-top: 5px;
-    float: right;
-    text-align: right;
-    overflow: hidden;
-
-    .right-toolbar-con {
-      text-align: left;
-      width: 600px;
-    }
-
-    :deep(.el-button) {
-      margin-left: 10px;
-    }
-
-    :deep(.el-button--text) {
-      font-size: 14px !important;
-    }
-
-    :deep(.svg-icon) {
-      margin-left: 0;
-      margin-right: 0.05em;
-    }
-  }
-
-  .el-button i {
-    margin-right: 3px;
-  }
-
-  .small-padding-dialog {
-    :deep(.el-dialog__header) {
-      //padding-top: 3px;
-      //padding-bottom: 3px;
-      background: #f1f2f3;
-    }
-
-    :deep(.el-dialog__body) {
-      padding: 12px 15px 12px 15px;
-
-      .el-alert.alert-padding {
-        padding: 0 10px;
-      }
-    }
-
-    :deep(.ace-container) {
-      border: 1px solid #DCDFE6;
-    }
-  }
-
-  .dialog-title-light-bg {
-    :deep(.el-dialog__header) {
-      background: #f1f2f3;
-    }
-  }
-
-  .no-box-shadow {
-    box-shadow: none;
-  }
-
-  .no-padding.el-tabs--border-card {
-    :deep(.el-tabs__content) {
-      padding: 0;
-    }
-  }
-
-  .form-render-wrapper {
-    //height: calc(100vh - 142px);
-    //all: revert !important; /* 防止表单继承el-dialog等外部样式，未生效，原因不明？？ */
-  }
-
-  .form-render-wrapper.h5-layout {
-    margin: 0 auto;
-    width: 420px;
-    border-radius: 15px;
-    //border-width: 10px;
-    box-shadow: 0 0 1px 10px #495060;
-    height: calc(100vh - 175px);
-  }
-
-  .form-render-wrapper.pad-layout {
-    margin: 0 auto;
-    width: 960px;
-    border-radius: 15px;
-    //border-width: 10px;
-    box-shadow: 0 0 1px 10px #495060;
-    height: calc(100vh - 175px);
-  }
-
-  .node-tree-drawer {
-    :deep(.el-drawer) {
-      padding: 10px;
-      overflow: auto;
-    }
-
-    :deep(.el-drawer__header) {
-      margin-bottom: 12px;
-      padding: 5px 5px 0;
-    }
-
-    :deep(.el-drawer__body) {
-      padding-left: 5px;
-    }
-  }
-
-  /*.node-tree-scroll-bar {*/
-  /*  height: 100%;*/
-  /*  overflow: auto;*/
-  /*}*/
-
-  :deep(.node-tree) {
-    .el-tree > .el-tree-node:after {
-      border-top: none;
-    }
-    .el-tree-node {
-      position: relative;
-      padding-left: 12px;
-    }
-
-    .el-tree-node__content {
-      padding-left: 0 !important;
-    }
-
-    .el-tree-node__expand-icon.is-leaf{
-      display: none;
-    }
-
-    .el-tree-node__children {
-      padding-left: 12px;
-      overflow: visible !important; /* 加入此行让el-tree宽度自动撑开，超出宽度el-draw自动出现水平滚动条！ */
-    }
-
-    .el-tree-node :last-child:before {
-      height: 38px;
-    }
-
-    .el-tree > .el-tree-node:before {
-      border-left: none;
-    }
-
-    .el-tree > .el-tree-node:after {
-      border-top: none;
-    }
-
-    .el-tree-node:before {
-      content: "";
-      left: -4px;
-      position: absolute;
-      right: auto;
-      border-width: 1px;
-    }
-
-    .el-tree-node:after {
-      content: "";
-      left: -4px;
-      position: absolute;
-      right: auto;
-      border-width: 1px;
-    }
-
-    .el-tree-node:before {
-      border-left: 1px dashed #4386c6;
-      bottom: 0px;
-      height: 100%;
-      top: -10px;
-      width: 1px;
-    }
-
-    .el-tree-node:after {
-      border-top: 1px dashed #4386c6;
-      height: 20px;
-      top: 12px;
-      width: 16px;
-    }
-
-    .el-tree-node.is-current > .el-tree-node__content {
-      background: #c2d6ea !important;
-    }
-
-    .el-tree-node__expand-icon {
-      margin-left: -3px;
-      padding: 6px 6px 6px 0px;
-      font-size: 16px;
-    }
-
-  }
+}
 </style>

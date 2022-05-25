@@ -235,6 +235,7 @@ export default {
       fileTypes: '上传文件类型',
       fileTypesHelp: '支持添加其他文件类型',
       headers: '上传请求头',
+      dataTarget:'数据目标',
 
       cellWidth: '宽度',
       cellHeight: '高度',

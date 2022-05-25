@@ -27,6 +27,7 @@ const COMMON_PROPERTIES = {
   'requiredHint'      :            'requiredHint-editor',
   'validation'        :            'validation-editor',
   'validationHint'    :            'validationHint-editor',
+  'dataTarget'        :            'dataTarget-editor',
   'readonly'          :            'readonly-editor',
   'disabled'          :            'disabled-editor',
   'hidden'            :            'hidden-editor',
@@ -50,12 +51,12 @@ const COMMON_PROPERTIES = {
   'uploadTip'         :            'uploadTip-editor',
   'withCredentials'   :            'withCredentials-editor',
   'multipleSelect'    :            'multipleSelect-editor',
+
   'limit'             :            'limit-editor',
   'fileMaxSize'       :            'fileMaxSize-editor',
   'fileTypes'         :            'fileTypes-editor',
   'contentHeight'     :            'contentHeight-editor',
   'customClass'       :            'customClass-editor',
-
   //容器
   'showBlankRow'       :            'showBlankRow-editor',
   'showRowNumber'      :            'showRowNumber-editor',
