@@ -8,13 +8,10 @@ export const editTableSchema = {
     label: 'edit-table',
     hidden: false,
     customClass: '',
-    dataTarget: '',
-    tableColumns: [
-      {columnId: 1, prop: 'name', label: '姓名', width: '100', show: true, align: 'left', fixed: 'left', sortable: true},
-    ],
-    tableData: [{
-      name: 'aaa',
-      age: 16
-    }]
+    dataTarget: {},
+    column: '',
+    cellStyle: {'height': '39px', 'cursor': 'pointer'},
+    tableColumns: [],
+    tableData: []
   }
 }

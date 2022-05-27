@@ -21,12 +21,14 @@ const tableData = [{
   "name_": "VAE01",
   "type_": "arrtibute",
   "value_": "603",
+  "cname": "VAE01中文名",
   "pid": "cfd3b461c5b85ed9"
 }, {
   "id": "a2aa0f1b3a443ad9",
   "name_": "VAA01",
   "type_": "arrtibute",
   "value_": "10231",
+  "cname": "VAA01中文名",
   "pid": "cfd3b461c5b85ed9"
 }, {
   "id": "117e52768421cad9",
@@ -1507,8 +1509,8 @@ export function getDataById() {
 export function getDataListByPid(pid) {
   const data = []
   tableData.map(item => {
-    if (item.pid == pid) {
-      const hasChildren = ['object', 'array'].find((str) => str == item.type_) ? true : false
+    if (item.pid === pid) {
+      const hasChildren = !!['object', 'array'].find((str) => str === item.type_)
       data.push({
         ...item,
         hasChildren,
