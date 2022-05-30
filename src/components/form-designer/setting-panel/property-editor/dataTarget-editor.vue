@@ -12,7 +12,7 @@
     <el-drawer v-if="showDataTargetDialog" v-model="showDataTargetDialog" title="选择需要匹配的数据" show-close>
       <div style="height: 80vh;overflow: auto">
         <el-tree
-            ref="refTree"
+            ref="tree$"
             :props="treeProps"
             :load="loadNode"
             lazy
@@ -36,16 +36,17 @@
 <script>
 import i18n from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
-import {computed, nextTick, reactive, ref, watch} from "vue";
+import {nextTick, reactive, ref, watch} from "vue";
 import {getDataListByPid} from "@/api/data-schema";
 
 export default {
   name: "dataTarget-editor",
   mixins: [i18n, propertyMixin],
   setup(props, ctx) {
+    let expended = 0
     const showDataTargetDialog = ref(false)
     const openNodeSet = reactive(new Set(props.optionModel.dataTarget.expendedNodes || []))
-    const refTree = ref("")
+    const tree$ = ref("")
     const treeProps = {
       label: 'name_',
       children: 'children',
@@ -56,18 +57,28 @@ export default {
     watch(openNodeSet, (newVal) => {
       props.optionModel.dataTarget["expendedNodes"] = Array.from(newVal)
     })
+    watch(showDataTargetDialog, () => {
+      if (showDataTargetDialog) {
+        expended = 0
+      }
+    })
 
     function loadNode(node, resolve) {
+      expended++
+      const {checkedNodes, expendedNodes} = props.optionModel.dataTarget
+      if (expended - 1 === expendedNodes.length) {
+        nextTick(() => {
+          tree$.value.setCheckedKeys(checkedNodes.map(node => node.id))
+        })
+      }
       if (node.level === 0) {
         resolve(getDataListByPid('00000'))
       } else {
         resolve(getDataListByPid(node.data.id))
-        // console.log(loadNum)
       }
     }
 
     function checkNode(data, {checkedNodes}) {
-      // console.log('checkedNodes', checkedNodes);
       selectedData.value = checkedNodes
       props.optionModel.dataTarget['checkedNodes'] = checkedNodes
     }
@@ -76,6 +87,11 @@ export default {
       openNodeSet.add(data.id)
     }
 
+    /**
+     * 递归移除关闭节点，如果某节点关闭，则将移除改节点下的子节点
+     * @param data
+     * @param node
+     */
     function nodeCollapse(data, node) {
       const traverse = (node) => {
         const nodes = node.childNodes.filter(item => item.expanded)
@@ -92,7 +108,7 @@ export default {
       showDataTargetDialog,
       selectedData,
       treeProps,
-      refTree,
+      tree$,
       checkNode,
       loadNode,
       nodeExpand,
@@ -103,13 +119,6 @@ export default {
     designer: Object,
     selectedWidget: Object,
     optionModel: Object,
-  },
-  computed: {
-    defaultCheckedKeys() {
-      const keys = this.optionModel?.dataTarget?.checkedNodes?.map(item => item.id.toString())
-      console.log(222, keys);
-      return keys
-    }
   }
 }
 </script>
