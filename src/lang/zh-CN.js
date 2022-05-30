@@ -164,7 +164,7 @@ export default {
       exportCode: '导出代码',
       generateCode: '生成代码',
       generateSFC: '生成SFC',
-      bindData:'绑定数据'
+      dataSchema:'数据结构管理'
     },
 
     setting: {

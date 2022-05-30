@@ -55,7 +55,7 @@
         </el-button>
         <el-button v-if="showToolButton('dataSourceButton')" type="text" @click="showDataSource">
           <svg-icon icon-class="vue-sfc"/>
-          {{ i18nt('designer.toolbar.bindData') }}
+          {{ i18nt('designer.toolbar.dataSchema') }}
         </el-button>
         <template v-for="(idx, slotName) in $slots">
           <slot :name="slotName"></slot>
@@ -221,7 +221,7 @@
     </div>
 
     <div class="">
-      <el-dialog :title="i18nt('designer.toolbar.bindData')" v-model="showDataSourceDialogFlag"
+      <el-dialog :title="i18nt('designer.toolbar.dataSchema')" v-model="showDataSourceDialogFlag"
                  :show-close="true" custom-class="drag-dialog small-padding-dialog"
                  fullscreen
                  :close-on-click-modal="false" :close-on-press-escape="false"

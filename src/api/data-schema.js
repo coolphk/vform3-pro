@@ -1514,7 +1514,8 @@ export function getDataListByPid(pid) {
       data.push({
         ...item,
         hasChildren,
-        isLeaf: !hasChildren
+        isLeaf: !hasChildren,
+        dataType: "object"
       })
     }
   })

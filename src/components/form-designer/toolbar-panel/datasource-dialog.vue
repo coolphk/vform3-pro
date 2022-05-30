@@ -22,25 +22,22 @@
           </el-switch>
         </template>
       </el-table-column>
-      <el-table-column prop="level" width="120" label="层级"/>
-      <el-table-column prop="path" width="200" label="路径"/>
-
-      <!--    <el-table-column prop="component" label="绑定组件">
-            <template #default="scope">
-              <div>
-                <el-select v-if="scope.row.label.startsWith('@')" v-model="bindComponent">
-                  <el-option v-for="(field,index) in fieldWidgets" :key="field.name" :label="field.name" :value="field.name"/>
-                </el-select>
-              </div>
-            </template>
-          </el-table-column>-->
+      <el-table-column prop="" width="120" label="数据类型">
+        <template #default="scope">
+          <el-select v-model="scope.row.dataType">
+            <el-option v-for="(item,index) in dataTypes" :label="item.label" :value="item.value"></el-option>
+          </el-select>
+        </template>
+      </el-table-column>
+      <el-table-column prop="testValue" width="120" label="测试值">
+      </el-table-column>
     </el-table>
     <el-button @click="showData">控制台显示数据</el-button>
   </div>
 </template>
 
 <script setup>
-// import {transformDataToELTSchema} from "@/utils/data-adapter";
+
 import {getDataListByPid} from "@/api/data-schema"
 import {getAllFieldWidgets} from "@/utils/util";
 import {ref} from "vue";
@@ -48,6 +45,13 @@ import {ref} from "vue";
 const props = defineProps({
   designer: Object
 })
+const dataTypes = [{
+  label: "Object",
+  value: "object"
+}, {
+  label: "Array",
+  value: "array"
+}]
 const fieldWidgets = getAllFieldWidgets(props.designer.widgetList);
 
 const tableData = getDataListByPid('00000')
