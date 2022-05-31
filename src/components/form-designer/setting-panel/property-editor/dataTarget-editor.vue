@@ -20,7 +20,7 @@
             node-key="id"
             @check="checkNode"
             check-on-click-node
-            :default-expanded-keys="optionModel.dataTarget.expendedNodes"
+            :default-expanded-keys="optionModel.dataTarget.expandedNodes"
             @node-collapse="nodeCollapse"
             @node-expand="nodeExpand"
         >
@@ -43,9 +43,9 @@ export default {
   name: "dataTarget-editor",
   mixins: [i18n, propertyMixin],
   setup(props, ctx) {
-    let expended = 0
+    let expanded = 0
     const showDataTargetDialog = ref(false)
-    const openNodeSet = reactive(new Set(props.optionModel.dataTarget.expendedNodes || []))
+    const openNodeSet = reactive(new Set(props.optionModel.dataTarget.expandedNodes || []))
     const tree$ = ref("")
     const treeProps = {
       label: 'name_',
@@ -55,18 +55,18 @@ export default {
     const selectedData = ref("")
 
     watch(openNodeSet, (newVal) => {
-      props.optionModel.dataTarget["expendedNodes"] = Array.from(newVal)
+      props.optionModel.dataTarget["expandedNodes"] = Array.from(newVal)
     })
     watch(showDataTargetDialog, () => {
       if (showDataTargetDialog) {
-        expended = 0
+        expanded = 0
       }
     })
 
     function loadNode(node, resolve) {
-      expended++
-      const {checkedNodes, expendedNodes} = props.optionModel.dataTarget
-      if (expended - 1 === expendedNodes.length) {
+      expanded++
+      const {checkedNodes, expandedNodes} = props.optionModel.dataTarget
+      if (expanded - 1 === expandedNodes.length) {
         nextTick(() => {
           tree$.value.setCheckedKeys(checkedNodes.map(node => node.id))
         })
