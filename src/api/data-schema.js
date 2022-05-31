@@ -1515,7 +1515,9 @@ export function getDataListByPid(pid) {
         ...item,
         hasChildren,
         isLeaf: !hasChildren,
-        dataType: "object"
+        required: false,
+        isEditing: false
+
       })
     }
   })

@@ -41,14 +41,14 @@
       </el-cascader>
     </div>
     <div v-if="(selectedWidget.type === 'cascader')">
-      <el-button type="text" @click="importCascaderOptions">{{i18nt('designer.setting.importOptions')}}</el-button>
-      <el-button type="text" @click="resetDefault">{{i18nt('designer.setting.resetDefault')}}</el-button>
+      <el-button link @click="importCascaderOptions">{{i18nt('designer.setting.importOptions')}}</el-button>
+      <el-button link @click="resetDefault">{{i18nt('designer.setting.resetDefault')}}</el-button>
     </div>
 
     <div v-if="(selectedWidget.type === 'radio') || (selectedWidget.type === 'checkbox') || (selectedWidget.type === 'select')">
-      <el-button type="text" @click="addOption">{{i18nt('designer.setting.addOption')}}</el-button>
-      <el-button type="text" @click="importOptions">{{i18nt('designer.setting.importOptions')}}</el-button>
-      <el-button type="text" @click="resetDefault">{{i18nt('designer.setting.resetDefault')}}</el-button>
+      <el-button link @click="addOption">{{i18nt('designer.setting.addOption')}}</el-button>
+      <el-button link @click="importOptions">{{i18nt('designer.setting.importOptions')}}</el-button>
+      <el-button link @click="resetDefault">{{i18nt('designer.setting.resetDefault')}}</el-button>
     </div>
 
     <div v-if="showImportDialogFlag" class="" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">

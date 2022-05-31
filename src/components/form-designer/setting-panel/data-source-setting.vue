@@ -98,7 +98,7 @@
           </el-row>
           <el-row>
             <el-col :span="6">
-              <el-button type="text" icon="el-icon-plus" @click="addRequestHeader">
+              <el-button link icon="el-icon-plus" @click="addRequestHeader">
                 {{i18nt('designer.setting.addRequestHeader')}}</el-button>
             </el-col>
           </el-row>
@@ -131,7 +131,7 @@
           </el-row>
           <el-row>
             <el-col :span="6">
-              <el-button type="text" icon="el-icon-plus" @click="addRequestParam">
+              <el-button link icon="el-icon-plus" @click="addRequestParam">
                 {{i18nt('designer.setting.addRequestParam')}}</el-button>
             </el-col>
           </el-row>
@@ -164,7 +164,7 @@
           </el-row>
           <el-row>
             <el-col :span="6">
-              <el-button type="text" icon="el-icon-plus" @click="addRequestData">
+              <el-button link icon="el-icon-plus" @click="addRequestData">
                 {{i18nt('designer.setting.addRequestData')}}</el-button>
             </el-col>
           </el-row>

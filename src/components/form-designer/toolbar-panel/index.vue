@@ -1,10 +1,10 @@
 <template>
   <div class="toolbar-container">
     <div class="left-toolbar">
-      <el-button type="text" :disabled="undoDisabled" :title="i18nt('designer.toolbar.undoHint')" @click="undoHistory">
+      <el-button link :disabled="undoDisabled" :title="i18nt('designer.toolbar.undoHint')" @click="undoHistory">
         <svg-icon icon-class="undo"/>
       </el-button>
-      <el-button type="text" :disabled="redoDisabled" :title="i18nt('designer.toolbar.redoHint')" @click="redoHistory">
+      <el-button link :disabled="redoDisabled" :title="i18nt('designer.toolbar.redoHint')" @click="redoHistory">
         <svg-icon icon-class="redo"/>
       </el-button>
       <el-button-group style="margin-left: 20px">
@@ -32,28 +32,28 @@
 
     <div class="right-toolbar">
       <div class="right-toolbar-con">
-        <el-button v-if="showToolButton('clearDesignerButton')" type="text" @click="clearFormWidget">
+        <el-button v-if="showToolButton('clearDesignerButton')" link @click="clearFormWidget">
           <svg-icon icon-class="el-delete"/>
           {{ i18nt('designer.toolbar.clear') }}
         </el-button>
-        <el-button v-if="showToolButton('previewFormButton')" type="text" @click="previewForm">
+        <el-button v-if="showToolButton('previewFormButton')" link @click="previewForm">
           <svg-icon icon-class="el-view"/>
           {{ i18nt('designer.toolbar.preview') }}
         </el-button>
-        <el-button v-if="showToolButton('importJsonButton')" type="text" @click="importJson">
+        <el-button v-if="showToolButton('importJsonButton')" link @click="importJson">
           {{ i18nt('designer.toolbar.importJson') }}
         </el-button>
-        <el-button v-if="showToolButton('exportJsonButton')" type="text" @click="exportJson">
+        <el-button v-if="showToolButton('exportJsonButton')" link @click="exportJson">
           {{ i18nt('designer.toolbar.exportJson') }}
         </el-button>
-        <el-button v-if="showToolButton('exportCodeButton')" type="text" @click="exportCode">
+        <el-button v-if="showToolButton('exportCodeButton')" link @click="exportCode">
           {{ i18nt('designer.toolbar.exportCode') }}
         </el-button>
-        <el-button v-if="showToolButton('generateSFCButton')" type="text" @click="generateSFC">
+        <el-button v-if="showToolButton('generateSFCButton')" link @click="generateSFC">
           <svg-icon icon-class="vue-sfc"/>
           {{ i18nt('designer.toolbar.generateSFC') }}
         </el-button>
-        <el-button v-if="showToolButton('dataSourceButton')" type="text" @click="showDataSource">
+        <el-button v-if="showToolButton('dataSourceButton')" link @click="showDataSource">
           <svg-icon icon-class="vue-sfc"/>
           {{ i18nt('designer.toolbar.dataSchema') }}
         </el-button>
