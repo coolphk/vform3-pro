@@ -1,7 +1,8 @@
 <template>
-  <div class="datasouce-container">
+  <div class="datasouce-container" @contextmenu.prevent="">
     <!--  <code-editor mode="json" :readonly="false" v-model="dataSource"></code-editor>-->
     <el-table
+        ref="table$"
         :data="tableData"
         style="width: 100%; margin-bottom: 20px"
         row-key="id"
@@ -11,6 +12,7 @@
         header-cell-class-name="head-cell"
         height="80vh"
         :load="loadData"
+        @row-contextmenu="onRowContextmenu"
     >
       <el-table-column type="index" width="120" label="序列"/>
       <el-table-column prop="id" width="300" label="ID"/>
@@ -46,16 +48,29 @@
           </el-select>
         </template>
       </el-table-column>
-      <el-table-column label="操作">
-        <template #default="scope">
-          <el-button v-if="!scope.row.isEditing" type="primary" :icon="Edit" @click="scope.row.isEditing=true" circle/>
-          <el-button v-else type="warning" :icon="Check" @click="scope.row.isEditing=false" circle/>
-          <el-button type="success" :icon="Plus" circle/>
-          <el-button type="danger" :icon="Delete" circle/>
-        </template>
-      </el-table-column>
+      <!--      <el-table-column label="操作">
+              <template #default="scope">
+                <el-button v-if="!scope.row.isEditing" type="primary" :icon="Edit" @click="scope.row.isEditing=true" circle/>
+                <el-button v-else type="warning" :icon="Check" @click="scope.row.isEditing=false" circle/>
+                <el-popover v-if="scope.row.showAdd" v-model:visible="scope.row.showAdd" placement="top">
+                  <div style="display: flex;flex-direction: column;align-items: center">
+                    <div>
+                      <el-button type="success" @click="scope.row.showAdd = false">添加同级节点</el-button>
+                    </div>
+                    <div style="margin-top: 10px">
+                      <el-button type="primary" @click="scope.row.showAdd = false">添加子级节点</el-button>
+                    </div>
+                  </div>
+                  <template #reference>
+                    <el-button type="success" @click="scope.row.showAdd=!scope.row.showAdd" :icon="Plus" circle/>
+                  </template>
+                </el-popover>
+                <el-button type="danger" :icon="Delete" circle/>
+              </template>
+            </el-table-column>-->
     </el-table>
     <el-button @click="showData">控制台显示数据</el-button>
+    <datasource-contextmenu :menu-state="menuState" :tableData="tableData"></datasource-contextmenu>
   </div>
 </template>
 
@@ -63,17 +78,21 @@
 
 import {getDataListByPid} from "@/api/data-schema"
 import {getAllFieldWidgets} from "@/utils/util";
+import {onClickOutside} from "@vueuse/core"
 import {
   Check,
   Delete,
   Edit,
   Plus,
 } from '@element-plus/icons-vue'
-import {ref} from "vue";
+import {reactive, ref} from "vue";
+import DatasourceContextmenu from "@/components/form-designer/toolbar-panel/datasource-contextmenu";
 
+const table$ = ref()
 const props = defineProps({
   designer: Object
 })
+const menuState = reactive({})
 const dataTypes = [
   {
     label: "Object",
@@ -88,10 +107,19 @@ const dataTypes = [
   }
 ]
 const fieldWidgets = getAllFieldWidgets(props.designer.widgetList);
-const tableData = getDataListByPid('00000')
+const tableData = reactive(getDataListByPid('00000'))
+
 
 function loadData(row, node, resolve) {
   resolve(getDataListByPid(row.id))
+}
+
+function onRowContextmenu(row, column, event) {
+  menuState.x = `${event.x}px`
+  menuState.y = `${event.y}px`
+  menuState.show = true
+  menuState.row = row
+  menuState.table = table$
 }
 
 function showData() {
@@ -108,4 +136,6 @@ function showData() {
     font-weight: bold;
   }
 }
+
+
 </style>
