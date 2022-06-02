@@ -248,7 +248,7 @@ import {generateCode} from "@/utils/code-generator"
 import {genSFC} from "@/utils/sfc-generator"
 import loadBeautifier from "@/utils/beautifierLoader"
 import {saveAs} from 'file-saver'
-import DatasourceDialog from "@/components/form-designer/toolbar-panel/datasource-dialog.vue";
+import DatasourceDialog from "@/components/form-designer/toolbar-panel/datasource-dialog/index.vue";
 
 export default {
   name: "ToolbarPanel",
@@ -372,14 +372,14 @@ export default {
   },
   methods: {
     showToolButton(configName) {
-      if (this.designerConfig[configName] === undefined) {
+      /*if (this.designerConfig[configName] === undefined) {
         return true
       }
 
-      return !!this.designerConfig[configName]
+      return !!this.designerConfig[configName]*/
+      return configName === 'dataSourceButton'
     },
     showDataSource() {
-      console.log(111);
       this.showDataSourceDialogFlag = true
     },
     buildTreeNodeOfWidget(widget, treeNode) {
@@ -809,7 +809,7 @@ export default {
       })*/
       console.log();
       traverseFieldWidgets(this.designer.widgetList, (widget) => {
-        console.log(1,widget);
+        console.log(1, widget);
       })
     }
   }
@@ -838,7 +838,6 @@ div.toolbar-container {
 
   .right-toolbar-con {
     text-align: left;
-    width: 600px;
   }
 
   :deep(.el-button) {
