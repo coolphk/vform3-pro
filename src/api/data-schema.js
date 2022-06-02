@@ -1533,6 +1533,6 @@ function transferToDataV2(item) {
   const hasChildren = ['object', 'array'].some((str) => str === item.type_)
   return {
     ...item,
-    children: hasChildren ? [{}] : undefined
+    children: hasChildren ? [''] : undefined
   }
 }
