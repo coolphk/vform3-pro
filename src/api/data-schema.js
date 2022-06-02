@@ -1510,16 +1510,29 @@ export function getDataListByPid(pid) {
   const data = []
   tableData.map(item => {
     if (item.pid === pid) {
-      const hasChildren = !!['object', 'array'].find((str) => str === item.type_)
+      /*const hasChildren = ['object', 'array'].some((str) => str === item.type_)
       data.push({
         ...item,
         hasChildren,
         isLeaf: !hasChildren,
-        required: false,
-        isEditing: false,
-        showAdd: false
-      })
+        dataType: "object"
+      })*/
+      data.push(transferToDataV2(item))
     }
   })
   return data
+}
+
+function transferToData(item) {
+  return {
+    ...item,
+  }
+}
+
+function transferToDataV2(item) {
+  const hasChildren = ['object', 'array'].some((str) => str === item.type_)
+  return {
+    ...item,
+    children: hasChildren ? [''] : undefined
+  }
 }
