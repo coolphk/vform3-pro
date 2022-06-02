@@ -4,6 +4,7 @@
     <el-auto-resizer>
       <template #default="{ height, width }">
         <el-table-v2
+            row-key="Param_ID"
             header-class="head-cell"
             row-class="row-cell"
             :expand-column-key="expandColumnKey"
@@ -112,19 +113,18 @@ function onProcedureSelect(val) {
   })
 }
 
-function onRowExpanded({rowData}) {
-  console.log(rowData);
-  getProcedureParams(procedureName, rowData.Param_ID).then(res => {
-    rowData.children = res.data.Data.map(item => transferData(item))
-    // rowData.children = reactive(res.data.Data)
-  })
-  // = getDataListByPid(row.rowKey)
+function onRowExpanded(row) {
+  if (row.expanded && JSON.stringify(row.rowData.children[0]) === '{}') {
+    getProcedureParams(procedureName, row.rowData.Param_ID).then(res => {
+      row.rowData.children = res.data.Data.map(item => transferData(item))
+    })
+  }
 }
 
 function transferData(object) {
   return {
     ...object,
-    children: object.HaveChild === '1' ? [''] : undefined
+    children: object.HaveChild === '1' ? [{}] : undefined
   }
 }
 
