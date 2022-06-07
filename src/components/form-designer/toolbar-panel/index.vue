@@ -377,7 +377,7 @@ export default {
       }
 
       return !!this.designerConfig[configName]*/
-      return configName === 'dataSourceButton'
+      return configName === 'dataSourceButton' || configName === 'previewFormButton'
     },
     showDataSource() {
       this.showDataSourceDialogFlag = true

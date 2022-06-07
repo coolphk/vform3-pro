@@ -7,12 +7,17 @@
  */
 
 import {deepClone, generateId, getDefaultFormConfig, overwriteObj} from "@/utils/util"
-import {containers, advancedFields, basicFields, customFields} from "@/components/form-designer/widget-panel/widgetsConfig.js"
+import {
+  containers,
+  advancedFields,
+  basicFields,
+  customFields
+} from "@/components/form-designer/widget-panel/widgetsConfig.js"
 import {VARIANT_FORM_VERSION} from "@/utils/config"
 import eventBus from "@/utils/event-bus"
 
 export function createDesigner(vueInstance) {
-  let defaultFormConfig = deepClone( getDefaultFormConfig() )
+  let defaultFormConfig = deepClone(getDefaultFormConfig())
 
   return {
     widgetList: [],
@@ -39,9 +44,9 @@ export function createDesigner(vueInstance) {
 
       //输出版本信息和语雀链接
       console.info(`%cVariantForm %cVer${VARIANT_FORM_VERSION} %chttps://www.yuque.com/variantdev/vform`,
-          "color:#409EFF;font-size: 22px;font-weight:bolder",
-          "color:#999;font-size: 12px",
-          "color:#333"
+        "color:#409EFF;font-size: 22px;font-weight:bolder",
+        "color:#999;font-size: 12px",
+        "color:#333"
       )
 
       if (!resetFormJson) {
@@ -226,7 +231,7 @@ export function createDesigner(vueInstance) {
         }
       }
 
-      let newRow = deepClone( widget.rows[cloneRowIdx] )
+      let newRow = deepClone(widget.rows[cloneRowIdx])
       newRow.id = 'table-row-' + generateId()
       newRow.merged = false
       newRow.cols.forEach(col => {
@@ -303,7 +308,7 @@ export function createDesigner(vueInstance) {
       })
 
       let rowNo = 0
-      while((newColIdx < widget.rows[0].cols.length - 1) && (rowNo < widget.rows.length)) {  //越界判断
+      while ((newColIdx < widget.rows[0].cols.length - 1) && (rowNo < widget.rows.length)) {  //越界判断
         const cellOfNextCol = widget.rows[rowNo].cols[newColIdx + 1]
         const colMerged = cellOfNextCol.merged  //确定插入位置右侧列的单元格是否为合并单元格
         if (!!colMerged) {
@@ -433,8 +438,8 @@ export function createDesigner(vueInstance) {
       })
       if (!!widgetListCols && (widgetListCols.length > 0)) { //保留widgetList
         if ((widgetListCols[0].id !== colArray[0].id) && (!colArray[0].widgetList ||
-            colArray[0].widgetList.length <= 0)) {
-          colArray[0].widgetList = deepClone( widgetListCols[0].widgetList )
+          colArray[0].widgetList.length <= 0)) {
+          colArray[0].widgetList = deepClone(widgetListCols[0].widgetList)
         }
       }
 
@@ -498,8 +503,8 @@ export function createDesigner(vueInstance) {
       let firstCellOfCol = rowArray[0].cols[colIndex]
       if (!!widgetListCols && (widgetListCols.length > 0)) { //保留widgetList
         if ((widgetListCols[0].id !== firstCellOfCol.id) && (!firstCellOfCol.widgetList ||
-            firstCellOfCol.widgetList.length <= 0)) {
-          firstCellOfCol.widgetList = deepClone( widgetListCols[0].widgetList )
+          firstCellOfCol.widgetList.length <= 0)) {
+          firstCellOfCol.widgetList = deepClone(widgetListCols[0].widgetList)
         }
       }
 
@@ -741,7 +746,7 @@ export function createDesigner(vueInstance) {
       newCon.id = newCon.type.replace(/-/g, '') + generateId()
       newCon.options.name = newCon.id
       if (newCon.type === 'grid') {
-        let newCol = deepClone( this.getContainerByType('grid-col') )
+        let newCol = deepClone(this.getContainerByType('grid-col'))
         let tmpId = generateId()
         newCol.id = 'grid-col-' + tmpId
         newCol.options.name = 'gridCol' + tmpId
@@ -756,7 +761,7 @@ export function createDesigner(vueInstance) {
         let newRow = {cols: []}
         newRow.id = 'table-row-' + generateId()
         newRow.merged = false
-        let newCell = deepClone( this.getContainerByType('table-cell') )
+        let newCell = deepClone(this.getContainerByType('table-cell'))
         newCell.id = 'table-cell-' + generateId()
         newCell.options.name = newCell.id
         newCell.merged = false
@@ -765,7 +770,7 @@ export function createDesigner(vueInstance) {
         newRow.cols.push(newCell)
         newCon.rows.push(newRow)
       } else if (newCon.type === 'tab') {
-        let newTabPane = deepClone( this.getContainerByType('tab-pane') )
+        let newTabPane = deepClone(this.getContainerByType('tab-pane'))
         newTabPane.id = 'tab-pane-' + generateId()
         newTabPane.options.name = 'tab1'
         newTabPane.options.label = 'tab 1'
@@ -838,7 +843,7 @@ export function createDesigner(vueInstance) {
 
     addTabPaneOfTabs(tabsWidget) {
       const tabPanes = tabsWidget.tabs
-      let newTabPane = deepClone( this.getContainerByType('tab-pane') )
+      let newTabPane = deepClone(this.getContainerByType('tab-pane'))
       newTabPane.id = 'tab-pane-' + generateId()
       newTabPane.options.name = newTabPane.id
       newTabPane.options.label = 'tab ' + (tabPanes.length + 1)

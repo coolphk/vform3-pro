@@ -103,9 +103,12 @@ function isArray(obj) {
   return Object.prototype.toString.call(obj) === '[object Array]'
 }
 
-export const transformDataToELTSchema = (data = originalData) => {
-  id = 1
-  const a = objectToArray(data, 0, '', undefined)
-  console.log(a);
-  return a;
+
+export function transferData(object) {
+  return {
+    ...object,
+    isLeaf: object.HaveChild !== '1',
+
+    children: object.HaveChild === '1' ? [{}] : undefined
+  }
 }

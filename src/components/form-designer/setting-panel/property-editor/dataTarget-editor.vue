@@ -1,31 +1,25 @@
 <template>
 
   <el-form-item :label="i18nt('designer.setting.dataTarget')">
-    <!--    <el-input type="text" v-model="optionModel.dataTarget" @click="showDataTargetDialog=true"></el-input>-->
     <el-button @click="showDataTargetDialog=true">选择</el-button>
-    <div style="max-height: 300px;overflow: auto">
-      <el-tag round closable v-for="(tag,index) in selectedData" :key="tag.id">
-        {{ tag.name_ }}
-      </el-tag>
-    </div>
-
-    <el-drawer v-if="showDataTargetDialog" v-model="showDataTargetDialog" title="选择需要匹配的数据" show-close>
+    <el-drawer v-model="showDataTargetDialog" title="选择需要匹配的数据" show-close>
       <div style="height: 80vh;overflow: auto">
+        <datasource-head v-if="showDataTargetDialog" @onProcedureSelect="onProcedureSelect"
+                         :procedureValue="optionModel.dataTarget['procedureValue']"/>
         <el-tree
             ref="tree$"
             :props="treeProps"
-            :load="loadNode"
-            lazy
+            :data="treeData"
             show-checkbox
-            node-key="id"
+            node-key="Param_ID"
             @check="checkNode"
             check-on-click-node
-            :default-expanded-keys="optionModel.dataTarget.expandedNodes"
             @node-collapse="nodeCollapse"
             @node-expand="nodeExpand"
+            :default-expanded-keys="optionModel.dataTarget['expandedNodes']"
+            :default-checked-keys="optionModel.dataTarget['checkedKeys']"
         >
         </el-tree>
-        <!--        :default-checked-keys="['fb2fcba84c2702d9','a2aa0f1b3a443ad9']"-->
       </div>
       <el-button type="primary" size="large">确定</el-button>
     </el-drawer>
@@ -36,55 +30,69 @@
 <script>
 import i18n from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
-import {nextTick, reactive, ref, watch} from "vue";
-import {getDataListByPid} from "@/api/data-schema";
+import {computed, nextTick, reactive, ref, watch} from "vue";
+import {getProcedureParams} from "@/api/data-schema";
+import DatasourceHead from "@/components/form-designer/toolbar-panel/datasource-dialog/datasource-head";
+import {transferData} from "@/utils/data-adapter";
+
 
 export default {
   name: "dataTarget-editor",
+  components: {DatasourceHead},
   mixins: [i18n, propertyMixin],
   setup(props, ctx) {
-    let expanded = 0
+    //存储过程值
+    // const procedureValue = ref(props.optionModel.dataTarget['procedureValue'])
     const showDataTargetDialog = ref(false)
-    const openNodeSet = reactive(new Set(props.optionModel.dataTarget.expandedNodes || []))
+    const openNodeSet = reactive(new Set(props.optionModel.dataTarget['expandedNodes']))
     const tree$ = ref("")
     const treeProps = {
-      label: 'name_',
+      label: 'Param_Name',
       children: 'children',
       isLeaf: 'isLeaf',
     }
-    const selectedData = ref("")
-
+    console.log('props.optionModel.dataTarget', props.optionModel.dataTarget);
+    //目标源数据
+    const treeData = computed({
+      get: () => {
+        return props.optionModel.dataTarget['treeData']
+      },
+      set: (val) => {
+        props.optionModel.dataTarget['treeData'] = val
+      }
+    })
     watch(openNodeSet, (newVal) => {
       props.optionModel.dataTarget["expandedNodes"] = Array.from(newVal)
     })
-    watch(showDataTargetDialog, () => {
-      if (showDataTargetDialog) {
-        expanded = 0
-      }
-    })
 
-    function loadNode(node, resolve) {
-      expanded++
-      const {checkedNodes, expandedNodes} = props.optionModel.dataTarget
-      if (expanded - 1 === expandedNodes.length) {
+    // 选择存储过程，通过过程名称加载存储过程参数，并设置树形组件默认展开根节点
+    function onProcedureSelect(val) {
+      const root = {Param_ID: val.ProcedureID, Param_Name: val.ProcedureName, isRoot: true, children: []}
+      //切换存储过程时清空展开的节点
+      openNodeSet.clear()
+      props.optionModel.dataTarget['procedureValue'] = val
+      //选择存储过程后，动态加载树形数据
+      getProcedureParams(val.ProcedureName).then(res => {
+        root.children = res.data.Data.map(item => transferData(item))
+        treeData.value = [root]
+        //加载数据完成后，默认展开树形第一层节点
         nextTick(() => {
-          tree$.value.setCheckedKeys(checkedNodes.map(node => node.id))
+          tree$.value.store.setDefaultExpandedKeys([val.ProcedureID + ""]);
+        })
+      })
+    }
+
+    function checkNode(data, {checkedKeys}) {
+      props.optionModel.dataTarget['checkedKeys'] = checkedKeys
+    }
+
+    function nodeExpand(data, val) {
+      openNodeSet.add(data.Param_ID)
+      if (!data.isRoot && JSON.stringify(data.children[0]) === '{}') {
+        getProcedureParams(treeData.value[0].Param_Name, data.Param_ID).then(res => {
+          data.children = res.data.Data.map(item => transferData(item))
         })
       }
-      if (node.level === 0) {
-        resolve(getDataListByPid('00000'))
-      } else {
-        resolve(getDataListByPid(node.data.id))
-      }
-    }
-
-    function checkNode(data, {checkedNodes}) {
-      selectedData.value = checkedNodes
-      props.optionModel.dataTarget['checkedNodes'] = checkedNodes
-    }
-
-    function nodeExpand(data) {
-      openNodeSet.add(data.id)
     }
 
     /**
@@ -101,18 +109,19 @@ export default {
         })
       }
       traverse(node)
-      openNodeSet.delete(data.id)
+      openNodeSet.delete(data.Param_ID)
     }
 
     return {
       showDataTargetDialog,
-      selectedData,
       treeProps,
       tree$,
+      treeData,
+      // procedureValue,
       checkNode,
-      loadNode,
       nodeExpand,
-      nodeCollapse
+      nodeCollapse,
+      onProcedureSelect
     }
   },
   props: {

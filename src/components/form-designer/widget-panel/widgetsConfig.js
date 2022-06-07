@@ -266,7 +266,7 @@ export const basicFields = [
     icon: 'text-field',
     formItemFlag: true,
     options: {
-      dataTarget: '',
+      dataTarget: {},
       name: '',
       label: '',
       labelAlign: '',
@@ -484,7 +484,7 @@ export const basicFields = [
     icon: 'select-field',
     formItemFlag: true,
     options: {
-      dataTarget: '',
+      dataTarget: {},
       name: '',
       label: '',
       labelAlign: '',
