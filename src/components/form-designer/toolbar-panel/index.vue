@@ -222,10 +222,9 @@
 
     <div class="">
       <el-dialog :title="i18nt('designer.toolbar.dataSchema')" v-model="showDataSourceDialogFlag"
-                 :show-close="true" custom-class="drag-dialog small-padding-dialog"
-                 fullscreen
-                 :close-on-click-modal="false" :close-on-press-escape="false"
-                 :destroy-on-close="true">
+                 :show-close="true" fullscreen :append-to-body="true" :close-on-click-modal="false"
+                 :close-on-press-escape="false" :destroy-on-close="true"
+      >
         <datasource-dialog :designer="designer"></datasource-dialog>
       </el-dialog>
     </div>

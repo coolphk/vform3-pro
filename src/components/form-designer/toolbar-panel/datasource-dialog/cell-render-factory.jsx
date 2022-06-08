@@ -1,28 +1,42 @@
 import CodeEditor from "@/components/code-editor";
-import {reactive, ref} from "vue";
+import {xmlToJson} from "@/api/data-schema";
+import {ref} from "vue";
 
-export const editorRender = function ({rowData, column}) {
-  /*const input = ref('')
-  const slots = {
-    reference: () => <el-button>编辑</el-button>,
-    // default: () => <CodeEditor readonly={false} mode="xml" v-model={rowData[column['dataKey']]}></CodeEditor>
-    default: () => <el-input type="textarea" v-model={input.value}></el-input>
+export const editorRender = (type, procedureInfo) => (row) => {
+  const {rowData, column} = row
+  const visible = ref(false)
+  const sendXml = () => {
+    xmlToJson({
+      "ProcedureID": procedureInfo.value.ProcedureID,
+      "ProcedureName": procedureInfo.value.ProcedureName,
+      "Param_ID": rowData.Param_ID,
+      "Param_Name": rowData.Param_Name,
+      "pXML": rowData[column['dataKey']]
+    }).then(res => {
+      // console.log('xmlToJson', res, row);
+      if (res.data.Message === 'XML2JSON成功') {
+        console.log(row);
+      }
+    })
   }
-  const editXml = () => <el-popover width={800} trigger="click" v-slots={slots}></el-popover>*/
-  let showEditorDialog = ref(false)
-  const input = ref('')
-  const onEditButtonClick = () => {
-    showEditorDialog.value = true
-    console.log(111, showEditorDialog);
+  const showCodeEditor = () => {
+    visible.value = true
   }
   const slots = {
-    default: () => <el-input v-model={input.value}></el-input>
-  };
-  const editXml = () => <div>
-    <el-button onClick={onEditButtonClick}>编辑</el-button>
-    <el-dialog v-model={showEditorDialog} v-slots={slots}/>
-  </div>
+    reference: () => <el-button onClick={showCodeEditor}>编辑</el-button>,
+    default: () => visible.value && <div>
+      <CodeEditor readonly={false} mode={type}
+                  v-model={rowData[column['dataKey']]}/>
+      {type === 'xml' && <el-button type={'success'} onClick={sendXml} style={{marginTop: '10px'}}>发送xml</el-button>}
+    </div>
+  }
+  const editXml = () => <el-popover
+    key={rowData.Param_ID}
+    width={800}
+    v-slots={slots}
+    trigger={'click'}
+    append-to={'body'}/>
   return (
-    rowData.Param_isXML === '1' ? editXml() : <div>sss</div>
+    rowData.Param_isXML === '1' || type === 'text' ? editXml() : <el-input v-model={rowData[column['dataKey']]}/>
   )
 }

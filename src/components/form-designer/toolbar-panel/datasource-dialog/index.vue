@@ -10,7 +10,6 @@
             ref="table$"
             row-key="Param_ID"
             header-class="head-cell"
-            :estimated-row-height="50"
             row-class="row-cell"
             :expand-column-key="expandColumnKey"
             :columns="columns"
@@ -18,6 +17,7 @@
             :width="width"
             :height="height"
             @row-expand="onRowExpanded"
+            :append-to-body="true"
         />
       </template>
     </el-auto-resizer>
@@ -36,7 +36,7 @@ import {transferData} from "@/utils/data-adapter";
 
 import {editorRender} from "@/components/form-designer/toolbar-panel/datasource-dialog/cell-render-factory.jsx";
 
-let selectedProcedure
+const selectedProcedure = ref()
 const props = defineProps({
   designer: Object
 })
@@ -73,22 +73,8 @@ const columns = [
     key: 'Param_VALUE',
     dataKey: 'Param_VALUE',
     title: '值',
-    width: 300,
-    cellRenderer: ({rowData, column}) => {
-
-      /*const showDialog = ref(false)
-      const click = () => {
-        showDialog.value = true
-        console.log(111);
-      }
-      return (
-          <>
-            <el-button onClick={click}>显示</el-button>
-            <el-dialog v-model={showDialog.value} v-slots={{default: () => <div>ssss</div>}}>
-            </el-dialog>
-          </>
-      )*/
-    }
+    width: 150,
+    cellRenderer: editorRender('xml', selectedProcedure)
   }, {
     key: 'Param_TestVALUE',
     dataKey: 'Param_TestVALUE',
@@ -114,11 +100,7 @@ const columns = [
     dataKey: '  Param_BusiDes',
     title: '业务说明',
     width: 200,
-    cellRenderer: ({rowData, column}) => {
-      return (
-          <el-input type="textarea" v-model={rowData[column.dataKey]}></el-input>
-      )
-    }
+    cellRenderer: editorRender('text')
   }, {
     key: 'options',
     title: '操作',
@@ -126,7 +108,7 @@ const columns = [
     cellRenderer: ({rowData, column}) => {
       function onSave(event) {
         console.log(event, rowData);
-        console.log(selectedProcedure);
+        // console.log(selectedProcedure);
       }
 
       return (
@@ -153,7 +135,7 @@ const tableData = ref([])
 const table$ = ref()
 
 function onProcedureSelect(val) {
-  selectedProcedure = val
+  selectedProcedure.value = val
   getProcedureParams(val.ProcedureName).then(res => {
     tableData.value = res.data.Data.map(item => transferData(item))
   })
@@ -161,7 +143,7 @@ function onProcedureSelect(val) {
 
 function onRowExpanded(row) {
   if (row.expanded && JSON.stringify(row.rowData.children[0]) === '{}') {
-    getProcedureParams(selectedProcedure.ProcedureName, row.rowData.Param_ID).then(res => {
+    getProcedureParams(selectedProcedure.value.ProcedureName, row.rowData.Param_ID).then(res => {
       row.rowData.children = res.data.Data.map(item => transferData(item))
     })
   }
