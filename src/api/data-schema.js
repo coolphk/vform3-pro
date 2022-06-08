@@ -14,20 +14,10 @@ export function xmlToJson(params) {
   return post(`${baseUrl}/XML2JSON`, params)
 }
 
+export function delProcedureParams(params) {
+  return post(`${baseUrl}/Detele_ProcParams`, params)
+}
+
 export function updateParams(params) {
   return post(`${baseUrl}/Uapdate_ProcParams`, params)
-}
-
-function transferToData(item) {
-  return {
-    ...item,
-  }
-}
-
-function transferToDataV2(item) {
-  const hasChildren = ['object', 'array'].some((str) => str === item.type_)
-  return {
-    ...item,
-    children: hasChildren ? [''] : undefined
-  }
 }

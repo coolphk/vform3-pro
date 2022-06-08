@@ -108,7 +108,7 @@ export function transferData(object) {
   return {
     ...object,
     isLeaf: object.HaveChild !== '1',
-
-    children: object.HaveChild === '1' ? [{}] : undefined
+    children: object.HaveChild === '1' ? [{}] : undefined,
+    editorVisible: false
   }
 }

@@ -34,7 +34,10 @@ import {Delete, Select} from "@element-plus/icons-vue";
 import DatasourceHead from "@/components/form-designer/toolbar-panel/datasource-dialog/datasource-head.vue";
 import {transferData} from "@/utils/data-adapter";
 
-import {editorRender} from "@/components/form-designer/toolbar-panel/datasource-dialog/cell-render-factory.jsx";
+import {
+  editorRender,
+  operationRender
+} from "@/components/form-designer/toolbar-panel/datasource-dialog/cell-render-factory.jsx";
 
 const selectedProcedure = ref()
 const props = defineProps({
@@ -105,31 +108,7 @@ const columns = [
     key: 'options',
     title: '操作',
     width: 300,
-    cellRenderer: ({rowData, column}) => {
-      function onSave(event) {
-        console.log(event, rowData);
-        // console.log(selectedProcedure);
-      }
-
-      return (
-          <div style="display:flex">
-            <el-tooltip content="保存" placement="top">
-              <el-button type="primary" icon={Select} onClick={onSave}></el-button>
-            </el-tooltip>
-
-            <el-popconfirm
-                title="确定要删除吗?"
-                v-slots={{
-                  reference: () =>
-                      <div style="margin-left:8px">
-                        <el-tooltip content="删除" placement="top">
-                          <el-button type="danger" icon={Delete}></el-button>
-                        </el-tooltip>
-                      </div>
-                }}/>
-          </div>
-      )
-    }
+    cellRenderer: operationRender(selectedProcedure)
   }]
 const tableData = ref([])
 const table$ = ref()
@@ -142,9 +121,9 @@ function onProcedureSelect(val) {
 }
 
 function onRowExpanded(row) {
-  if (row.expanded && JSON.stringify(row.rowData.children[0]) === '{}') {
+  if (row.expanded && Object.keys(row.rowData.children[0]).length === 0) {
     getProcedureParams(selectedProcedure.value.ProcedureName, row.rowData.Param_ID).then(res => {
-      row.rowData.children = res.data.Data.map(item => transferData(item))
+      row.rowData.children = res.data.Data.map(item => transferData({parent: row.rowData, ...item}))
     })
   }
 }
