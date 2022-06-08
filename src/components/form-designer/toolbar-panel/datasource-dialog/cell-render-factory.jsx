@@ -1,11 +1,14 @@
 import CodeEditor from "@/components/code-editor";
-import {getProcedureParams, xmlToJson} from "@/api/data-schema";
+import {delProcedureParams, getProcedureParams, xmlToJson} from "@/api/data-schema";
 import {Delete, Select} from "@element-plus/icons-vue";
 import {transferData} from "@/utils/data-adapter";
+import {ref} from "vue";
+import {ElMessage} from "element-plus";
 
 
 export const editorRender = (type, procedureInfo) => (row) => {
   const {rowData, column} = row
+  const popover$ = ref()
   const sendXml = () => {
     xmlToJson({
       "ProcedureID": procedureInfo.value.ProcedureID,
@@ -14,12 +17,14 @@ export const editorRender = (type, procedureInfo) => (row) => {
       "Param_Name": rowData.Param_Name,
       "pXML": rowData[column['dataKey']]
     }).then(res => {
-      // console.log('xmlToJson', res, row);
       if (res.data.Status && res.data.Message === 'XML2JSON成功') {
-        console.log(row);
         getProcedureParams(procedureInfo.value.ProcedureName, rowData.Param_ID).then(res => {
-          console.log(res);
           rowData.children = res.data.Data.map(item => transferData({parent: rowData, ...item}))
+          popover$.value.hide();
+          ElMessage({
+            message: 'XML解析成功，已生成子节点.',
+            type: 'success',
+          })
         })
       }
     })
@@ -31,6 +36,7 @@ export const editorRender = (type, procedureInfo) => (row) => {
     </div>
   }
   const editXml = () => <el-popover
+    ref={popover$}
     key={rowData.Param_ID}
     width={800}
     v-slots={slots}
@@ -64,8 +70,22 @@ export const operationRender = (selectedProcedure) => (row) => {
   }
 
   function onDelete() {
-    const atParentIndex = row.rowData.parent.children.findIndex(item => item.Param_ID === row.rowData.Param_ID)
-    row.rowData.parent.children.splice(atParentIndex, 1)
+    const parent = rowData.parent
+    const children = rowData.children
+    delete rowData.parent
+    delete rowData.children
+    delProcedureParams({
+      ProcedureID: selectedProcedure.value.ProcedureID,
+      ProcedureName: selectedProcedure.value.ProcedureName,
+      ...rowData
+    }).then(res => {
+      if (res.status === 200 && res?.data?.Status) {
+        rowData.parent = parent
+        rowData.children = children
+        const atParentIndex = rowData.parent.children.findIndex(item => item.Param_ID === rowData.Param_ID)
+        rowData.parent.children.splice(atParentIndex, 1)
+      }
+    })
   }
 
   return (
