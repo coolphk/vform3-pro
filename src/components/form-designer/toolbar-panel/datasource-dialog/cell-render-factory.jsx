@@ -93,23 +93,6 @@ export const operationRender = (selectedProcedure, tableData) => (row) => {
   )
 }
 
-/*function submitData({type, rowData, callback, cbParams}) {
-  const parent = rowData?.parent
-  const children = rowData?.children
-  delete rowData?.parent
-  delete rowData?.children
-  callback(cbParams).then(res => {
-    if (res.status === 200 && res?.data?.Status) {
-      parent && (rowData.parent = parent)
-      children && (rowData.children = children)
-      if (type === 'delete') {
-        const atParentIndex = rowData.parent.children.findIndex(item => item.Param_ID === rowData.Param_ID)
-        rowData.parent.children.splice(atParentIndex, 1)
-      }
-    }
-  })
-}*/
-
 function mergeSubmitData(info, params) {
   return {
     ProcedureID: info.ProcedureID,
@@ -119,10 +102,10 @@ function mergeSubmitData(info, params) {
 }
 
 function findParentItem(tableData, item) {
-  const parent = tableData.find(data => data.Param_ID === item.Parent_ID)
+  let parent = tableData.find(data => data.Param_ID === item.Parent_ID)
   if (!parent) {
     tableData.forEach(data => {
-      findParentItem(data.children, item)
+      data.children && (parent = findParentItem(data.children, item))
     })
   }
   return parent

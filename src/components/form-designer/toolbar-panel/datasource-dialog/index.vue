@@ -127,19 +127,15 @@ function onRowExpanded(row) {
   }
 }
 
-function onSendTestData() {
+async function onSendTestData() {
   const submitData = []
   flatten(submitData, tableData.value)
-  console.log(submitData);
   const data = {
     procedureID: selectedProcedure.value.ProcedureID,
     procedureName: selectedProcedure.value.ProcedureName,
     params: submitData
   }
-
-  execProcedure(data).then(res => {
-    console.log(res);
-  })
+  await execProcedure(data)
 }
 
 function showData() {
