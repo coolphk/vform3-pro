@@ -56,23 +56,16 @@ export const editorRender = (type, procedureInfo) => (row) => {
   )
 }
 
-export const operationRender = (selectedProcedure) => (row) => {
+export const operationRender = (selectedProcedure, tableData) => (row) => {
   const {rowData, column} = row
 
   function onSave(event) {
-    submitData({
-      rowData,
-      callback: updateProcedureParams,
-      cbParams: mergeSubmitData(selectedProcedure.value, rowData),
-    })
+    updateProcedureParams(mergeSubmitData(selectedProcedure.value, rowData))
   }
 
   function onDelete() {
-    submitData({
-      rowData,
-      callback: delProcedureParams,
-      cbParams: mergeSubmitData(selectedProcedure.value, rowData),
-      type: 'delete'
+    delProcedureParams(mergeSubmitData(selectedProcedure.value, rowData)).then(res => {
+      deleteRow(tableData.value, rowData)
     })
   }
 
@@ -100,7 +93,7 @@ export const operationRender = (selectedProcedure) => (row) => {
   )
 }
 
-function submitData({type, rowData, callback, cbParams}) {
+/*function submitData({type, rowData, callback, cbParams}) {
   const parent = rowData?.parent
   const children = rowData?.children
   delete rowData?.parent
@@ -115,7 +108,7 @@ function submitData({type, rowData, callback, cbParams}) {
       }
     }
   })
-}
+}*/
 
 function mergeSubmitData(info, params) {
   return {
@@ -123,4 +116,20 @@ function mergeSubmitData(info, params) {
     ProcedureName: info.ProcedureName,
     ...params
   }
+}
+
+function findParentItem(tableData, item) {
+  const parent = tableData.find(data => data.Param_ID === item.Parent_ID)
+  if (!parent) {
+    tableData.forEach(data => {
+      findParentItem(data.children, item)
+    })
+  }
+  return parent
+}
+
+function deleteRow(tableData, item) {
+  const parent = findParentItem(tableData, item)
+  const {children} = parent
+  children.splice(children.findIndex(child => child.Param_ID === item.Param_ID), 1)
 }

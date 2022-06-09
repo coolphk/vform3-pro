@@ -122,7 +122,7 @@ function onProcedureSelect(val) {
 function onRowExpanded(row) {
   if (row.expanded && Object.keys(row.rowData.children[0]).length === 0) {
     getProcedureParams(selectedProcedure.value.ProcedureName, row.rowData.Param_ID).then(res => {
-      row.rowData.children = res.data.Data.map(item => transferData({parent: row.rowData, ...item}))
+      row.rowData.children = res.data.Data.map(item => transferData(item))
     })
   }
 }
@@ -136,8 +136,7 @@ function onSendTestData() {
     procedureName: selectedProcedure.value.ProcedureName,
     params: submitData
   }
-  // transferDataToSubmit(submitData)
-  // console.log(data);
+
   execProcedure(data).then(res => {
     console.log(res);
   })
@@ -149,14 +148,7 @@ function showData() {
 
 function flatten(submitData = [], data) {
   data.map(item => {
-    const parent = item?.parent
-    const children = item?.children
-    delete item?.parent
-    delete item?.children
-    submitData.push(JSON.parse(JSON.stringify(item)))
-    parent && (item.parent = parent)
-    children && (item.children = children)
-    // console.log('item', item);
+    submitData.push(item)
     if (item.children && Object.keys(item?.children[0]).length > 0) {
       flatten(submitData, item.children)
     }
