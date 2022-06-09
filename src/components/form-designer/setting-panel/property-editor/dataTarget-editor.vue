@@ -5,7 +5,7 @@
     <el-drawer v-model="showDataTargetDialog" title="选择需要匹配的数据" show-close>
       <div style="height: 80vh;overflow: auto">
         <procedure-select v-if="showDataTargetDialog" @onProcedureSelect="onProcedureSelect"
-                         :procedureValue="optionModel.dataTarget['procedureValue']"/>
+                          :procedureValue="optionModel.dataTarget['procedureValue']"/>
         <el-tree
             ref="tree$"
             :props="treeProps"
@@ -17,8 +17,15 @@
             @node-collapse="nodeCollapse"
             @node-expand="nodeExpand"
             :default-expanded-keys="optionModel.dataTarget['expandedNodes']"
-            :default-checked-keys="optionModel.dataTarget['checkedKeys']"
+            :default-checked-keys="optionModel?.dataTarget['checkedNodes']?.map(item=>item.Param_ID)"
         >
+          <template #default="{ node, data }">
+            <span class="custom-tree-node">
+              <span>{{ node.label }}</span><span v-if="data.Param_Des" style="color: #2c91ff">-[{{
+                data.Param_Des
+              }}]</span>
+            </span>
+          </template>
         </el-tree>
       </div>
       <el-button type="primary" size="large">确定</el-button>
@@ -51,7 +58,6 @@ export default {
       children: 'children',
       isLeaf: 'isLeaf',
     }
-    console.log('props.optionModel.dataTarget', props.optionModel.dataTarget);
     //目标源数据
     const treeData = computed({
       get: () => {
@@ -81,9 +87,20 @@ export default {
         })
       })
     }
-
-    function checkNode(data, {checkedKeys}) {
-      props.optionModel.dataTarget['checkedKeys'] = checkedKeys
+    function refreshTree() {
+      openNodeSet.clear()
+      //选择存储过程后，动态加载树形数据
+      getProcedureParams(props.optionModel.dataTarget['procedureValue'].ProcedureName).then(res => {
+        root.children = res.data.Data.map(item => transferData(item))
+        treeData.value = [root]
+        //加载数据完成后，默认展开树形第一层节点
+        nextTick(() => {
+          tree$.value.store.setDefaultExpandedKeys([props.optionModel.dataTarget['procedureValue'].ProcedureID + ""]);
+        })
+      })
+    }
+    function checkNode(data, {checkedNodes}) {
+      props.optionModel.dataTarget['checkedNodes'] = checkedNodes
     }
 
     function nodeExpand(data, val) {

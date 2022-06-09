@@ -54,8 +54,8 @@ export default {
     ['widget.options.dataTarget.checkedNodes'](newVal) {
       this.widget.options.tableColumns = newVal.map(treeItem => {
         return {
-          prop: treeItem.id,
-          label: treeItem.cname,
+          prop: treeItem.Param_ID,
+          label: treeItem.Param_Des,
         }
       })
     }

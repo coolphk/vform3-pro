@@ -272,7 +272,6 @@ export default {
           }
         } else {  //自定义容器组件
           if (wItem.type === 'edit-table') {
-            console.log('edit-table', wItem);
             this.formDataModel[wItem.options.name] = {
               tableData: wItem.options.tableData,
               dataTarget: wItem.options.dataTarget
