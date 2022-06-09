@@ -1,56 +1,3 @@
-const originalData = {
-  "Root": {
-    "VAA": {
-      "Ie": {
-        "@VAA01": "55846",
-        "@VAA07": "57869",
-        "@ACF01": "1",
-        "@VCJ10": null,
-        "@VCJ11": "",
-        "@VCJ12": "2022/4/24",
-        "@VCJ13": "",
-        "@VCJ14": ""
-      }
-    },
-    "VBL": {
-      "Ie": [
-        {
-          "@VBU01": "0",
-          "@VBL13": "800.0000",
-          "@VBL14": "现金支付",
-          "@VBL15": "01",
-          "@FAF01": "",
-          "@VBL11": ""
-        },
-        {
-          "@VBU01": "1",
-          "@VBL13": "800.0000",
-          "@VBL14": "现金支付",
-          "@VBL15": "01",
-          "@FAF01": "",
-          "@VBL11": ""
-        }
-      ]
-    },
-    /*"VAI": {
-      "Ie": {
-        "@VAI00": "LZ0000162003",
-        "@VAI01": "162003",
-        "@BCK01B": "261",
-        "@BCE02A": "3001",
-        "@BCE03A": "朱秀华",
-        "@VAI04": "LZ0000162003",
-        "@VAI05": "",
-        "@OldMoney": "800.0000",
-        "@SumMoney": "800.0000",
-        "@YbMoney": "0",
-        "@Enabled": "0",
-        "@VAI17": "1"
-      }
-    }*/
-  }
-}
-
 let id = 0
 
 function objectToArray(obj, level, path) {
@@ -86,14 +33,6 @@ function objectToArray(obj, level, path) {
   }
 }
 
-
-function dataFactory(schema) {
-  const data = {}
-  schema.keys.map((key, index) => {
-    data[key] = schema.values[index]
-  })
-  return data
-}
 
 function isObj(obj) {
   return Object.prototype.toString.call(obj) === '[object Object]'

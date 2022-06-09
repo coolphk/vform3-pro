@@ -4,11 +4,22 @@ import {ElMessage} from "element-plus";
 const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
   baseURL: import.meta.env.VITE_APP_BASE_API, // 超时
-  timeout: 10000
+  timeout: 30000
 })
 
-service.interceptors.response.use(config => {
-  return config
+service.interceptors.response.use(response => {
+  if (response.config.showTips) {
+    if (response.data.Status) {
+      ElMessage({
+        message: response.data.Message, type: 'success', duration: 5 * 1000
+      })
+    } else {
+      ElMessage({
+        message: response.data.Message, type: 'error', duration: 5 * 1000
+      })
+    }
+  }
+  return response
 }, (error) => {
   let {message} = error
   if (message.includes("timeout")) {
@@ -21,11 +32,13 @@ service.interceptors.response.use(config => {
 })
 
 
-export function post(url, parmas) {
+export function post(url, parmas, showTips = true) {
+  service.defaults['showTips'] = showTips
   return service.post(url, parmas)
 }
 
-export function get(url, params) {
+export function get(url, params, showTips) {
+  service.defaults['showTips'] = showTips
   return service.get(url, {params})
 }
 

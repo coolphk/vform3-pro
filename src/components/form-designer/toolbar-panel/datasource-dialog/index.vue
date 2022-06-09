@@ -1,8 +1,8 @@
 <template>
   <div class="datasouce-container" style="">
     <div style="display: flex">
-      <datasource-head @onProcedureSelect="onProcedureSelect"/>
-      <el-button type="primary" @click="onSendTestData" style="margin-left: 10px">发送测试数据</el-button>
+      <procedure-select @onProcedureSelect="onProcedureSelect"/>
+      <el-button type="primary" @click="onSendTestData" style="margin-left: 10px">提交测试数据</el-button>
     </div>
     <el-auto-resizer>
       <template #default="{ height, width }">
@@ -27,11 +27,10 @@
 
 <script setup lang="jsx">
 
-import {getProcedureParams} from "@/api/data-schema"
+import {execProcedure, getProcedureParams} from "@/api/data-schema"
 import {getAllFieldWidgets} from "@/utils/util";
 import {ref} from "vue";
-import {Delete, Select} from "@element-plus/icons-vue";
-import DatasourceHead from "@/components/form-designer/toolbar-panel/datasource-dialog/datasource-head.vue";
+import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select.vue";
 import {transferData} from "@/utils/data-adapter";
 
 import {
@@ -45,6 +44,8 @@ const props = defineProps({
 })
 const expandColumnKey = 'Param_ID'
 const fieldWidgets = getAllFieldWidgets(props.designer.widgetList);
+const tableData = ref([])
+const table$ = ref()
 const columns = [
   {
     key: 'Param_ID',
@@ -108,10 +109,8 @@ const columns = [
     key: 'options',
     title: '操作',
     width: 300,
-    cellRenderer: operationRender(selectedProcedure)
+    cellRenderer: operationRender(selectedProcedure, tableData)
   }]
-const tableData = ref([])
-const table$ = ref()
 
 function onProcedureSelect(val) {
   selectedProcedure.value = val
@@ -130,22 +129,36 @@ function onRowExpanded(row) {
 
 function onSendTestData() {
   const submitData = []
-  console.log('tableData', tableData.value);
-  flat(submitData, tableData.value)
-
-  console.log('submitData', submitData);
+  flatten(submitData, tableData.value)
+  console.log(submitData);
+  const data = {
+    procedureID: selectedProcedure.value.ProcedureID,
+    procedureName: selectedProcedure.value.ProcedureName,
+    params: submitData
+  }
+  // transferDataToSubmit(submitData)
+  // console.log(data);
+  execProcedure(data).then(res => {
+    console.log(res);
+  })
 }
 
 function showData() {
 
 }
 
-function flat(submitData = [], data) {
+function flatten(submitData = [], data) {
   data.map(item => {
-    submitData.push(item)
+    const parent = item?.parent
+    const children = item?.children
+    delete item?.parent
+    delete item?.children
+    submitData.push(JSON.parse(JSON.stringify(item)))
+    parent && (item.parent = parent)
+    children && (item.children = children)
     // console.log('item', item);
-    if (item.children && JSON.stringify(item?.children[0]) !== '{}') {
-      flat(submitData, item.children)
+    if (item.children && Object.keys(item?.children[0]).length > 0) {
+      flatten(submitData, item.children)
     }
   })
 }

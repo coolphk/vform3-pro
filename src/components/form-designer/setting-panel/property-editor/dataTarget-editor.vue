@@ -4,7 +4,7 @@
     <el-button @click="showDataTargetDialog=true">选择</el-button>
     <el-drawer v-model="showDataTargetDialog" title="选择需要匹配的数据" show-close>
       <div style="height: 80vh;overflow: auto">
-        <datasource-head v-if="showDataTargetDialog" @onProcedureSelect="onProcedureSelect"
+        <procedure-select v-if="showDataTargetDialog" @onProcedureSelect="onProcedureSelect"
                          :procedureValue="optionModel.dataTarget['procedureValue']"/>
         <el-tree
             ref="tree$"
@@ -32,13 +32,13 @@ import i18n from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
 import {computed, nextTick, reactive, ref, watch} from "vue";
 import {getProcedureParams} from "@/api/data-schema";
-import DatasourceHead from "@/components/form-designer/toolbar-panel/datasource-dialog/datasource-head";
+import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select";
 import {transferData} from "@/utils/data-adapter";
 
 
 export default {
   name: "dataTarget-editor",
-  components: {DatasourceHead},
+  components: {ProcedureSelect},
   mixins: [i18n, propertyMixin],
   setup(props, ctx) {
     //存储过程值

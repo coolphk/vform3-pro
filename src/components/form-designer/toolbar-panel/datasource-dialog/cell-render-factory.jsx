@@ -1,9 +1,8 @@
 import CodeEditor from "@/components/code-editor";
-import {delProcedureParams, getProcedureParams, xmlToJson} from "@/api/data-schema";
+import {delProcedureParams, getProcedureParams, updateProcedureParams, xmlToJson} from "@/api/data-schema";
 import {Delete, Select} from "@element-plus/icons-vue";
 import {transferData} from "@/utils/data-adapter";
 import {ref} from "vue";
-import {ElMessage} from "element-plus";
 
 
 export const editorRender = (type, procedureInfo) => (row) => {
@@ -21,10 +20,6 @@ export const editorRender = (type, procedureInfo) => (row) => {
         getProcedureParams(procedureInfo.value.ProcedureName, rowData.Param_ID).then(res => {
           rowData.children = res.data.Data.map(item => transferData({parent: rowData, ...item}))
           popover$.value.hide();
-          ElMessage({
-            message: 'XML解析成功，已生成子节点.',
-            type: 'success',
-          })
         })
       }
     })
@@ -65,26 +60,19 @@ export const operationRender = (selectedProcedure) => (row) => {
   const {rowData, column} = row
 
   function onSave(event) {
-    console.log(event, rowData);
-    // console.log(selectedProcedure);
+    submitData({
+      rowData,
+      callback: updateProcedureParams,
+      cbParams: mergeSubmitData(selectedProcedure.value, rowData),
+    })
   }
 
   function onDelete() {
-    const parent = rowData.parent
-    const children = rowData.children
-    delete rowData.parent
-    delete rowData.children
-    delProcedureParams({
-      ProcedureID: selectedProcedure.value.ProcedureID,
-      ProcedureName: selectedProcedure.value.ProcedureName,
-      ...rowData
-    }).then(res => {
-      if (res.status === 200 && res?.data?.Status) {
-        rowData.parent = parent
-        rowData.children = children
-        const atParentIndex = rowData.parent.children.findIndex(item => item.Param_ID === rowData.Param_ID)
-        rowData.parent.children.splice(atParentIndex, 1)
-      }
+    submitData({
+      rowData,
+      callback: delProcedureParams,
+      cbParams: mergeSubmitData(selectedProcedure.value, rowData),
+      type: 'delete'
     })
   }
 
@@ -110,6 +98,23 @@ export const operationRender = (selectedProcedure) => (row) => {
       }
     </div>
   )
+}
+
+function submitData({type, rowData, callback, cbParams}) {
+  const parent = rowData?.parent
+  const children = rowData?.children
+  delete rowData?.parent
+  delete rowData?.children
+  callback(cbParams).then(res => {
+    if (res.status === 200 && res?.data?.Status) {
+      parent && (rowData.parent = parent)
+      children && (rowData.children = children)
+      if (type === 'delete') {
+        const atParentIndex = rowData.parent.children.findIndex(item => item.Param_ID === rowData.Param_ID)
+        rowData.parent.children.splice(atParentIndex, 1)
+      }
+    }
+  })
 }
 
 function mergeSubmitData(info, params) {
