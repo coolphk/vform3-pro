@@ -93,11 +93,11 @@ export const operationRender = (selectedProcedure, tableData) => (row) => {
   )
 }
 
-function mergeSubmitData(info, params) {
+export function mergeSubmitData(procedureInfo, procedureParams) {
   return {
-    ProcedureID: info.ProcedureID,
-    ProcedureName: info.ProcedureName,
-    ...params
+    ProcedureID: procedureInfo.ProcedureID,
+    ProcedureName: procedureInfo.ProcedureName,
+    ...procedureParams
   }
 }
 

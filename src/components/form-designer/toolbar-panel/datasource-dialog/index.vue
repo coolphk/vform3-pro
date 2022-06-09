@@ -27,14 +27,14 @@
 
 <script setup lang="jsx">
 
-import {execProcedure, getProcedureParams} from "@/api/data-schema"
+import {execProcedure, getProcedureParams, updateProcedureParams} from "@/api/data-schema"
 import {getAllFieldWidgets} from "@/utils/util";
 import {ref} from "vue";
 import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select.vue";
 import {transferData} from "@/utils/data-adapter";
 
 import {
-  editorRender,
+  editorRender, mergeSubmitData,
   operationRender
 } from "@/components/form-designer/toolbar-panel/datasource-dialog/cell-render-factory.jsx";
 
@@ -90,18 +90,21 @@ const columns = [
       )
     }
   }, {
-    key: '  Param_Des',
-    dataKey: '  Param_Des',
+    key: 'Param_Des',
+    dataKey: 'Param_Des',
     title: '中文名',
     width: 150,
     cellRenderer: ({rowData, column}) => {
+      const onBlur = (e) => {
+        updateProcedureParams(mergeSubmitData(selectedProcedure.value, rowData))
+      }
       return (
-          <el-input type="text" v-model={rowData[column.dataKey]}></el-input>
+          <el-input type="text" v-model={rowData[column.dataKey]} onBlur={onBlur}></el-input>
       )
     }
   }, {
-    key: '  Param_BusiDes',
-    dataKey: '  Param_BusiDes',
+    key: 'Param_BusiDes',
+    dataKey: 'Param_BusiDes',
     title: '业务说明',
     width: 200,
     cellRenderer: editorRender('text')
