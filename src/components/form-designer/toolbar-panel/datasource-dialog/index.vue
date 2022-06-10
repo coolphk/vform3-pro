@@ -142,7 +142,7 @@ async function onSendTestData() {
 }
 
 function showData() {
-
+  console.log(tableData.value);
 }
 
 function flatten(submitData = [], data) {

@@ -23,7 +23,12 @@ import {onClickOutside} from "@vueuse/core";
 
 const menu$ = ref();
 const props = defineProps({
-  menuState: Object,
+  menuState: {
+    type: Object,
+    default: {
+      show: true
+    }
+  },
   tableData: Array
 })
 
