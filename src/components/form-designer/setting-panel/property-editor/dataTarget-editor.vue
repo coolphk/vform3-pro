@@ -8,22 +8,26 @@
                           :procedureValue="optionModel.dataTarget['procedureValue']"/>
         <el-tree
             ref="tree$"
-            :props="treeProps"
-            :data="treeData"
             show-checkbox
             node-key="Param_ID"
-            @check="checkNode"
             check-on-click-node
-            @node-collapse="nodeCollapse"
-            @node-expand="nodeExpand"
+            :props="treeProps"
+            :data="treeData"
+            :check-on-click-node="false"
             :default-expanded-keys="optionModel.dataTarget['expandedNodes']"
             :default-checked-keys="optionModel?.dataTarget['checkedNodes']?.map(item=>item.Param_ID)"
+            @check="checkNode"
+            @node-collapse="nodeCollapse"
+            @node-expand="nodeExpand"
+
         >
           <template #default="{ node, data }">
             <span class="custom-tree-node">
-              <span>{{ node.label }}</span><span v-if="data.Param_Des" style="color: #2c91ff">-[{{
-                data.Param_Des
-              }}]</span>
+              <span>{{ node.label }}</span>
+              <span style="color:darkcyan">({{ data.Param_ObjType }})</span>
+              <span v-if="data.Param_Des" style="color: #2c91ff">-[{{
+                  data.Param_Des
+                }}]</span>
             </span>
           </template>
         </el-tree>
@@ -35,12 +39,13 @@
 </template>
 
 <script>
-import i18n from "@/utils/i18n"
+import i18n, {translate} from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
 import {computed, nextTick, reactive, ref, watch} from "vue";
 import {getProcedureParams} from "@/api/data-schema";
 import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select";
 import {transferData} from "@/utils/data-adapter";
+import {ElMessage} from "element-plus";
 
 
 export default {
@@ -102,9 +107,24 @@ export default {
     }
 
     function checkNode(data, {checkedNodes}) {
-      console.log(tree$.value);
-      console.log(data);
-      props.optionModel.dataTarget['checkedNodes'] = checkedNodes
+
+      console.log('selectedWidget', props.selectedWidget);
+      if (props.selectedWidget.type === 'edit-table') {
+        if (!_isArrayChild(data)) {
+          ElMessage.error(`${translate('extension.widgetLabel.' + props.selectedWidget.type)}只能选择数组子节点!`)
+          tree$.value.setChecked(data, false, true)
+          return;
+
+        }
+      } else {
+        if (data?.Param_ObjType !== 'attribute') {
+          ElMessage.error('您选择的不是叶节点')
+          tree$.value.setChecked(data, false, true)
+          return
+        }
+      }
+      props.optionModel.dataTarget['checkedNodes'] = checkedNodes.filter(node => node.Param_ObjType === 'attribute')
+      // console.log(props.optionModel.dataTarget['checkedNodes']);
     }
 
     function nodeExpand(data, val) {
@@ -131,6 +151,11 @@ export default {
       }
       traverse(node)
       openNodeSet.delete(data.Param_ID)
+    }
+
+    function _isArrayChild(data) {
+      const node = tree$.value.store.nodesMap[data.Param_ID]
+      return node?.parent?.data.Param_ObjType === 'array' || node?.parent?.parent?.data.Param_ObjType === 'array';
     }
 
     return {
