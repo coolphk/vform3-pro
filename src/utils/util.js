@@ -14,7 +14,7 @@ export function isEmptyStr(str) {
   return (str === undefined) || (!str && (str !== 0) && (str !== '0')) || (!/[^\s]/.test(str));
 }
 
-export const generateId = function() {
+export const generateId = function () {
   return Math.floor(Math.random() * 100000 + Math.random() * 20000 + Math.random() * 5000);
 };
 
@@ -26,7 +26,7 @@ export const deepClone = function (origin) {
   return JSON.parse(JSON.stringify(origin))
 }
 
-export const overwriteObj = function(obj1, obj2) {  /* 浅拷贝对象属性，obj2覆盖obj1 */
+export const overwriteObj = function (obj1, obj2) {  /* 浅拷贝对象属性，obj2覆盖obj1 */
   // for (let prop in obj2) {
   //   if (obj2.hasOwnProperty(prop)) {
   //     obj1[prop] = obj2[prop]
@@ -50,7 +50,7 @@ export const addWindowResizeHandler = function (handler) {
   }
 }
 
-const createStyleSheet = function() {
+const createStyleSheet = function () {
   let head = document.head || document.getElementsByTagName('head')[0];
   let style = document.createElement('style');
   style.type = 'text/css';
@@ -75,7 +75,7 @@ export const insertCustomCssToHead = function (cssCode, formId = '') {
   newStyle.id = !!formId ? 'vform-custom-css' + '-' + formId : 'vform-custom-css'
   try {
     newStyle.appendChild(document.createTextNode(cssCode))
-  } catch(ex) {
+  } catch (ex) {
     newStyle.styleSheet.cssText = cssCode
   }
 
@@ -98,7 +98,7 @@ export const insertGlobalFunctionsToHtml = function (functionsCode, formId = '')
   bodyEle.appendChild(newScriptEle)
 }
 
-export const optionExists = function(optionsObj, optionName) {
+export const optionExists = function (optionsObj, optionName) {
   if (!optionsObj) {
     return false
   }
@@ -106,7 +106,7 @@ export const optionExists = function(optionsObj, optionName) {
   return Object.keys(optionsObj).indexOf(optionName) > -1
 }
 
-export const loadRemoteScript = function(srcPath, callback) {  /*加载远程js，加载成功后执行回调函数*/
+export const loadRemoteScript = function (srcPath, callback) {  /*加载远程js，加载成功后执行回调函数*/
   let sid = encodeURIComponent(srcPath)
   let oldScriptEle = document.getElementById(sid)
 
@@ -313,9 +313,9 @@ export function copyToClipboard(content, clickEvent, $message, successMsg, error
 export function getQueryParam(variable) {
   let query = window.location.search.substring(1);
   let vars = query.split("&")
-  for (let i=0; i<vars.length; i++) {
+  for (let i = 0; i < vars.length; i++) {
     let pair = vars[i].split("=")
-    if(pair[0] == variable) {
+    if (pair[0] == variable) {
       return pair[1]
     }
   }
@@ -348,7 +348,7 @@ export function getDefaultFormConfig() {
 export function buildDefaultFormJson() {
   return {
     widgetList: [],
-    formConfig: deepClone( getDefaultFormConfig() )
+    formConfig: deepClone(getDefaultFormConfig())
   }
 }
 
@@ -458,3 +458,35 @@ export function getDSByName(formConfig, dsName) {
 
   return resultDS
 }
+
+export function uuid2(len, radix) {
+  const chars = '0123456789abcdefghijklmnopqrstuvwxyz'.split('');
+  const uuid = []
+
+  radix = radix || chars.length;
+
+  if (len) {
+    // Compact form
+    for (let i = 0; i < len; i++) uuid[i] = chars[0 | Math.random() * radix];
+  } else {
+    // rfc4122, version 4 form
+    let r;
+
+    // rfc4122 requires these characters
+    uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+    uuid[14] = '4';
+
+    // Fill in random data.  At i==19 set the high bits of clock sequence as
+    // per rfc4122, sec. 4.1.5
+    for (let i = 0; i < 36; i++) {
+      if (!uuid[i]) {
+        r = 0 | Math.random() * 16;
+        uuid[i] = chars[(i === 19) ? (r & 0x3) | 0x8 : r];
+      }
+    }
+  }
+
+  return uuid.join('');
+}
+
+uuid2(16, 16) // "277571702EE33E11"

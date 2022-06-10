@@ -1,8 +1,9 @@
 import CodeEditor from "@/components/code-editor";
 import {delProcedureParams, getProcedureParams, updateProcedureParams, xmlToJson} from "@/api/data-schema";
-import {Delete, Select} from "@element-plus/icons-vue";
+import {Delete, Select, Plus} from "@element-plus/icons-vue";
 import {transferData} from "@/utils/data-adapter";
 import {ref} from "vue";
+import {uuid2} from "@/utils/util";
 
 
 export const editorRender = (type, procedureInfo) => (row) => {
@@ -69,12 +70,16 @@ export const operationRender = (selectedProcedure, tableData) => (row) => {
     })
   }
 
+  function addChild() {
+    console.log(rowData);
+    console.log(uuid2(16));
+  }
+
   return (
     <div style="display:flex">
       <el-tooltip content="保存" placement="top">
         <el-button type="primary" icon={Select} onClick={onSave}></el-button>
       </el-tooltip>
-
       {
         rowData.Param_ObjType !== 'param' &&
         <el-popconfirm
@@ -88,6 +93,12 @@ export const operationRender = (selectedProcedure, tableData) => (row) => {
                 </el-tooltip>
               </div>
           }}/>
+      }
+      {
+        rowData.Param_ObjType === 'array' &&
+        <el-tooltip content="增加子节点" placement="top">
+          <el-button type="success" onClick={addChild} icon={Plus} style={{marginLeft: '8px'}}></el-button>
+        </el-tooltip>
       }
     </div>
   )

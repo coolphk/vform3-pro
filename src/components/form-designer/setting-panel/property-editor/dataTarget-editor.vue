@@ -87,6 +87,7 @@ export default {
         })
       })
     }
+
     function refreshTree() {
       openNodeSet.clear()
       //选择存储过程后，动态加载树形数据
@@ -99,7 +100,10 @@ export default {
         })
       })
     }
+
     function checkNode(data, {checkedNodes}) {
+      console.log(tree$.value);
+      console.log(data);
       props.optionModel.dataTarget['checkedNodes'] = checkedNodes
     }
 
