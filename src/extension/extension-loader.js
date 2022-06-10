@@ -1,6 +1,7 @@
 //import { vfApp } from '@/utils/create-app'
 
 import {
+  addBasicFieldSchema,
   addContainerWidgetSchema,
   addCustomWidgetSchema
 } from '@/components/form-designer/widget-panel/widgetsConfig'
@@ -56,7 +57,7 @@ export const loadExtension = function (app) {
   /* -------------------------------------------------- */
   registerCWGenerator('card', cardTemplateGenerator)  //注册容器组件的代码生成器
   /* -------------------------------------------------- */
-  editTable.install(addContainerWidgetSchema, app, PERegister)
+  editTable.install(addBasicFieldSchema, app, PERegister)
 
   /* 容器组件加载完毕 end */
 

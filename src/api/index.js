@@ -8,16 +8,17 @@ const service = axios.create({
 })
 
 service.interceptors.response.use(response => {
-  if (response.config.showTips) {
-    if (response.data.Status) {
+
+  if (response.data.Status) {
+    if (response.config.showTips) {
       ElMessage({
         message: response.data.Message, type: 'success', duration: 5 * 1000
       })
-    } else {
-      ElMessage({
-        message: response.data.Message, type: 'error', duration: 5 * 1000
-      })
     }
+  } else {
+    ElMessage({
+      message: response.data.Message, type: 'error', duration: 5 * 1000
+    })
   }
   return response
 }, (error) => {

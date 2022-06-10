@@ -59,21 +59,7 @@ export default {
     widget: Object,
     formModel: Object
   },
-  watch: {
-    ['widget.options.dataTarget.checkedNodes'](newVal) {
-      this.widget.options.tableColumns = newVal.map(column => {
-        return {
-          prop: column.name_,
-          label: column.cname,
-        }
-      })
-    }
-  },
-  /*computed: {
-    customClass() {
-      return this.widget.options.customClass || ''
-    },
-  },*/
+
   created() {
     this.initRefList()
   },
