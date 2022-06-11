@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import {getProcedureList} from "@/api/data-schema";
+import {getProcedureList} from "@/api/data-schema.js";
 import {ref} from "vue";
 
 const props = defineProps({
