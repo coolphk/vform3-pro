@@ -1,5 +1,5 @@
 <template>
-  <div class="datasouce-container" style="">
+  <div class="datasouce-container" @contextmenu.prevent="onContextMenu">
     <div style="display: flex">
       <procedure-select @onProcedureSelect="onProcedureSelect"/>
       <el-button type="primary" @click="onSendTestData" style="margin-left: 10px">提交测试数据</el-button>
@@ -21,6 +21,7 @@
         />
       </template>
     </el-auto-resizer>
+    <datasource-contextmenu :menu-state="menuState"></datasource-contextmenu>
     <el-button type="primary" @click="showData">Show Data</el-button>
   </div>
 </template>
@@ -29,15 +30,16 @@
 
 import {execProcedure, getProcedureParams, updateProcedureParams} from "@/api/data-schema"
 import {getAllFieldWidgets} from "@/utils/util";
-import {ref} from "vue";
+import {reactive, ref} from "vue";
 import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select.vue";
 import {transferData} from "@/utils/data-adapter";
-
+import DatasourceContextmenu from "../datasource-contextmenu.vue"
 import {
   editorRender, mergeSubmitData,
   operationRender
 } from "@/components/form-designer/toolbar-panel/datasource-dialog/cell-render-factory.jsx";
 
+const menuState = reactive({show: false})
 const selectedProcedure = ref()
 const props = defineProps({
   designer: Object
@@ -130,6 +132,13 @@ function onRowExpanded(row) {
   }
 }
 
+function onContextMenu(e) {
+  menuState.x = e.pageX
+  menuState.y = e.pageY
+  menuState.show = !menuState.show
+  console.log(222, e);
+}
+
 async function onSendTestData() {
   const submitData = []
   flatten(submitData, tableData.value)
@@ -159,6 +168,7 @@ function flatten(submitData = [], data) {
 .datasouce-container {
   height: 80vh;
   width: 98vw;
+  position: absolute;
 
   .head-cell {
     background: #f5f7fa !important;
