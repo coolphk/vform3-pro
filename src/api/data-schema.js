@@ -6,8 +6,9 @@ export function getProcedureList() {
   return post(`${baseUrl}/Get_ProcedureList`, undefined, false)
 }
 
-export function getProcedureParams(procedureName, parent_ID = "") {
-  return post(`${baseUrl}/Get_ProcParams`, {procedureName, parent_ID}, false)
+//查询存储过程子参数，if_recur=1包含所有子节点，=0包含1级子节点
+export function getProcedureParams(procedureName, parent_ID = "", IF_recur = 0) {
+  return post(`${baseUrl}/Get_ProcParams`, {procedureName, parent_ID, IF_recur}, false)
 }
 
 export function xmlToJson(params) {

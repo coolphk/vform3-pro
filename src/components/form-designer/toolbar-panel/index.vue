@@ -221,7 +221,8 @@
     </div>
 
     <div class="">
-      <el-dialog :title="i18nt('designer.toolbar.dataSchema')" v-model="showDataSourceDialogFlag"
+      <el-dialog v-if="showDataSourceDialogFlag" :title="i18nt('designer.toolbar.dataSchema')"
+                 v-model="showDataSourceDialogFlag"
                  :show-close="true" fullscreen :append-to-body="true" :close-on-click-modal="false"
                  :close-on-press-escape="false" :destroy-on-close="true"
       >

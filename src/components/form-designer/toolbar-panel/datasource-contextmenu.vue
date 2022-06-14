@@ -32,7 +32,6 @@ const props = defineProps({
   tableData: Array
 })
 
-
 const closeMenu = (callback) => {
   props.menuState.show = false
   callback()
@@ -107,7 +106,7 @@ watch(() => props.menuState.show, (newVal) => {
         props.menuState.x = x - left - 10
       }
       if (top > 0) {
-        props.menuState.y = y - top - 10
+        props.menuState.y = y - top - 20
       }
     })
   }
