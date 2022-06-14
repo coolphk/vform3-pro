@@ -42,7 +42,15 @@ function isArray(obj) {
   return Object.prototype.toString.call(obj) === '[object Array]'
 }
 
+export function unflatten(arr, node) {
+  if (node.HaveChild === "1") {
+    node['children'] = getChildren(arr, node.Param_ID)
+  }
+}
 
+export function getChildren(arr, parentId) {
+  return arr.filter(item => item.Parent_ID === parentId)
+}
 export function transferData(object) {
   return {
     ...object,

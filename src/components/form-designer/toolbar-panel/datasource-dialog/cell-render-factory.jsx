@@ -1,9 +1,10 @@
 import CodeEditor from "@/components/code-editor";
 import {delProcedureParams, getProcedureParams, updateProcedureParams, xmlToJson} from "@/api/data-schema";
-import {Delete, Select, Plus} from "@element-plus/icons-vue";
-import {transferData} from "@/utils/data-adapter";
+import {Delete, Plus, Select} from "@element-plus/icons-vue";
+import {getChildren, transferData, unflatten} from "@/utils/data-adapter";
 import {ref} from "vue";
-import {uuid2} from "@/utils/util";
+import {deepClone, uuid2} from "@/utils/util";
+import {ElMessage} from "element-plus";
 
 
 export const editorRender = (type, procedureInfo) => (row) => {
@@ -56,23 +57,58 @@ export const editorRender = (type, procedureInfo) => (row) => {
     rowData.Param_isXML === '1' || type === 'text' ? editXml() : <el-input v-model={rowData[column['dataKey']]}/>
   )
 }
-
-export const operationRender = (selectedProcedure, tableData) => (row) => {
+let schema
+export const operationRender = (selectedProcedure, tableData, expandedKeys = []) => (row) => {
   const {rowData, column} = row
 
-  function onSave(event) {
+  function onSave() {
     updateProcedureParams(mergeSubmitData(selectedProcedure.value, rowData))
   }
 
   function onDelete() {
+    const parent = findParentItem(tableData.value, rowData)
+    if (parent.children[0].Param_ID === rowData.Param_ID) {
+      ElMessage.error('不能删除数组的第一个子元素!')
+      return
+    }
     delProcedureParams(mergeSubmitData(selectedProcedure.value, rowData)).then(res => {
-      deleteRow(tableData.value, rowData)
+      deleteRow(parent, rowData)
     })
   }
 
-  function addChild() {
-    console.log(rowData);
-    console.log(uuid2(16));
+
+  async function addChild() {
+    if (!schema) {
+      // console.log(1);
+      const res = (await getProcedureParams(selectedProcedure.value.ProcedureName, rowData.Param_ID, '1'))?.data.Data
+      res.forEach(item => {
+        unflatten(res, item)
+      })
+      rowData.children = res
+      schema = res
+    }
+
+    // console.log(3, schema);
+    let copyData = deepClone(schema)
+    rowData.children = rowData.children.concat(copyData)
+    copyData.forEach(item => {
+      traverBuildId(item)
+    })
+
+    rowData['children'] = getChildren(rowData.children, rowData.Param_ID)
+    expandedKeys.value = [...expandedKeys.value, rowData.Param_ID]
+
+    function traverBuildId(node) {
+      if (node.HaveChild === "1") {
+        const oldId = node.Param_ID
+        node.Param_ID = uuid2(16)
+        node['children'] = getChildren(copyData, oldId).map(item => ({
+          ...item,
+          Param_ID: uuid2(16),
+          Parent_ID: node.Param_ID
+        }))
+      }
+    }
   }
 
   return (
@@ -122,8 +158,11 @@ function findParentItem(tableData, item) {
   return parent
 }
 
-function deleteRow(tableData, item) {
-  const parent = findParentItem(tableData, item)
+function deleteRow(parent, item) {
   const {children} = parent
-  children.splice(children.findIndex(child => child.Param_ID === item.Param_ID), 1)
+  if (children.length === 1) {
+
+  } else {
+    children.splice(children.findIndex(child => child.Param_ID === item.Param_ID), 1)
+  }
 }

@@ -16,12 +16,13 @@
             :data="tableData"
             :width="width"
             :height="height"
+            v-model:expanded-row-keys="expandedKeys"
             @row-expand="onRowExpanded"
             :append-to-body="true"
         />
       </template>
     </el-auto-resizer>
-    <datasource-contextmenu :menu-state="menuState"></datasource-contextmenu>
+    <!--    <datasource-contextmenu :menu-state="menuState"></datasource-contextmenu>-->
     <el-button type="primary" @click="showData">Show Data</el-button>
   </div>
 </template>
@@ -48,6 +49,7 @@ const expandColumnKey = 'Param_ID'
 const fieldWidgets = getAllFieldWidgets(props.designer.widgetList);
 const tableData = ref([])
 const table$ = ref()
+const expandedKeys = ref([])
 const columns = [
   {
     key: 'Param_ID',
@@ -101,7 +103,7 @@ const columns = [
         updateProcedureParams(mergeSubmitData(selectedProcedure.value, rowData))
       }
       return (
-          <el-input type="text" v-model={rowData[column.dataKey]} onBlur={onBlur}></el-input>
+          <el-input type="text" v-model={rowData[column.dataKey]}></el-input>
       )
     }
   }, {
@@ -114,7 +116,7 @@ const columns = [
     key: 'options',
     title: '操作',
     width: 300,
-    cellRenderer: operationRender(selectedProcedure, tableData)
+    cellRenderer: operationRender(selectedProcedure, tableData, expandedKeys)
   }]
 
 function onProcedureSelect(val) {
@@ -136,7 +138,6 @@ function onContextMenu(e) {
   menuState.x = e.pageX
   menuState.y = e.pageY
   menuState.show = !menuState.show
-  console.log(222, e);
 }
 
 async function onSendTestData() {
