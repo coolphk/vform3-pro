@@ -43,7 +43,7 @@ import i18n, {translate} from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
 import {computed, nextTick, reactive, ref, watch} from "vue";
 import {getProcedureParams} from "@/api/data-schema";
-import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select";
+import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select/index";
 import {getChildren, transferData, unflatten} from "@/utils/data-adapter";
 import {ElMessage} from "element-plus";
 
@@ -64,15 +64,7 @@ export default {
       isLeaf: 'isLeaf',
     }
     const treeData = ref([])
-    //目标源数据
-    /*const treeData = computed({
-      get: () => {
-        return props.optionModel.dataTarget['treeData']
-      },
-      set: (val) => {
-        props.optionModel.dataTarget['treeData'] = val
-      }
-    })*/
+
     watch(openNodeSet, (newVal) => {
       props.optionModel.dataTarget["expandedNodes"] = Array.from(newVal)
     })
@@ -84,18 +76,6 @@ export default {
       props.optionModel.dataTarget['procedureValue'] = val
       props.optionModel.dataTarget.checkedNodes = []
       loadTreeData(val)
-      /*const root = {Param_ID: val.ProcedureID, Param_Name: val.ProcedureName, isRoot: true, children: []}
-
-
-      //选择存储过程后，动态加载树形数据
-      getProcedureParams(val.ProcedureName).then(res => {
-        root.children = res.data.Data.map(item => transferData(item))
-        treeData.value = [root]
-        //加载数据完成后，默认展开树形第一层节点
-        nextTick(() => {
-          tree$.value.store.setDefaultExpandedKeys([val.ProcedureID + ""]);
-        })
-      })*/
     }
 
     function checkNode(data, {checkedNodes}) {
@@ -122,11 +102,6 @@ export default {
     function nodeExpand(data, val) {
       console.log('nodeExpand_data', data);
       openNodeSet.add(data.Param_ID)
-      /*if (!data.isRoot && JSON.stringify(data.children[0]) === '{}') {
-        getProcedureParams(treeData.value[0].Param_Name, data.Param_ID).then(res => {
-          data.children = res.data.Data.map(item => transferData(item))
-        })
-      }*/
     }
 
     /**
@@ -170,8 +145,6 @@ export default {
           children: getChildren(res.data.Data, '0000')
         }]
       })
-
-
     }
 
     return {

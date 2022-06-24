@@ -32,9 +32,8 @@
 import {execProcedure, getProcedureParams, updateProcedureParams} from "@/api/data-schema"
 import {getAllFieldWidgets} from "@/utils/util";
 import {reactive, ref} from "vue";
-import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select.vue";
+import ProcedureSelect from './procedure-select/index.vue'
 import {transferData} from "@/utils/data-adapter";
-import DatasourceContextmenu from "../datasource-contextmenu.vue"
 import {
   editorRender, mergeSubmitData,
   operationRender
