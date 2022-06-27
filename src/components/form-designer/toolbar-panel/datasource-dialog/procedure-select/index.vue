@@ -26,7 +26,7 @@ function onChange(val) {
 
 
 getProcedureList().then(res => {
-  procedureList.value = res.data.Data.TableData
+  procedureList.value = res.Data.TableData
   selectedProcedure.value = props.procedureValue
 })
 

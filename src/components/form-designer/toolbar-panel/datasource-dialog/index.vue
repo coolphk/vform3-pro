@@ -121,14 +121,14 @@ const columns = [
 function onProcedureSelect(val) {
   selectedProcedure.value = val
   getProcedureParams(val.ProcedureName).then(res => {
-    tableData.value = res.data.Data.map(item => transferData(item))
+    tableData.value = res.Data.map(item => transferData(item))
   })
 }
 
 function onRowExpanded(row) {
   if (row.expanded && Object.keys(row.rowData.children[0]).length === 0) {
     getProcedureParams(selectedProcedure.value.ProcedureName, row.rowData.Param_ID).then(res => {
-      row.rowData.children = res.data.Data.map(item => transferData(item))
+      row.rowData.children = res.Data.map(item => transferData(item))
     })
   }
 }
