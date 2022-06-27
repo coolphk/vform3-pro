@@ -32,7 +32,6 @@
           </template>
         </el-tree>
       </div>
-      <el-button type="primary" size="large">确定</el-button>
     </el-drawer>
   </el-form-item>
 
@@ -80,7 +79,7 @@ export default {
 
     function checkNode(data, {checkedNodes}) {
 
-      console.log('selectedWidget', props.selectedWidget);
+      // console.log('selectedWidget', props.selectedWidget);
       if (props.selectedWidget.type === 'edit-table') {
         if (!_isArrayChild(data)) {
           ElMessage.error(`${translate('extension.widgetLabel.' + props.selectedWidget.type)}只能选择数组子节点!`)
@@ -128,21 +127,20 @@ export default {
 
     function onDrawOpen() {
       const val = props.optionModel.dataTarget['procedureValue']
-      // val &&
-      loadTreeData(val)
+      val && loadTreeData(val)
     }
 
     function loadTreeData(val) {
       getProcedureParams(val.ProcedureName, "", 1).then((res) => {
         // treeData.value = res.data.Data
-        res.data.Data.map(item => {
-          unflatten(res.data.Data, item)
+        res.Data.map(item => {
+          unflatten(res.Data, item)
         })
 
         treeData.value = [{
           Param_ID: val.ProcedureID,
           Param_Name: val.ProcedureName,
-          children: getChildren(res.data.Data, '0000')
+          children: getChildren(res.Data, '0000')
         }]
       })
     }
