@@ -529,7 +529,12 @@ export const basicFields = [
     icon: 'select-field',
     formItemFlag: true,
     options: {
-      bussinessSource: {},
+      bussinessSource: {
+        currentNodeKey:"",
+        scriptParams:[],
+        expandedNodes:[],
+
+      },
       dataTarget: {},
       name: '',
       label: '',
