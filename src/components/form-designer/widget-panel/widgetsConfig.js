@@ -299,6 +299,12 @@ export const containers = [
       onSelectionChange: '',
       //操作按钮点击事件
       onOperationButtonClick: '',
+      bussinessSource: {
+        currentNodeKey: "",
+        scriptParams: [],
+        expandedNodes: [],
+        pageSize: 10
+      },
     }
   }
 
@@ -311,7 +317,11 @@ export const basicFields = [
     icon: 'text-field',
     formItemFlag: true,
     options: {
-      dataTarget: {},
+      dataTarget: {
+        checkedNodes: [],
+        expandedNodes: [],
+        procedureValue: {}
+      },
       name: '',
       label: '',
       labelAlign: '',
@@ -521,6 +531,17 @@ export const basicFields = [
       onMounted: '',
       onChange: '',
       onValidate: '',
+      dataTarget: {
+        checkedNodes: [],
+        expandedNodes: [],
+        procedureValue: {}
+      },
+      bussinessSource: {
+        currentNodeKey: "",
+        scriptParams: [],
+        expandedNodes: [],
+        pageSize: 10
+      },
     },
   },
 
@@ -530,12 +551,16 @@ export const basicFields = [
     formItemFlag: true,
     options: {
       bussinessSource: {
-        currentNodeKey:"",
-        scriptParams:[],
-        expandedNodes:[],
-
+        currentNodeKey: "",
+        scriptParams: [],
+        expandedNodes: [],
+        pageSize: 10
       },
-      dataTarget: {},
+      dataTarget: {
+        checkedNodes: [],
+        expandedNodes: [],
+        procedureValue: {}
+      },
       name: '',
       label: '',
       labelAlign: '',

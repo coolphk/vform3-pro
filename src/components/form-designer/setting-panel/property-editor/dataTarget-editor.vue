@@ -45,6 +45,7 @@ import {getProcedureParams} from "@/api/data-schema";
 import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select/index";
 import {getChildren, transferData, unflatten} from "@/utils/data-adapter";
 import {ElMessage} from "element-plus";
+import {isEmptyObj} from "@/utils/util";
 
 
 export default {
@@ -126,8 +127,11 @@ export default {
     }
 
     function onDrawOpen() {
+
       const val = props.optionModel.dataTarget['procedureValue']
-      val && loadTreeData(val)
+      if(!isEmptyObj(val)) {
+        loadTreeData(val)
+      }
     }
 
     function loadTreeData(val) {

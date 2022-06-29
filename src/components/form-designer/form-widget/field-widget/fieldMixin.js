@@ -1,5 +1,7 @@
 import {deepClone, getDSByName, overwriteObj, runDataSourceRequest, translateOptionItems} from "@/utils/util"
 import FormValidators from '@/utils/validators'
+import {loadBussinessSource} from "@/api/bussiness-source";
+import {assembleBussinessParams} from "@/utils/data-adapter";
 
 export default {
   inject: ['refList', 'getFormConfig', 'globalOptionData', 'globalModel', 'getOptionData', 'getGlobalDsv', 'getReadMode'],
@@ -88,7 +90,7 @@ export default {
         let subFormData = this.formModel[this.subFormName]
         if (((subFormData === undefined) || (subFormData[this.subFormRowIndex] === undefined) ||
             (subFormData[this.subFormRowIndex][this.field.options.name] === undefined)) &&
-            (this.field.options.defaultValue !== undefined)) {
+          (this.field.options.defaultValue !== undefined)) {
           this.fieldModel = this.field.options.defaultValue
           subFormData[this.subFormRowIndex][this.field.options.name] = this.field.options.defaultValue
         } else if (subFormData[this.subFormRowIndex][this.field.options.name] === undefined) {
@@ -110,7 +112,7 @@ export default {
       }
 
       if ((this.formModel[this.field.options.name] === undefined) &&
-          (this.field.options.defaultValue !== undefined)) {
+        (this.field.options.defaultValue !== undefined)) {
         this.fieldModel = this.field.options.defaultValue
       } else if (this.formModel[this.field.options.name] === undefined) {  //如果formModel为空对象，则初始化字段值为null!!
         this.formModel[this.field.options.name] = null
@@ -122,7 +124,7 @@ export default {
     },
 
     initFileList() { //初始化上传组件的已上传文件列表
-      if ( ((this.field.type !== 'picture-upload') && (this.field.type !== 'file-upload')) || (this.designState === true) ) {
+      if (((this.field.type !== 'picture-upload') && (this.field.type !== 'file-upload')) || (this.designState === true)) {
         return
       }
 
@@ -207,9 +209,19 @@ export default {
       }
 
       if ((this.field.type === 'radio') || (this.field.type === 'checkbox')
-          || (this.field.type === 'select') || (this.field.type === 'cascader')) {
+        || (this.field.type === 'select') || (this.field.type === 'cascader')) {
         /* 首先处理数据源选项加载 */
-        if (!!this.field.options.dsEnabled) {
+        const bussinessSource = this.field.options.bussinessSource
+        if (!!bussinessSource?.currentNodeKey) {
+          loadBussinessSource(assembleBussinessParams({
+            scriptId: bussinessSource.currentNodeKey,
+            params: bussinessSource.scriptParams,
+            pageSize: bussinessSource.pageSize
+          })).then(res => {
+            this.loadOptions(res.Data.TableData)
+          })
+          // loadBussinessSource()
+        } else if (!!this.field.options.dsEnabled) {
           this.field.options.optionItems.splice(0, this.field.options.optionItems.length) // 清空原有选项
           let curDSName = this.field.options.dsName
           let curDS = getDSByName(this.formConfig, curDSName)
@@ -293,7 +305,7 @@ export default {
       if (!!this.field.options.onValidate) {
         //let customFn = new Function('rule', 'value', 'callback', this.field.options.onValidate)
         let customFn = (rule, value, callback) => {
-          let tmpFunc =  new Function('rule', 'value', 'callback', this.field.options.onValidate)
+          let tmpFunc = new Function('rule', 'value', 'callback', this.field.options.onValidate)
           return tmpFunc.call(this, rule, value, callback)
         }
         this.rules.push({
@@ -364,7 +376,7 @@ export default {
 
       /* 必须用dispatch向指定父组件派发消息！！ */
       this.dispatch('VFormRender', 'fieldChange',
-          [this.field.options.name, newValue, oldValue, this.subFormName, this.subFormRowIndex])
+        [this.field.options.name, newValue, oldValue, this.subFormName, this.subFormRowIndex])
     },
 
     syncUpdateFormModel(value) {
@@ -489,7 +501,8 @@ export default {
     setValue(newValue) {
       /* if ((this.field.type === 'picture-upload') || (this.field.type === 'file-upload')) {
         this.fileList = newValue
-      } else */ if (!!this.field.formItemFlag) {
+      } else */
+      if (!!this.field.formItemFlag) {
         let oldValue = deepClone(this.fieldModel)
         this.fieldModel = newValue
         this.initFileList()
@@ -502,7 +515,8 @@ export default {
     getValue() {
       /* if ((this.field.type === 'picture-upload') || (this.field.type === 'file-upload')) {
         return this.fileList
-      } else */ {
+      } else */
+      {
         return this.fieldModel
       }
     },
@@ -575,7 +589,7 @@ export default {
       }
 
       if ((this.field.type === 'checkbox') ||
-          ((this.field.type === 'select') && this.field.options.multiple)) {
+        ((this.field.type === 'select') && this.field.options.multiple)) {
         this.fieldModel = []
       } else {
         this.fieldModel = ''
@@ -591,9 +605,8 @@ export default {
       this.field.options.optionItems = deepClone(options)
       //this.clearSelectedOptions()  //清空已选选项
        */
-
       this.field.options.optionItems = translateOptionItems(options, this.field.type,
-          this.field.options.labelKey, this.field.options.valueKey)
+        this.field.options.labelKey, this.field.options.valueKey)
     },
 
     /**
@@ -604,7 +617,7 @@ export default {
       //this.field.options.optionItems = deepClone(options)
 
       this.field.options.optionItems = translateOptionItems(options, this.field.type,
-          this.field.options.labelKey, this.field.options.valueKey)
+        this.field.options.labelKey, this.field.options.valueKey)
     },
 
     disableOption(optionValue) {
