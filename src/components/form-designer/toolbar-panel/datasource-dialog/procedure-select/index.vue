@@ -13,7 +13,10 @@ import {getProcedureList} from "@/api/data-schema.js";
 import {ref} from "vue";
 
 const props = defineProps({
-  procedureValue: Object
+  procedureValue: {
+    type: Object,
+    default: {}
+  }
 })
 const emit = defineEmits(['onProcedureSelect'])
 

@@ -3,21 +3,6 @@
     <el-button @click="showDataSource=true">选择</el-button>
     <el-drawer @opened="onDrawOpened" v-model="showDataSource" title="选择需要匹配的数据" size="70%" show-close>
       <div class="bussiness-container">
-        <!--        <el-tree
-                    ref="tree$"
-                    show-checkbox
-                    node-key="Param_ID"
-                    check-on-click-node
-                    :props="treeProps"
-                    :data="treeData"
-                    :check-on-click-node="false"
-                    :default-expanded-keys="optionModel.dataTarget['expandedNodes']"
-                    :default-checked-keys="optionModel?.dataTarget['checkedNodes']?.map(item=>item.Param_ID)"
-                    @check="checkNode"
-                    @node-collapse="nodeCollapse"
-                    @node-expand="nodeExpand"
-
-                >-->
         <div class="tree_wrap">
           <el-tree
               ref="tree$"
@@ -36,61 +21,85 @@
           </el-tree>
         </div>
         <div class="table_wrap">
+          <div style="margin:10px 0 10px 8px">
+            数据展示条数:
+            <el-input-number v-model="optionModel.bussinessSource.pageSize"></el-input-number>
+            <el-button type="primary" style="margin-left: 8px" @click="refreshData">刷新数据</el-button>
+          </div>
+
           <el-table :data="tableData" border max-height="200">
             <el-table-column prop="Param_Name" label="参数名" width="150"/>
-            <!--            <el-table-column prop="widgetId" label="绑定组件" width="150">
-                          <template #default="{row}">
-                            <el-select v-model="optionModel.bussinessSource.bindWidgetId" value-key="id" clearable>
-                              <el-option v-for="(widget,index) in designer.widgetList.filter(item=>item.id !==selectedWidget.id)"
-                                         :value="widget.id" :label="widget.options.label"/>
-                            </el-select>
-                          </template>
-
-                        </el-table-column>-->
             <el-table-column prop="Param_TestVALUE" label="默认值" width="150">
               <template #default="{row}">
                 <el-input v-model="row.Param_VALUE"></el-input>
               </template>
             </el-table-column>
             <el-table-column prop="Param_BusiDes" label="业务说明"/>
-
+          </el-table>
+          <div class="widget-wrapper" v-if="selectedWidget.options.labelKey">
+            <span class="label">控件Label：</span><span style="color:darkcyan">{{ selectedWidget.options.labelKey }}</span>
+            <span class="label" style="margin-left: 8px">控件Value：</span><span style="color:brown">{{
+              selectedWidget.options.valueKey
+            }}</span>
+          </div>
+          <el-table v-if="bussinessData.length>0"
+                    ref="busTable$"
+                    style="width: 800px"
+                    :data="bussinessData"
+                    max-height="600"
+                    @row-contextmenu="onBusTableContextmenu"
+          >
+            <el-table-column v-for="(item) in Object.keys(bussinessData?.[0])" :prop="item" :label="item"/>
           </el-table>
         </div>
+        <table-menu v-model:show="showMenu" :options="menuOptions"></table-menu>
       </div>
     </el-drawer>
   </el-form-item>
 </template>
 
 <script>
-import i18n, {translate} from "@/utils/i18n"
+import i18n from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin";
-import {onMounted, ref, reactive, watch, nextTick} from "vue";
-import {getScriptsParams, getScriptTree} from "@/api/bussiness-source";
+import {reactive, ref, watch} from "vue";
+import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
+import {assembleBussinessParams} from "@/utils/data-adapter";
+import TableMenu from "@/components/table-menu/index.vue"
 
 export default {
   name: "bussinessSource-editor",
   mixins: [i18n, propertyMixin],
   setup(props, ctx) {
     const tree$ = ref()
+    const busTable$ = ref()
     const showDataSource = ref(false)
     const treeData = ref([])
     const tableData = ref([])
+    const bussinessData = ref([])
     const openNodeSet = reactive(new Set(props.optionModel.bussinessSource['expandedNodes']))
-
-
+    const showMenu = ref(false)
+    const menuOptions = reactive({
+      x: 0,
+      y: 0,
+      handles: [{
+        label: '设为label',
+        category: 'label',
+        handle: setColumnToWidget
+      }, {
+        label: '设为value',
+        category: 'value',
+        handle: setColumnToWidget
+      }],
+      currentColumn: ""
+    })
     watch(openNodeSet, (newVal) => {
       props.optionModel.bussinessSource["expandedNodes"] = Array.from(newVal)
     })
 
-
-    /*onMounted(() => {
-      console.log(111, tree$.value);
-      nextTick(() => {
-        console.log(222, tree$.value);
-        tree$.value.setCurrentNode(props.optionModel.bussinessSource.currentNodeKey)
-      })
+    /*const bussinessTableColumns = computed(() => {
+      console.log(11);
+      return Object.keys(bussinessData.value?.[0])
     })*/
-
 
     /***
      * 将数组转换为children树形结构
@@ -115,12 +124,8 @@ export default {
 
     function currentChange(node) {
       if (node.type === 'Scripts') {
-        console.log('currentChange', node);
         props.optionModel.bussinessSource['currentNodeKey'] = node.ID
-        getScriptsParams(node.ID).then(res => {
-          tableData.value = res?.Data?.Params
-          props.optionModel.bussinessSource.scriptParams = tableData.value
-        })
+        loadScriptsParams(node.ID)
       }
       /**/
     }
@@ -138,26 +143,74 @@ export default {
         treeData.value = unFlatten(res.Data, 'ID')
       })
       const scriptId = props?.optionModel?.bussinessSource?.currentNodeKey
+      loadScriptsParams(scriptId)
+    }
+
+    function loadScriptsParams(scriptId) {
       scriptId && getScriptsParams(scriptId).then(res => {
         tableData.value = res?.Data?.Params
+        props.optionModel.bussinessSource['scriptParams'] = tableData.value
+        loadTableData(scriptId, tableData.value)
       })
+    }
+
+    function loadTableData(scriptId, params) {
+      loadBussinessSource(assembleBussinessParams({
+        scriptId,
+        params,
+        pageSize: props.optionModel.bussinessSource.pageSize
+      })).then(res => {
+        console.log('bussiness source load tableData', res);
+        // this.loadOptions(res.Data.TableData)
+        bussinessData.value = res.Data.TableData
+      })
+    }
+
+    function refreshData() {
+      loadTableData(props?.optionModel?.bussinessSource?.currentNodeKey, tableData.value)
+    }
+
+    function onBusTableContextmenu(row, column, event) {
+      event.preventDefault()
+      showMenu.value = true
+      menuOptions.x = event.x
+      menuOptions.y = event.y
+      menuOptions.currentColumn = column
+    }
+
+    /***
+     * 设置当前控件的labelKey,labelValue
+     * @param column
+     * @param category
+     */
+    function setColumnToWidget(column, category) {
+      props.selectedWidget.options[`${category}Key`] = column.property
     }
 
     return {
       showDataSource,
       treeData,
       tableData,
+      bussinessData,
       tree$,
+      busTable$,
+      showMenu,
+      menuOptions,
       currentChange,
       nodeExpand,
       nodeCollapse,
-      onDrawOpened
+      onDrawOpened,
+      refreshData,
+      onBusTableContextmenu
     }
   },
   props: {
     designer: Object,
     selectedWidget: Object,
     optionModel: Object,
+  },
+  components: {
+    TableMenu
   }
 }
 </script>
@@ -178,6 +231,15 @@ export default {
     flex: 1;
     border: var(--el-border);
     margin-left: 10px;
+  }
+
+  .widget-wrapper {
+    margin: 10px 0 10px 8px;
+
+    .label {
+      font-weight: bolder;
+      font-size: 14px;
+    }
   }
 }
 </style>

@@ -60,3 +60,15 @@ export function transferData(object) {
     editorVisible: false
   }
 }
+
+export function assembleBussinessParams({scriptId, params, pageSize = 10, currentPage = 1}) {
+  const data = {
+    "Scripts_ID": scriptId,
+    currentPage,
+    pageSize,
+  }
+  params.forEach(item => {
+    data[item.Param_Name] = item.Param_VALUE
+  })
+  return data
+}

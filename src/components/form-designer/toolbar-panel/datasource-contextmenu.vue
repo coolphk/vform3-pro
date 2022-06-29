@@ -1,7 +1,7 @@
 <template>
   <teleport to="body">
     <div ref="menu$" class="el-transfer context-menu" v-show="props.menuState.show"
-         :style="{left:`${props.menuState.x}px`,top:`${props.menuState.y}px`}">
+         :style="{left:`${props.options.x}px`,top:`${props.menuState.y}px`}">
       <div class="el-transfer-panel" style="padding: 0">
         <p class="el-transfer-panel__header">
           列表操作

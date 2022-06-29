@@ -14,6 +14,10 @@ export function isEmptyStr(str) {
   return (str === undefined) || (!str && (str !== 0) && (str !== '0')) || (!/[^\s]/.test(str));
 }
 
+export function isEmptyObj(obj) {
+  return Object.keys(obj).length === 0
+}
+
 export const generateId = function () {
   return Math.floor(Math.random() * 100000 + Math.random() * 20000 + Math.random() * 5000);
 };
@@ -368,10 +372,16 @@ export function translateOptionItems(rawData, widgetType, labelKey, valueKey) {
   let result = []
   if (!!rawData && (rawData.length > 0)) {
     rawData.forEach(ri => {
-      result.push({
-        label: ri[labelKey],
-        value: ri[valueKey]
-      })
+      const label = ri[labelKey]
+      const value = ri[valueKey]
+      if (label && value) {
+        result.push({
+          label,
+          value
+        })
+      } else {
+
+      }
     })
   }
 
