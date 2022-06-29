@@ -15,7 +15,7 @@ export function isEmptyStr(str) {
 }
 
 export function isEmptyObj(obj) {
-  return Object.keys(obj).length === 0
+  return obj === undefined || Object.keys(obj).length === 0
 }
 
 export const generateId = function () {
