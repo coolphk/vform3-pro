@@ -36,11 +36,22 @@
             </el-table-column>
             <el-table-column prop="Param_BusiDes" label="业务说明"/>
           </el-table>
-          <div class="widget-wrapper" v-if="selectedWidget.options.labelKey">
-            <span class="label">控件Label：</span><span style="color:darkcyan">{{ selectedWidget.options.labelKey }}</span>
-            <span class="label" style="margin-left: 8px">控件Value：</span><span style="color:brown">{{
-              selectedWidget.options.valueKey
-            }}</span>
+          <div class="widget-wrapper">
+            <template v-if="selectedWidget.options.labelKey">
+              <span class="label">控件Label：</span><span style="color:darkcyan">{{
+                selectedWidget.options.labelKey
+              }}</span>
+              <span class="label" style="margin-left: 8px">控件Value：</span><span style="color:brown">{{
+                selectedWidget.options.valueKey
+              }}</span>
+            </template>
+            <template v-if="selectedWidget.type==='data-table'&& bussinessData.length>0">
+              <div class="label">选择要显示的列</div>
+              <el-checkbox-group v-model="selectedColumns" style="max-height: 100px;overflow: auto">
+                <el-checkbox v-for="(item) in Object.keys(bussinessData?.[0])" :label="item"></el-checkbox>
+              </el-checkbox-group>
+              <!--              {{bussinessData?.[0]}}-->
+            </template>
           </div>
           <el-table v-if="bussinessData.length>0"
                     ref="busTable$"
@@ -61,7 +72,7 @@
 <script>
 import i18n from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin";
-import {reactive, ref, watch} from "vue";
+import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams} from "@/utils/data-adapter";
 import TableMenu from "@/components/table-menu/index.vue"
@@ -78,28 +89,33 @@ export default {
     const bussinessData = ref([])
     const openNodeSet = reactive(new Set(props.optionModel.bussinessSource['expandedNodes']))
     const showMenu = ref(false)
+    // const selectedColumns = ref()
+    const selectedColumns = computed({
+      get: () => {
+        return props.selectedWidget.options.tableColumns.map(item => item.prop)
+      },
+      set: (value) => {
+        props.selectedWidget.options.tableColumns = value.map((prop, index) => ({
+              columnId: ++index,
+              prop,
+              "label": prop,
+              "width": "100",
+              "show": true,
+              "align": "center"
+            })
+        )
+      }
+    })
     const menuOptions = reactive({
       x: 0,
       y: 0,
-      handles: [{
-        label: '设为label',
-        category: 'label',
-        handle: setColumnToWidget
-      }, {
-        label: '设为value',
-        category: 'value',
-        handle: setColumnToWidget
-      }],
-      currentColumn: ""
+      currentRow: {},
+      currentColumn: {},
+      currentWidget: {}
     })
     watch(openNodeSet, (newVal) => {
       props.optionModel.bussinessSource["expandedNodes"] = Array.from(newVal)
     })
-
-    /*const bussinessTableColumns = computed(() => {
-      console.log(11);
-      return Object.keys(bussinessData.value?.[0])
-    })*/
 
     /***
      * 将数组转换为children树形结构
@@ -127,7 +143,6 @@ export default {
         props.optionModel.bussinessSource['currentNodeKey'] = node.ID
         loadScriptsParams(node.ID)
       }
-      /**/
     }
 
     function nodeExpand(data) {
@@ -160,9 +175,10 @@ export default {
         params,
         pageSize: props.optionModel.bussinessSource.pageSize
       })).then(res => {
-        console.log('bussiness source load tableData', res);
+        console.log('loadBussinessSource', res);
         // this.loadOptions(res.Data.TableData)
         bussinessData.value = res.Data.TableData
+        props.selectedWidget.options.tableData = res.Data.TableData
       })
     }
 
@@ -176,15 +192,13 @@ export default {
       menuOptions.x = event.x
       menuOptions.y = event.y
       menuOptions.currentColumn = column
+      menuOptions.currentRow = row
+      menuOptions.currentWidget = props.selectedWidget
     }
 
-    /***
-     * 设置当前控件的labelKey,labelValue
-     * @param column
-     * @param category
-     */
-    function setColumnToWidget(column, category) {
-      props.selectedWidget.options[`${category}Key`] = column.property
+    //给数据表控件选择要显示的列
+    function selectTableColumn(value) {
+      console.log(value);
     }
 
     return {
@@ -196,12 +210,13 @@ export default {
       busTable$,
       showMenu,
       menuOptions,
+      selectedColumns,
       currentChange,
       nodeExpand,
       nodeCollapse,
       onDrawOpened,
       refreshData,
-      onBusTableContextmenu
+      onBusTableContextmenu,
     }
   },
   props: {
