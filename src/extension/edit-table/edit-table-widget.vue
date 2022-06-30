@@ -51,7 +51,7 @@ export default {
     designer: Object,
   },
   watch: {
-    ['widget.options.dataTarget.checkedNodes'](newVal) {
+    /*['widget.options.dataTarget.checkedNodes'](newVal) {
       this.widget.options.tableColumns = newVal.map(treeItem => {
         return {
           prop: treeItem.Param_Name,
@@ -59,7 +59,7 @@ export default {
           label: treeItem.Param_Des,
         }
       })
-    }
+    }*/
   },
   computed: {
     selected() {

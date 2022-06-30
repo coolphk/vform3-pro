@@ -7,8 +7,14 @@ export const editTableSchema = {
     name: '',
     label: 'edit-table',
     hidden: false,
-    customClass: '',
+    bussinessSource: {
+      currentNodeKey: "",
+      scriptParams: [],
+      expandedNodes: [],
+      pageSize: 10
+    },
     dataTarget: {},
+    customClass: '',
     column: '',
     cellStyle: {'height': '39px', 'cursor': 'pointer'},
     tableColumns: [],

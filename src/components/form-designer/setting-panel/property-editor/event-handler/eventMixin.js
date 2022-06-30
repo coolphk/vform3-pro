@@ -7,6 +7,5 @@ export default {
     editEventHandler(eventName, eventParams) {
       this.dispatch('SettingPanel', 'editEventHandler', [eventName, [...eventParams]])
     },
-
   }
 }

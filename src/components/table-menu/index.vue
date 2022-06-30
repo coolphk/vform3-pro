@@ -8,8 +8,8 @@
         </p>
         <div class="el-transfer-panel__body" style="padding: 0; height: auto">
           <ul>
-            <li v-for="(item) in props.options.handles">
-              <el-button link @click="execHandle(item.handle,item.category)"
+            <li v-for="(item,index) in handles">
+              <el-button link @click="item.handle(index)"
                          style="width: 100%;justify-content: flex-start">
                 {{ item.label }}
               </el-button>
@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import {defineProps, ref} from "vue";
+import {defineProps, reactive, ref, watch} from "vue";
 import {onClickOutside} from "@vueuse/core";
 
 const menu$ = ref();
@@ -33,16 +33,54 @@ const props = defineProps({
   },
   options: Object
 })
+const handles = ref([])
 const emits = defineEmits(['update:show'])
 
+watch(() => props.show, (newVal) => {
+  if (newVal) {
+    handles.value = createHandles()
+  }
+})
 
 onClickOutside(menu$, (evt) => {
   evt.type !== 'pointerup' && emits('update:show', false)
 })
 
-function execHandle(handle, category) {
-  handle(props.options.currentColumn, category)
+function setWidgetKeyValue(index) {
+  //获取label或value
+  const type = handles.value[index].type
+  props.options.currentWidget.options[`${type}Key`] = props.options.currentColumn.property
   emits('update:show', false)
+}
+
+
+function createHandles() {
+  let handles
+  switch (props.options.currentWidget.type) {
+    case 'data-table':
+      /*handles = [
+        {
+          label: '设置为显示列',
+          handle: setWidgetColumns
+        }
+      ]*/
+      break
+    default:
+      handles = [
+        {
+          label: '设置为label',
+          type: 'label',
+          handle: setWidgetKeyValue
+        },
+        {
+          label: '设置为value',
+          type: 'value',
+          handle: setWidgetKeyValue
+        }
+      ]
+      break
+  }
+  return handles
 }
 
 </script>

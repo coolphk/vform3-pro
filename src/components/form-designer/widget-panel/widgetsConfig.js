@@ -195,7 +195,8 @@ export const containers = [
       showButtonsColumn: false, // 是否显示操作列
       buttonsColumnTitle: '操作',
       buttonsColumnWidth: 120,
-      operationButtons: [{ // 操作按钮配置
+      operationButtons: [
+        { // 操作按钮配置
         name: 'detail',
         label: '详情',
         type: 'text',
@@ -224,7 +225,7 @@ export const containers = [
       pagination: { // 分页信息
         currentPage: 1,
         pageSizes: [10, 15, 20, 30, 50, 100, 200],
-        pageSize: 20,
+        pageSize: 10,
         total: 366,
       },
       dsEnabled: false, //是否使用数据源数据
