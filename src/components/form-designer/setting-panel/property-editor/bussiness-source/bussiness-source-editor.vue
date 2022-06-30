@@ -193,6 +193,12 @@ export default {
       // props.optionModel.tableColumns = []
       scriptId && getScriptsParams(scriptId).then(res => {
         tableData.value = res?.Data?.Params
+        //将当前控件的默认值替换脚本配置页的默认值
+        props.optionModel.bussinessSource['scriptParams'].map(param => {
+          if (!!param.Param_VALUE) {
+            tableData.value.find(item => item.Param_ID === param.Param_ID).Param_VALUE = param.Param_VALUE
+          }
+        })
         props.optionModel.bussinessSource['scriptParams'] = tableData.value
         loadTableData(scriptId, tableData.value)
       })
