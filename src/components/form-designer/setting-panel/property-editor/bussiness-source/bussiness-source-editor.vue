@@ -46,7 +46,7 @@
                 optionModel.valueKey
               }}</span>
             </template>
-            <template v-if="selectedWidget.type==='data-table'">
+            <template v-if="isTable(selectedWidget.type)">
               <div class="label">选择要显示的列</div>
               <el-checkbox-group v-model="compSelectedColumns" style="max-height: 100px;overflow: auto">
                 <el-checkbox v-for="(item) in tableColumn" :label="item"></el-checkbox>
@@ -76,6 +76,7 @@ import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams} from "@/utils/data-adapter";
 import TableMenu from "@/components/table-menu/index.vue"
+import {isTable} from "@/utils/util";
 
 export default {
   name: "bussinessSource-editor",
@@ -95,7 +96,7 @@ export default {
       y: 0,
       currentRow: {},
       currentColumn: {},
-      currentWidget: {}
+      currentWidget: {},
     })
 
     const compSelectedColumns = computed({
@@ -116,17 +117,17 @@ export default {
     })
     const compPageSize = computed({
       set(value) {
-        if (props.selectedWidget.type === 'data-table') {
+        if (isTable(props.selectedWidget.type)) {
           props.optionModel.pagination.pageSize = value
         } else {
-          props.optionModel.bussinessData.pageSize = value
+          props.optionModel.bussinessSource.pageSize = value
         }
       },
       get() {
-        if (props.selectedWidget.type === 'data-table') {
-          return props.optionModel.pagination.pageSize
+        if (isTable(props.selectedWidget.type)) {
+          return props.optionModel?.pagination?.pageSize || 10
         } else {
-          return props.optionModel.bussinessData.pageSize
+          return props.optionModel.bussinessSource.pageSize
         }
       }
     })
@@ -247,6 +248,7 @@ export default {
       menuOptions,
       compSelectedColumns,
       compPageSize,
+      isTable,
       currentChange,
       nodeExpand,
       nodeCollapse,

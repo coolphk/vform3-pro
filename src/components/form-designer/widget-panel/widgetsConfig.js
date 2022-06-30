@@ -195,7 +195,8 @@ export const containers = [
       showButtonsColumn: false, // 是否显示操作列
       buttonsColumnTitle: '操作',
       buttonsColumnWidth: 120,
-      operationButtons: [{ // 操作按钮配置
+      operationButtons: [
+        { // 操作按钮配置
         name: 'detail',
         label: '详情',
         type: 'text',

@@ -47,14 +47,12 @@ onClickOutside(menu$, (evt) => {
 })
 
 function setWidgetKeyValue(index) {
+  //获取label或value
   const type = handles.value[index].type
   props.options.currentWidget.options[`${type}Key`] = props.options.currentColumn.property
   emits('update:show', false)
 }
 
-function setWidgetColumns() {
-  console.log(22, props.options.currentWidget);
-}
 
 function createHandles() {
   let handles
