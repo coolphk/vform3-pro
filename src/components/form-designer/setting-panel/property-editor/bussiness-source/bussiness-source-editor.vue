@@ -63,7 +63,7 @@
             <el-table-column v-for="(item) in tableColumn" :prop="item" :label="item"/>
           </el-table>
         </div>
-        <table-menu v-model:show="showMenu" :options="menuOptions"></table-menu>
+        <context-menu v-model:show="showMenu" :options="menuOptions"></context-menu>
       </div>
     </el-drawer>
   </el-form-item>
@@ -75,7 +75,7 @@ import propertyMixin from "@/components/form-designer/setting-panel/property-edi
 import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams} from "@/utils/data-adapter";
-import TableMenu from "@/components/table-menu/index.vue"
+import ContextMenu from "@/components/context-menu/index.vue"
 import {isTable} from "@/utils/util";
 
 export default {
@@ -91,12 +91,26 @@ export default {
     const bussinessData = ref([])
     const openNodeSet = reactive(new Set(props.optionModel.bussinessSource['expandedNodes']))
     const showMenu = ref(false)
+    const currentColumn = ref({})
     const menuOptions = reactive({
       x: 0,
       y: 0,
-      currentRow: {},
-      currentColumn: {},
-      currentWidget: {},
+      handles: [
+        {
+          label: '设为label',
+          handle() {
+            props.optionModel[`labelKey`] = currentColumn.value?.property
+            showMenu.value = false
+          }
+        },
+        {
+          label: '设为value',
+          handle() {
+            props.optionModel[`valueKey`] = currentColumn.value?.property
+            showMenu.value = false
+          }
+        }
+      ]
     })
 
     const compSelectedColumns = computed({
@@ -231,9 +245,7 @@ export default {
       showMenu.value = true
       menuOptions.x = event.x
       menuOptions.y = event.y
-      menuOptions.currentColumn = column
-      menuOptions.currentRow = row
-      menuOptions.currentWidget = props.selectedWidget
+      currentColumn.value = column
     }
 
     return {
@@ -263,7 +275,7 @@ export default {
     optionModel: Object,
   },
   components: {
-    TableMenu
+    ContextMenu
   }
 }
 </script>
