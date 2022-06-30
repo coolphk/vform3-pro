@@ -23,7 +23,7 @@
         <div class="table_wrap">
           <div style="margin:10px 0 10px 8px">
             数据展示条数:
-            <el-input-number v-model="optionModel.bussinessSource.pageSize"></el-input-number>
+            <el-input-number v-model="compPageSize"></el-input-number>
             <el-button type="primary" style="margin-left: 8px" @click="refreshData">刷新数据</el-button>
           </div>
 
@@ -37,20 +37,19 @@
             <el-table-column prop="Param_BusiDes" label="业务说明"/>
           </el-table>
           <div class="widget-wrapper">
-            <template v-if="selectedWidget.options.labelKey">
+            <template v-if="optionModel.labelKey">
               <span class="label">控件Label：</span><span style="color:darkcyan">{{
-                selectedWidget.options.labelKey
+                optionModel.labelKey
               }}</span>
               <span class="label" style="margin-left: 8px">控件Value：</span><span style="color:brown">{{
-                selectedWidget.options.valueKey
+                optionModel.valueKey
               }}</span>
             </template>
-            <template v-if="selectedWidget.type==='data-table'&& bussinessData.length>0">
+            <template v-if="selectedWidget.type==='data-table'">
               <div class="label">选择要显示的列</div>
-              <el-checkbox-group v-model="selectedColumns" style="max-height: 100px;overflow: auto">
-                <el-checkbox v-for="(item) in Object.keys(bussinessData?.[0])" :label="item"></el-checkbox>
+              <el-checkbox-group v-model="compSelectedColumns" style="max-height: 100px;overflow: auto">
+                <el-checkbox v-for="(item) in tableColumn" :label="item"></el-checkbox>
               </el-checkbox-group>
-              <!--              {{bussinessData?.[0]}}-->
             </template>
           </div>
           <el-table v-if="bussinessData.length>0"
@@ -60,7 +59,7 @@
                     max-height="600"
                     @row-contextmenu="onBusTableContextmenu"
           >
-            <el-table-column v-for="(item) in Object.keys(bussinessData?.[0])" :prop="item" :label="item"/>
+            <el-table-column v-for="(item) in tableColumn" :prop="item" :label="item"/>
           </el-table>
         </div>
         <table-menu v-model:show="showMenu" :options="menuOptions"></table-menu>
@@ -86,16 +85,24 @@ export default {
     const showDataSource = ref(false)
     const treeData = ref([])
     const tableData = ref([])
+    const tableColumn = ref([]) //列表列的复选框组
     const bussinessData = ref([])
     const openNodeSet = reactive(new Set(props.optionModel.bussinessSource['expandedNodes']))
     const showMenu = ref(false)
-    // const selectedColumns = ref()
-    const selectedColumns = computed({
+    const menuOptions = reactive({
+      x: 0,
+      y: 0,
+      currentRow: {},
+      currentColumn: {},
+      currentWidget: {}
+    })
+
+    const compSelectedColumns = computed({
       get: () => {
-        return props.selectedWidget.options.tableColumns.map(item => item.prop)
+        return props.optionModel.tableColumns.map(item => item.prop)
       },
       set: (value) => {
-        props.selectedWidget.options.tableColumns = value.map((prop, index) => ({
+        props.optionModel.tableColumns = value.map((prop, index) => ({
               columnId: ++index,
               prop,
               "label": prop,
@@ -106,13 +113,23 @@ export default {
         )
       }
     })
-    const menuOptions = reactive({
-      x: 0,
-      y: 0,
-      currentRow: {},
-      currentColumn: {},
-      currentWidget: {}
+    const compPageSize = computed({
+      set(value) {
+        if (props.selectedWidget.type === 'data-table') {
+          props.optionModel.pagination.pageSize = value
+        } else {
+          props.optionModel.bussinessData.pageSize = value
+        }
+      },
+      get() {
+        if (props.selectedWidget.type === 'data-table') {
+          return props.optionModel.pagination.pageSize
+        } else {
+          return props.optionModel.bussinessData.pageSize
+        }
+      }
     })
+
     watch(openNodeSet, (newVal) => {
       props.optionModel.bussinessSource["expandedNodes"] = Array.from(newVal)
     })
@@ -141,6 +158,8 @@ export default {
     function currentChange(node) {
       if (node.type === 'Scripts') {
         props.optionModel.bussinessSource['currentNodeKey'] = node.ID
+        props.optionModel.tableColumns = []
+        props.optionModel.tableData = []
         loadScriptsParams(node.ID)
       }
     }
@@ -153,6 +172,9 @@ export default {
       openNodeSet.delete(data.ID)
     }
 
+    /**
+     * 抽屉展开时刷新左侧树,获取脚本数据源
+     */
     function onDrawOpened() {
       getScriptTree().then(res => {
         treeData.value = unFlatten(res.Data, 'ID')
@@ -161,7 +183,12 @@ export default {
       loadScriptsParams(scriptId)
     }
 
+    /**
+     * 根据脚本ID获取脚本参数
+     * @param scriptId
+     */
     function loadScriptsParams(scriptId) {
+      // props.optionModel.tableColumns = []
       scriptId && getScriptsParams(scriptId).then(res => {
         tableData.value = res?.Data?.Params
         props.optionModel.bussinessSource['scriptParams'] = tableData.value
@@ -169,16 +196,20 @@ export default {
       })
     }
 
+    /**
+     * 根据id与参数从通用接口读取数据
+     * @param scriptId
+     * @param params
+     */
     function loadTableData(scriptId, params) {
       loadBussinessSource(assembleBussinessParams({
         scriptId,
         params,
-        pageSize: props.optionModel.bussinessSource.pageSize
+        pageSize: compPageSize.value
       })).then(res => {
-        console.log('loadBussinessSource', res);
-        // this.loadOptions(res.Data.TableData)
         bussinessData.value = res.Data.TableData
-        props.selectedWidget.options.tableData = res.Data.TableData
+        tableColumn.value = res.Data.TableHeaders
+        props.optionModel.tableData = res.Data.TableData
       })
     }
 
@@ -196,21 +227,18 @@ export default {
       menuOptions.currentWidget = props.selectedWidget
     }
 
-    //给数据表控件选择要显示的列
-    function selectTableColumn(value) {
-      console.log(value);
-    }
-
     return {
       showDataSource,
       treeData,
       tableData,
+      tableColumn,
       bussinessData,
       tree$,
       busTable$,
       showMenu,
       menuOptions,
-      selectedColumns,
+      compSelectedColumns,
+      compPageSize,
       currentChange,
       nodeExpand,
       nodeCollapse,

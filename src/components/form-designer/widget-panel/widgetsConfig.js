@@ -224,7 +224,7 @@ export const containers = [
       pagination: { // 分页信息
         currentPage: 1,
         pageSizes: [10, 15, 20, 30, 50, 100, 200],
-        pageSize: 20,
+        pageSize: 10,
         total: 366,
       },
       dsEnabled: false, //是否使用数据源数据
