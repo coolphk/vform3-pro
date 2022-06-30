@@ -1,7 +1,8 @@
 <template>
   <el-form-item :label="i18nt('designer.setting.bussinessSource')">
     <el-button @click="showDataSource=true">选择</el-button>
-    <el-drawer @opened="onDrawOpened" v-model="showDataSource" title="选择需要匹配的数据" size="70%" show-close>
+    <el-drawer v-if="showDataSource" @opened="onDrawOpened" v-model="showDataSource" title="选择需要匹配的数据" size="70%"
+               show-close>
       <div class="bussiness-container">
         <div class="tree_wrap">
           <el-tree
@@ -179,6 +180,7 @@ export default {
       getScriptTree().then(res => {
         treeData.value = unFlatten(res.Data, 'ID')
       })
+      console.log('onDrawOpened currentNodeKey', props?.optionModel?.bussinessSource?.currentNodeKey);
       const scriptId = props?.optionModel?.bussinessSource?.currentNodeKey
       loadScriptsParams(scriptId)
     }
