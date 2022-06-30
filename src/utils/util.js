@@ -18,6 +18,11 @@ export function isEmptyObj(obj) {
   return obj === undefined || Object.keys(obj).length === 0
 }
 
+export function isTable(type) {
+  const tables = ['edit-table', 'data-table']
+  return tables.includes(type)
+}
+
 export const generateId = function () {
   return Math.floor(Math.random() * 100000 + Math.random() * 20000 + Math.random() * 5000);
 };
