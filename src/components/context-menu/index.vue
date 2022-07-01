@@ -4,15 +4,16 @@
          :style="{left:`${props.options.x}px`,top:`${props.options.y}px`}">
       <div class="el-transfer-panel" style="padding: 0">
         <p class="el-transfer-panel__header">
-          列表操作
+          {{ options.title }}
         </p>
         <div class="el-transfer-panel__body" style="padding: 0; height: auto">
           <ul>
-            <li v-for="(item,index) in options.handles">
-              <el-button link @click="item.handle"
-                         style="width: 100%;justify-content: flex-start">
-                {{ item.label }}
-              </el-button>
+            <li v-for="(item,index) in options.handles" @click="item.handle">
+              <!--              <el-button link @click="item.handle"
+                                       style="width: 100%;justify-content: flex-start">
+                              {{ item.label }}
+                            </el-button>-->
+              {{ item.label }}
             </li>
           </ul>
         </div>
@@ -56,6 +57,12 @@ onClickOutside(menu$, (evt) => {
       list-style: none;
       padding: 5px 0 5px 15px;
       border-bottom: 1px solid #c2d6ea;
+      font-size: 12px;
+      color: #222222;
+
+      &:hover {
+        background-color: #eeeeee;
+      }
     }
   }
 }

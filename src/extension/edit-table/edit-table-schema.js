@@ -13,7 +13,9 @@ export const editTableSchema = {
       expandedNodes: [],
       pageSize: 10
     },
-    dataTarget: {},
+    dataTarget: {
+      bindMap: {}
+    },
     customClass: '',
     column: '',
     cellStyle: {'height': '39px', 'cursor': 'pointer'},

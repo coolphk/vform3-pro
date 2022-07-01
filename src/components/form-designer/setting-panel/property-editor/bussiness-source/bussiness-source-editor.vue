@@ -95,6 +95,7 @@ export default {
     const menuOptions = reactive({
       x: 0,
       y: 0,
+      title: '操作列表',
       handles: [
         {
           label: '设为label',
@@ -194,10 +195,9 @@ export default {
     function onDrawOpened() {
       getScriptTree().then(res => {
         treeData.value = unFlatten(res.Data, 'ID')
+        const scriptId = props?.optionModel?.bussinessSource?.currentNodeKey
+        loadScriptsParams(scriptId)
       })
-      console.log('onDrawOpened currentNodeKey', props?.optionModel?.bussinessSource?.currentNodeKey);
-      const scriptId = props?.optionModel?.bussinessSource?.currentNodeKey
-      loadScriptsParams(scriptId)
     }
 
     /**
