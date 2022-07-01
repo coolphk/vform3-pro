@@ -2,7 +2,7 @@
 
   <el-form-item :label="i18nt('designer.setting.dataTarget')">
     <el-button @click="showDataTargetDialog=true">选择</el-button>
-    <el-drawer @open="onDrawOpen" v-model="showDataTargetDialog" title="选择需要匹配的数据" show-close>
+    <el-drawer @open="onDrawOpen" v-if="showDataTargetDialog" v-model="showDataTargetDialog" title="选择需要匹配的数据" show-close>
       <div style="height: 80vh;overflow: auto">
         <procedure-select v-if="showDataTargetDialog" @onProcedureSelect="onProcedureSelect"
                           :procedureValue="optionModel.dataTarget['procedureValue']"/>
@@ -91,6 +91,8 @@ export default {
   components: {ProcedureSelect, ContextMenu},
   mixins: [i18n, propertyMixin],
   setup(props, ctx) {
+    console.log(111, props.selectedWidget);
+    console.log(222, props.optionModel);
     //显示数据目标
     const showDataTargetDialog = ref(false)
     const showLoading = ref(false)
@@ -196,7 +198,7 @@ export default {
     }
 
     function onDrawOpen() {
-
+      debugger
       const val = props.optionModel.dataTarget['procedureValue']
       if (!isEmptyObj(val)) {
         loadTreeData(val)

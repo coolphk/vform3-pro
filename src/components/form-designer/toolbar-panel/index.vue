@@ -372,12 +372,12 @@ export default {
   },
   methods: {
     showToolButton(configName) {
-      /*if (this.designerConfig[configName] === undefined) {
+      if (this.designerConfig[configName] === undefined) {
         return true
       }
 
-      return !!this.designerConfig[configName]*/
-      return configName === 'dataSourceButton' || configName === 'previewFormButton'
+      return !!this.designerConfig[configName]
+      // return configName === 'dataSourceButton' || configName === 'previewFormButton'
     },
     showDataSource() {
       this.showDataSourceDialogFlag = true

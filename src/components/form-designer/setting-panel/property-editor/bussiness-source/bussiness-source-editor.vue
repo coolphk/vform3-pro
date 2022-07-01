@@ -232,7 +232,9 @@ export default {
       })).then(res => {
         bussinessData.value = res.Data.TableData
         tableColumn.value = res.Data.TableHeaders
-        props.optionModel.tableData = res.Data.TableData
+        if (isTable(props.selectedWidget.type)) {
+          props.optionModel.tableData = res.Data.TableData
+        }
       })
     }
 
@@ -241,11 +243,13 @@ export default {
     }
 
     function onBusTableContextmenu(row, column, event) {
-      event.preventDefault()
-      showMenu.value = true
-      menuOptions.x = event.x
-      menuOptions.y = event.y
-      currentColumn.value = column
+      if (!isTable(props.selectedWidget.type)) {
+        event.preventDefault()
+        showMenu.value = true
+        menuOptions.x = event.x
+        menuOptions.y = event.y
+        currentColumn.value = column
+      }
     }
 
     return {
