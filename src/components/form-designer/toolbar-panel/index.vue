@@ -87,6 +87,7 @@
             <el-button type="primary" plain @click="switchReadMode">{{ i18nt('designer.hint.switchReadMode') }}
             </el-button>
             <el-button @click="showPreviewDialogFlag = false">{{ i18nt('designer.hint.closePreview') }}</el-button>
+            <el-button type="primary" @click="getBussinessData">查看业务数据</el-button>
             <el-button v-if="false" @click="testSetFormJson">setFormJson</el-button>
           </div>
         </template>
@@ -241,7 +242,7 @@ import {
   copyToClipboard,
   generateId,
   getQueryParam,
-  traverseAllWidgets, addWindowResizeHandler, traverseFieldWidgets
+  traverseAllWidgets, addWindowResizeHandler, traverseFieldWidgets, isEmptyObj
 } from "@/utils/util"
 import i18n from '@/utils/i18n'
 import {generateCode} from "@/utils/code-generator"
@@ -249,6 +250,8 @@ import {genSFC} from "@/utils/sfc-generator"
 import loadBeautifier from "@/utils/beautifierLoader"
 import {saveAs} from 'file-saver'
 import DatasourceDialog from "@/components/form-designer/toolbar-panel/datasource-dialog/index.vue";
+import {buildProcedureSchema} from "@/utils/data-adapter";
+import {getProcedureParams} from "@/api/data-schema";
 
 export default {
   name: "ToolbarPanel",
@@ -372,12 +375,12 @@ export default {
   },
   methods: {
     showToolButton(configName) {
-      if (this.designerConfig[configName] === undefined) {
-        return true
-      }
+      /* if (this.designerConfig[configName] === undefined) {
+         return true
+       }
 
-      return !!this.designerConfig[configName]
-      // return configName === 'dataSourceButton' || configName === 'previewFormButton'
+       return !!this.designerConfig[configName]*/
+      return configName === 'dataSourceButton' || configName === 'previewFormButton'
     },
     showDataSource() {
       this.showDataSourceDialogFlag = true
@@ -798,18 +801,67 @@ export default {
       }
     },
     generateSubmitData() {
-      /*this.$refs['preForm'].getFormData().then(formData => {
-        this.formDataJson = JSON.stringify(formData, null, '  ')
-        this.formDataRawJson = JSON.stringify(formData)
-        console.log(111, formData);
-        console.log('widgetList', this.designer.widgetList);
-        this.showFormDataDialogFlag = true
-      }).catch(error => {
-        this.$message.error(error)
-      })*/
       console.log();
       traverseFieldWidgets(this.designer.widgetList, (widget) => {
         console.log(1, widget);
+      })
+    },
+    getBussinessData() {
+      // buildProcedureSchema()
+      const procedureMap = new Map()
+      /**
+       * 1、遍历所有业务组件（带dataTarget属性的组件)map={schema={},widgets:[]}
+       * 2、将相同的存储过程合并放入schema中,并且将绑定相同存储过程的组件放入widgets中
+       * 3、获取存储过程的值放入map中
+       */
+      traverseAllWidgets(this.designer.widgetList, (widget) => {
+
+        if (!isEmptyObj(widget?.options?.dataTarget?.procedureValue)) {
+          // if (widget.formItemFlag) {
+          const {ProcedureName: procedureName, ProcedureID: procedureID} = widget.options?.dataTarget?.procedureValue
+
+          if (!procedureMap.has(procedureName)) {
+            procedureMap.set(procedureName, {
+              widgets: [widget]
+            })
+            const procedure = procedureMap.get(procedureName)
+            //获取当前存储过程的数据结构
+            getProcedureParams(procedureName, "", 1).then(res => {
+              const resData = res.Data
+              const submitData = {
+                procedureID,
+                procedureName,
+                params: []
+              }
+              this.$refs['preForm'].getFormData().then(formData => {
+                procedure['schema'] = resData
+                procedure.widgets.forEach(wi => {
+                  // console.log('widget', wi);
+                  if (wi.formItemFlag) {
+                    wi.options.dataTarget.checkedNodes.forEach(node => {
+                      //验证组件dataTarget中的节点是否存在于当前数据结构中，如果存在则应该进行赋值，否则报错
+                      if (resData.find((data) => data.Param_ID === node.Param_ID)) {
+                        node.Param_VALUE = formData[wi.id]
+                        submitData.params.push(node)
+                      } else {
+                        console.error(`参数${node}不存在,请检查数据`)
+                      }
+                    })
+                  } else if (wi.type === 'edit-table') {
+                    console.log('edit-table', wi);
+                  }
+                })
+                console.log('最终提交数据', submitData);
+              })
+            })
+          } else {
+            const widgets = procedureMap.get(procedureName)?.widgets
+            if (Array.isArray(widgets)) {
+              widgets.push(widget)
+            }
+          }
+        }
+        // }
       })
     }
   }

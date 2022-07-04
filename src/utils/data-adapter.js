@@ -72,3 +72,30 @@ export function assembleBussinessParams({scriptId, params, pageSize = 10, curren
   })
   return data
 }
+
+export function buildProcedureSchema() {
+  return {
+    "Param_ID": "",
+    "Param_Name": "",
+    "Param_ObjType": "",
+    "Param_Type": "",
+    "Param_MaxLen": "",
+    "Param_isOUT": "",
+    "Param_isXML": "",
+    "Param_VALUE": "",
+    "Param_TestVALUE": "",
+    "Param_Des": "",
+    "Param_BusiDes": "",
+    "Param_LinkTableID": "",
+    "Param_LinkTableName": "",
+    "Param_LinkColumID": "",
+    "Param_LinkColumName": "",
+    "Param_LinkColumBusiDes": "",
+    "Parent_ID": "",
+    "ROWNR": null,
+  }
+}
+
+export function buildExecProcedureSchema() {
+
+}

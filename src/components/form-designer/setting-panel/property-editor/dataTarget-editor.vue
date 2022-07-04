@@ -2,7 +2,8 @@
 
   <el-form-item :label="i18nt('designer.setting.dataTarget')">
     <el-button @click="showDataTargetDialog=true">选择</el-button>
-    <el-drawer @open="onDrawOpen" v-if="showDataTargetDialog" v-model="showDataTargetDialog" title="选择需要匹配的数据" show-close>
+    <el-drawer @opened="onDrawOpen" v-if="showDataTargetDialog" v-model="showDataTargetDialog" title="选择需要匹配的数据"
+               show-close>
       <div style="height: 80vh;overflow: auto">
         <procedure-select v-if="showDataTargetDialog" @onProcedureSelect="onProcedureSelect"
                           :procedureValue="optionModel.dataTarget['procedureValue']"/>
@@ -26,11 +27,13 @@
         >
           <template #default="{ node, data }">
             <span class="custom-tree-node">
+<!--              <span>{{ data.Param_ID }}</span>-->
               <span>{{ node.label }}</span>
               <span style="color:darkcyan">({{ data.Param_ObjType }})</span>
               <span v-if="data.Param_Des" style="color: #2c91ff">-[{{
                   data.Param_Des
                 }}]</span>
+
               <span v-if="optionModel.dataTarget?.bindMap?.[data.Param_ID]">
                 <el-button type="warning" @click="unbindNode(node)">{{
                     optionModel.dataTarget?.bindMap?.[data.Param_ID]
@@ -77,7 +80,7 @@
 <script>
 import i18n from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
-import {computed, reactive, ref, watch} from "vue";
+import {computed, nextTick, onMounted, reactive, ref, watch} from "vue";
 import {getProcedureParams} from "@/api/data-schema";
 import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select/index";
 import {getChildren, unflatten} from "@/utils/data-adapter";
@@ -91,8 +94,6 @@ export default {
   components: {ProcedureSelect, ContextMenu},
   mixins: [i18n, propertyMixin],
   setup(props, ctx) {
-    console.log(111, props.selectedWidget);
-    console.log(222, props.optionModel);
     //显示数据目标
     const showDataTargetDialog = ref(false)
     const showLoading = ref(false)
@@ -120,6 +121,10 @@ export default {
     watch(openNodeSet, (newVal) => {
       props.optionModel.dataTarget["expandedNodes"] = Array.from(newVal)
     })
+
+    /*onMounted(() => {
+      onDrawOpen()
+    })*/
 
     function createMenuHandle(node) {
       const bindMap = props.optionModel.dataTarget.bindMap
@@ -161,12 +166,12 @@ export default {
         }
       } else {*/
       if (!isTable(props.selectedWidget.type)) {
-        if (data?.Param_ObjType !== 'attribute') {
-          ElMessage.error('您选择的不是叶节点')
-          tree$.value.setChecked(data, false, true)
-          return
-        }
-        props.optionModel.dataTarget['checkedNodes'] = checkedNodes.filter(node => node.Param_ObjType === 'attribute')
+        // if (data?.Param_ObjType !== 'attribute') {
+        //   ElMessage.error('您选择的不是叶节点')
+        //   tree$.value.setChecked(data, false, true)
+          // return
+        // }
+        props.optionModel.dataTarget['checkedNodes'] = checkedNodes
       }
     }
 
@@ -198,8 +203,9 @@ export default {
     }
 
     function onDrawOpen() {
-      debugger
+      console.log('onDrawOpen');
       const val = props.optionModel.dataTarget['procedureValue']
+      // console.log(111, val);
       if (!isEmptyObj(val)) {
         loadTreeData(val)
       }
