@@ -242,7 +242,7 @@ import {
   copyToClipboard,
   generateId,
   getQueryParam,
-  traverseAllWidgets, addWindowResizeHandler, traverseFieldWidgets, isEmptyObj
+  traverseAllWidgets, addWindowResizeHandler, traverseFieldWidgets, isEmptyObj, uuid2
 } from "@/utils/util"
 import i18n from '@/utils/i18n'
 import {generateCode} from "@/utils/code-generator"
@@ -252,6 +252,8 @@ import {saveAs} from 'file-saver'
 import DatasourceDialog from "@/components/form-designer/toolbar-panel/datasource-dialog/index.vue";
 import {buildProcedureSchema} from "@/utils/data-adapter";
 import {getProcedureParams} from "@/api/data-schema";
+import {ElMessage} from "element-plus";
+import {toRaw} from "vue";
 
 export default {
   name: "ToolbarPanel",
@@ -817,7 +819,6 @@ export default {
       traverseAllWidgets(this.designer.widgetList, (widget) => {
 
         if (!isEmptyObj(widget?.options?.dataTarget?.procedureValue)) {
-          // if (widget.formItemFlag) {
           const {ProcedureName: procedureName, ProcedureID: procedureID} = widget.options?.dataTarget?.procedureValue
 
           if (!procedureMap.has(procedureName)) {
@@ -836,7 +837,6 @@ export default {
               this.$refs['preForm'].getFormData().then(formData => {
                 procedure['schema'] = resData
                 procedure.widgets.forEach(wi => {
-                  // console.log('widget', wi);
                   if (wi.formItemFlag) {
                     wi.options.dataTarget.checkedNodes.forEach(node => {
                       //验证组件dataTarget中的节点是否存在于当前数据结构中，如果存在则应该进行赋值，否则报错
@@ -844,14 +844,21 @@ export default {
                         node.Param_VALUE = formData[wi.id]
                         submitData.params.push(node)
                       } else {
+                        ElMessage({
+                          message: `参数${node}不存在,请检查数据`, type: 'error', duration: 3 * 1000, showClose: true
+                        })
                         console.error(`参数${node}不存在,请检查数据`)
                       }
                     })
                   } else if (wi.type === 'edit-table') {
                     console.log('edit-table', wi);
+                    // console.log(22, wi.options.dataTarget.arraySchema);
+                    // transferTableDataToSubmitData()
+                    submitData.params = submitData.params.concat(transferTableDataToSubmitData(wi, formData))
+                    console.log(submitData);
                   }
                 })
-                console.log('最终提交数据', submitData);
+                // console.log('最终提交数据', submitData);
               })
             })
           } else {
@@ -861,8 +868,28 @@ export default {
             }
           }
         }
-        // }
       })
+
+      function transferTableDataToSubmitData(wi, formData) {
+        //获取绑定数据结构的列表结构array->item
+        const {tableData, dataTarget} = formData[wi.id]
+        const params = []
+        tableData.map(row => {
+          const item = deepClone(dataTarget.arraySchema)
+          item.Param_ID = uuid2(16)
+          params.push(item)
+          Object.keys(row).map(key => {
+            const rowData = buildProcedureSchema()
+            rowData.Param_Name = key
+            rowData.Param_VALUE = row[key]
+            rowData.Parent_ID = item.Param_ID
+            rowData.Param_ObjType = 'attribute'
+            params.push(rowData)
+          })
+        })
+        console.log('table params', params);
+        return params
+      }
     }
   }
 }
