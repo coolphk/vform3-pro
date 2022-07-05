@@ -15,8 +15,11 @@
             <div>
               <el-input v-model="scope.row[scope.column.property]"></el-input>
             </div>
-            <!--            <div>{{scope.column}}</div>-->
-            <!--            <el-input v-model="scope.row"></el-input>-->
+          </template>
+        </el-table-column>
+        <el-table-column width="100" fixed="right" label="操作">
+          <template #default="scope">
+            <el-button @click="onDeleteRow(scope.$index)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -37,6 +40,9 @@ export default {
   mixins: [i18n, containerMixin, refMixinDesign],
   inject: ['refList'],
   setup(props) {
+    /**
+     * 添加一个空行
+     */
     function addData() {
       const rowData = {}
       props.widget.options.tableColumns.map((column) => {
@@ -45,8 +51,13 @@ export default {
       props.widget.options.tableData.push(rowData)
     }
 
+    function onDeleteRow(rowIndex) {
+      props.widget.options.tableData.splice(rowIndex, 1)
+    }
+
     return {
-      addData
+      addData,
+      onDeleteRow
     }
   },
   components: {

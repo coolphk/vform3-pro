@@ -1,3 +1,5 @@
+import {uuid2} from "@/utils/util";
+
 let id = 0
 
 function objectToArray(obj, level, path) {
@@ -75,7 +77,7 @@ export function assembleBussinessParams({scriptId, params, pageSize = 10, curren
 
 export function buildProcedureSchema() {
   return {
-    "Param_ID": "",
+    "Param_ID": uuid2(16),
     "Param_Name": "",
     "Param_ObjType": "",
     "Param_Type": "",

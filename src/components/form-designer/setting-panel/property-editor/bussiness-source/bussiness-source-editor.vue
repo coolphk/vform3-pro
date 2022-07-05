@@ -119,8 +119,7 @@ export default {
         return props.optionModel.tableColumns.map(item => item.prop)
       },
       set: (values) => {
-        setWidgetTableDataWithColumn(values)
-        synchronizeBindMap(values)
+
         //设置table的列
         props.optionModel.tableColumns = values.map((prop, index) => ({
               columnId: ++index,
@@ -255,30 +254,6 @@ export default {
         menuOptions.y = event.y
         currentColumn.value = column
       }
-    }
-
-    //同步绑定关系，绑定关系里的列被取消选中，则删除掉
-    function synchronizeBindMap(values) {
-      const {bindMap} = props.optionModel?.dataTarget
-      Object.keys(bindMap).map(key => {
-        if (!values.includes(bindMap[key])) {
-          delete bindMap[key]
-        }
-      })
-      console.log(11, props.optionModel?.dataTarget);
-    }
-
-    //只赋值选中列的数据
-    function setWidgetTableDataWithColumn(values) {
-      const data = []
-      bussinessData.value.map(row => {
-        const rowData = {}
-        values.map(column => {
-          rowData[column] = row[column]
-        })
-        data.push(rowData)
-      })
-      props.optionModel.tableData = data
     }
 
     return {

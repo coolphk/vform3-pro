@@ -4,7 +4,7 @@
     <div :key="widget.id" class="collapse-container data-table-container"
          style="display: flex;flex-direction: column"
          :class="{'selected': selected}" @click.stop="selectWidget(widget)">
-      <el-button type="primary" @click="showData" style="margin-left: auto">
+      <el-button type="primary" style="margin-left: auto">
         添加行
       </el-button>
       <el-table :data="widget.options.tableData" row-key="id" border>
@@ -23,19 +23,26 @@ import containerMixin from "@/components/form-designer/form-widget/container-wid
 import refMixinDesign from "@/components/form-designer/refMixinDesign";
 import FieldComponents from "@/components/form-designer/form-widget/field-widget";
 import {ArrowDown, ArrowUp} from "@element-plus/icons-vue";
+import {watch} from "vue";
 
 export default {
   name: "edit-table-widget",
   mixins: [i18n, containerMixin, refMixinDesign],
   inject: ['refList'],
   setup(props) {
-    function showData() {
-      console.log(props.widget);
-    }
 
-    return {
-      showData
-    }
+    watch(() => [...props.widget.options.tableColumns], (newVal, oldValue) => {
+      if (oldValue.length > newVal.length) {
+        const deletedColumn = oldValue.find(item => !newVal.find(nItem => nItem.prop === item.prop))
+        const bindMap = props.widget.options.dataTarget.bindMap
+        Object.keys(bindMap).map(key => {
+          if (bindMap[key] === deletedColumn.prop) {
+            delete bindMap[key]
+          }
+        })
+      }
+    }, {deep: true})
+    return {}
   },
   components: {
     ContainerWrapper,
@@ -49,17 +56,6 @@ export default {
     parentList: Array,
     indexOfParentList: Number,
     designer: Object,
-  },
-  watch: {
-    /*['widget.options.dataTarget.checkedNodes'](newVal) {
-      this.widget.options.tableColumns = newVal.map(treeItem => {
-        return {
-          prop: treeItem.Param_Name,
-          // key: treeItem.Param_Name,
-          label: treeItem.Param_Des,
-        }
-      })
-    }*/
   },
   computed: {
     selected() {

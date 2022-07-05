@@ -80,7 +80,7 @@
 <script>
 import i18n from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
-import {computed, nextTick, onMounted, reactive, ref, watch} from "vue";
+import {computed, nextTick, onMounted, reactive, ref, toRaw, watch} from "vue";
 import {getProcedureParams} from "@/api/data-schema";
 import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select/index";
 import {getChildren, unflatten} from "@/utils/data-adapter";
@@ -140,6 +140,14 @@ export default {
             handle: () => {
               bindMap[node.data.Param_ID] = column.prop
               menuOptions.show = false
+              //绑定编辑表格时获取绑定节点的父级结构
+              const parent = tree$.value.store.nodesMap[node.data.Param_ID].parent
+              if (parent.data.Param_ObjType === 'object' && parent.parent.data.Param_ObjType === 'array') {
+                const schema = toRaw(parent.data)
+                //删除掉暂时不用的children
+                delete schema.children
+                props.optionModel.dataTarget.arraySchema = schema
+              }
             }
           }))
       return handles
@@ -169,7 +177,7 @@ export default {
         // if (data?.Param_ObjType !== 'attribute') {
         //   ElMessage.error('您选择的不是叶节点')
         //   tree$.value.setChecked(data, false, true)
-          // return
+        // return
         // }
         props.optionModel.dataTarget['checkedNodes'] = checkedNodes
       }
