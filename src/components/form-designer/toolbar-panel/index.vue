@@ -884,7 +884,8 @@ export default {
 
       function transferTableDataToSubmitData(wi, formData) {
         //获取绑定数据结构的列表结构array->item
-        const {tableData, dataTarget} = formData[wi.id]
+        const {tableData} = formData[wi.id]
+        const {dataTarget} = wi.options
         const params = []
         tableData.map(row => {
           const item = deepClone(dataTarget.arraySchema)
