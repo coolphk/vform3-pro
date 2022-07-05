@@ -20,38 +20,35 @@
 </template>
 
 <script>
-  import emitter from '@/utils/emitter'
-  import i18n from "../../../utils/i18n"
-  import refMixin from "../../../components/form-render/refMixin"
-  import ContainerItemWrapper from './container-item-wrapper'
-  import GridColItem from './grid-col-item'
-  import containerItemMixin from "./containerItemMixin"
+import emitter from '@/utils/emitter'
+import i18n from "../../../utils/i18n"
+import refMixin from "../../../components/form-render/refMixin"
+import ContainerItemWrapper from './container-item-wrapper'
+import GridColItem from './grid-col-item'
+import containerItemMixin from "./containerItemMixin"
 
-  export default {
-    name: "grid-item",
-    componentName: 'ContainerItem',
-    mixins: [emitter, i18n, refMixin, containerItemMixin],
-    components: {
-      ContainerItemWrapper,
-      GridColItem,
-    },
-    props: {
-      widget: Object,
-    },
-    inject: ['refList', 'sfRefList', 'globalModel'],
-    created() {
-      this.initRefList()
-    },
-    mounted() {
-
-    },
-    beforeUnmount() {
-      this.unregisterFromRefList()
-    },
-    methods: {
-
-    },
-  }
+export default {
+  name: "grid-item",
+  componentName: 'ContainerItem',
+  mixins: [emitter, i18n, refMixin, containerItemMixin],
+  components: {
+    ContainerItemWrapper,
+    GridColItem,
+  },
+  props: {
+    widget: Object,
+  },
+  inject: ['refList', 'sfRefList', 'globalModel'],
+  created() {
+    this.initRefList()
+  },
+  mounted() {
+  },
+  beforeUnmount() {
+    this.unregisterFromRefList()
+  },
+  methods: {},
+}
 </script>
 
 <style lang="scss" scoped>

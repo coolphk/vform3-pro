@@ -197,30 +197,30 @@ export const containers = [
       buttonsColumnWidth: 120,
       operationButtons: [
         { // 操作按钮配置
-        name: 'detail',
-        label: '详情',
-        type: 'text',
-        size: 'small',
-        round: false,
-        hidden: true,
-        disabled: false,
-      }, {
-        name: 'edit',
-        label: '编辑',
-        type: 'text',
-        size: 'small',
-        round: false,
-        hidden: false,
-        disabled: false,
-      }, {
-        name: 'delete',
-        label: '删除',
-        type: 'text',
-        size: 'small',
-        round: false,
-        hidden: false,
-        disabled: false,
-      },
+          name: 'detail',
+          label: '详情',
+          type: 'text',
+          size: 'small',
+          round: false,
+          hidden: true,
+          disabled: false,
+        }, {
+          name: 'edit',
+          label: '编辑',
+          type: 'text',
+          size: 'small',
+          round: false,
+          hidden: false,
+          disabled: false,
+        }, {
+          name: 'delete',
+          label: '删除',
+          type: 'text',
+          size: 'small',
+          round: false,
+          hidden: false,
+          disabled: false,
+        },
       ],
       pagination: { // 分页信息
         currentPage: 1,
@@ -371,6 +371,11 @@ export const basicFields = [
     icon: 'textarea-field',
     formItemFlag: true,
     options: {
+      dataTarget: {
+        checkedNodes: [],
+        expandedNodes: [],
+        procedureValue: {}
+      },
       name: '',
       label: '',
       labelAlign: '',
@@ -452,6 +457,17 @@ export const basicFields = [
     icon: 'radio-field',
     formItemFlag: true,
     options: {
+      bussinessSource: {
+        currentNodeKey: "",
+        scriptParams: [],
+        expandedNodes: [],
+        pageSize: 10
+      },
+      dataTarget: {
+        checkedNodes: [],
+        expandedNodes: [],
+        procedureValue: {}
+      },
       name: '',
       label: '',
       labelAlign: '',

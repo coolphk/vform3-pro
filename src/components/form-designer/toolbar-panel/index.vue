@@ -307,13 +307,26 @@ export default {
       activeSFCTab: 'vue2',
 
       testFormData: {
-        // 'userName': '666888',
-        // 'productItems': [
-        //   {'pName': 'iPhone12', 'pNum': 10},
-        //   {'pName': 'P50', 'pNum': 16},
-        // ]
-
-        'select62173': 2,
+        "input50474": "11",
+        "select20475": 4,
+        "edittable104802": {
+          "tableData": [
+            {
+              "VAA01": "a1",
+              "VAA03": "b1",
+              "VAA05": "c1"
+            },
+            {
+              "VAA01": "a2",
+              "VAA03": "b2",
+              "VAA05": "c2"
+            }
+          ]
+        },
+        "checkbox62894": [
+          "MZ00000005"
+        ],
+        "radio110226": 21
       },
       testOptionData: {
         'select62173': [
@@ -809,7 +822,7 @@ export default {
       })
     },
     getBussinessData() {
-      // buildProcedureSchema()
+      const submitDatas = []
       const procedureMap = new Map()
       /**
        * 1、遍历所有业务组件（带dataTarget属性的组件)map={schema={},widgets:[]}
@@ -835,7 +848,6 @@ export default {
                 params: []
               }
               this.$refs['preForm'].getFormData().then(formData => {
-                procedure['schema'] = resData
                 procedure.widgets.forEach(wi => {
                   if (wi.formItemFlag) {
                     wi.options.dataTarget.checkedNodes.forEach(node => {
@@ -851,14 +863,14 @@ export default {
                       }
                     })
                   } else if (wi.type === 'edit-table') {
-                    console.log('edit-table', wi);
-                    // console.log(22, wi.options.dataTarget.arraySchema);
-                    // transferTableDataToSubmitData()
                     submitData.params = submitData.params.concat(transferTableDataToSubmitData(wi, formData))
-                    console.log(submitData);
                   }
                 })
-                // console.log('最终提交数据', submitData);
+                submitDatas.push(submitData)
+                if (submitDatas.length === procedureMap.size) {
+                  this.formDataJson = JSON.stringify(submitDatas, null, '  ')
+                  this.showFormDataDialogFlag = true
+                }
               })
             })
           } else {
@@ -887,7 +899,6 @@ export default {
             params.push(rowData)
           })
         })
-        console.log('table params', params);
         return params
       }
     }

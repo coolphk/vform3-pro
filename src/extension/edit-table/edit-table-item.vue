@@ -7,6 +7,7 @@
           添加行
         </el-button>
       </div>
+
       <el-table :data="widget.options.tableData" row-key="id" :ref="widget.id" border
                 :cell-style="widget.options.cellStyle">
         <el-table-column :label="column.label" :prop="column.prop"
@@ -67,8 +68,7 @@ export default {
     ArrowUp
   },
   props: {
-    widget: Object,
-    formModel: Object
+    widget: Object
   },
 
   created() {
