@@ -47,9 +47,13 @@
               }}</span>
             </template>
             <template v-if="isTable(selectedWidget.type)">
-              <div class="label">选择要显示的列<span style="margin-left: 8px"><el-checkbox label="全选"
-                                                                                    v-model="checkAll"
-                                                                                    @change="onCheckAll"></el-checkbox></span>
+              <div class="label">选择要显示的列
+                <span style="margin-left: 8px">
+                  <el-checkbox label="全选"
+                               v-model="checkAll"
+                               :indeterminate="compSelectedColumns.length<tableColumn.length && compSelectedColumns.length!==0"
+                               @change="onCheckAll"/>
+                </span>
               </div>
               <el-checkbox-group v-model="compSelectedColumns" style="max-height: 100px;overflow: auto">
                 <el-checkbox v-for="(item) in tableColumn" :label="item"></el-checkbox>
