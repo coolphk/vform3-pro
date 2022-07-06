@@ -47,7 +47,10 @@
               }}</span>
             </template>
             <template v-if="isTable(selectedWidget.type)">
-              <div class="label">选择要显示的列</div>
+              <div class="label">选择要显示的列<span style="margin-left: 8px"><el-checkbox label="全选"
+                                                                                    v-model="checkAll"
+                                                                                    @change="onCheckAll"></el-checkbox></span>
+              </div>
               <el-checkbox-group v-model="compSelectedColumns" style="max-height: 100px;overflow: auto">
                 <el-checkbox v-for="(item) in tableColumn" :label="item"></el-checkbox>
               </el-checkbox-group>
@@ -92,6 +95,7 @@ export default {
     const openNodeSet = reactive(new Set(props.optionModel.bussinessSource['expandedNodes']))
     const showMenu = ref(false)
     const currentColumn = ref({})
+    const checkAll = ref(false)
     const menuOptions = reactive({
       x: 0,
       y: 0,
@@ -153,6 +157,15 @@ export default {
     watch(openNodeSet, (newVal) => {
       props.optionModel.bussinessSource["expandedNodes"] = Array.from(newVal)
     })
+
+    function onCheckAll(value) {
+      if (value)
+        compSelectedColumns.value = tableColumn.value
+      else {
+        compSelectedColumns.value = []
+      }
+    }
+
 
     /***
      * 将数组转换为children树形结构
@@ -268,6 +281,7 @@ export default {
       menuOptions,
       compSelectedColumns,
       compPageSize,
+      checkAll,
       isTable,
       currentChange,
       nodeExpand,
@@ -275,6 +289,7 @@ export default {
       onDrawOpened,
       refreshData,
       onBusTableContextmenu,
+      onCheckAll
     }
   },
   props: {

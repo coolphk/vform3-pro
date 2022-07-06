@@ -67,7 +67,7 @@
       <el-dialog :title="i18nt('designer.toolbar.preview')" v-model="showPreviewDialogFlag"
                  :show-close="true" :close-on-click-modal="false" :close-on-press-escape="false" center
                  :destroy-on-close="true" custom-class="drag-dialog small-padding-dialog" width="75%"
-                 :fullscreen="(layoutType === 'H5') || (layoutType === 'Pad')">
+                 :fullscreen="true">
         <div>
           <div class="form-render-wrapper"
                :class="[layoutType === 'H5' ? 'h5-layout' : (layoutType === 'Pad' ? 'pad-layout' : '')]">
@@ -882,6 +882,7 @@ export default {
         }
       })
 
+      //将edittable数据转换为params格式
       function transferTableDataToSubmitData(wi, formData) {
         //获取绑定数据结构的列表结构array->item
         const {tableData} = formData[wi.id]
