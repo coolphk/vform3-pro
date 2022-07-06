@@ -82,7 +82,7 @@ import i18n from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
 import {computed, nextTick, onMounted, reactive, ref, toRaw, watch} from "vue";
 import {getProcedureParams} from "@/api/data-schema";
-import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select/index";
+import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select";
 import {getChildren, unflatten} from "@/utils/data-adapter";
 import {ElMessage} from "element-plus";
 import {isEmptyObj, isTable} from "@/utils/util";
@@ -179,7 +179,14 @@ export default {
         //   tree$.value.setChecked(data, false, true)
         // return
         // }
-        props.optionModel.dataTarget['checkedNodes'] = checkedNodes
+        // props.optionModel.dataTarget['checkedNodes'] = checkedNodes
+        /*console.log(checkedNodes);
+        console.log(checkedNodes.filter(node => {
+          // node.data.Param_ID === data.Param_ID)
+          console.log(node);
+        }))*/
+        props.optionModel.dataTarget['checkedNodes'] = [data]
+        tree$.value.setCheckedKeys([data.Param_ID])
       }
     }
 

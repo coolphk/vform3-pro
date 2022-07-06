@@ -1,8 +1,8 @@
 <template>
   <el-config-provider :locale="elLocale">
-  <div id="app">
-    <VFormDesigner :designer-config="designerConfig" :global-dsv="globalDsv" />
-  </div>
+    <div id="app">
+      <VFormDesigner :designer-config="designerConfig" :global-dsv="globalDsv"/>
+    </div>
   </el-config-provider>
 </template>
 
@@ -19,13 +19,30 @@ export default {
   },
   data() {
     return {
-      formJson: {"widgetList":[],"formConfig":{"modelName":"formData","refName":"vForm","rulesName":"rules","labelWidth":80,"labelPosition":"left","size":"","labelAlign":"label-left-align","cssCode":"","customClass":"","functions":"","layoutType":"PC","onFormCreated":"","onFormMounted":"","onFormDataChange":"","onFormValidate":""}},
+      formJson: {
+        "widgetList": [],
+        "formConfig": {
+          "modelName": "formData",
+          "refName": "vForm",
+          "rulesName": "rules",
+          "labelWidth": 80,
+          "labelPosition": "left",
+          "size": "",
+          "labelAlign": "label-left-align",
+          "cssCode": "",
+          "customClass": "",
+          "functions": "",
+          "layoutType": "PC",
+          "onFormCreated": "",
+          "onFormMounted": "",
+          "onFormDataChange": "",
+          "onFormValidate": ""
+        }
+      },
       formData: {},
       optionData: {},
 
-      designerConfig: {
-        //logoHeader: false,
-      },
+      designerConfig: undefined,
 
       //全局数据源变量
       globalDsv: {
@@ -49,7 +66,7 @@ export default {
     submitForm() {
       this.$refs.vFormRef.getFormData().then(formData => {
         // Form Validation OK
-        alert( JSON.stringify(formData) )
+        alert(JSON.stringify(formData))
       }).catch(error => {
         // Form Validation failed
         this.$message.error(error)
@@ -60,7 +77,7 @@ export default {
 </script>
 
 <style lang="scss">
-  #app {
-    height: 100%;
-  }
+#app {
+  height: 100%;
+}
 </style>

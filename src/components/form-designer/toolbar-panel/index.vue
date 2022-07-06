@@ -7,17 +7,17 @@
       <el-button link :disabled="redoDisabled" :title="i18nt('designer.toolbar.redoHint')" @click="redoHistory">
         <svg-icon icon-class="redo"/>
       </el-button>
-      <el-button-group style="margin-left: 20px">
-        <el-button :type="layoutType === 'PC' ? 'info': ''" @click="changeLayoutType('PC')">
-          {{ i18nt('designer.toolbar.pcLayout') }}
-        </el-button>
-        <el-button :type="layoutType === 'Pad' ? 'info': ''" @click="changeLayoutType('Pad')">
-          {{ i18nt('designer.toolbar.padLayout') }}
-        </el-button>
-        <el-button :type="layoutType === 'H5' ? 'info': ''" @click="changeLayoutType('H5')">
-          {{ i18nt('designer.toolbar.mobileLayout') }}
-        </el-button>
-      </el-button-group>
+      <!--      <el-button-group style="margin-left: 20px">
+              <el-button :type="layoutType === 'PC' ? 'info': ''" @click="changeLayoutType('PC')">
+                {{ i18nt('designer.toolbar.pcLayout') }}
+              </el-button>
+              <el-button :type="layoutType === 'Pad' ? 'info': ''" @click="changeLayoutType('Pad')">
+                {{ i18nt('designer.toolbar.padLayout') }}
+              </el-button>
+              <el-button :type="layoutType === 'H5' ? 'info': ''" @click="changeLayoutType('H5')">
+                {{ i18nt('designer.toolbar.mobileLayout') }}
+              </el-button>
+            </el-button-group>-->
       <el-button style="margin-left: 20px" :title="i18nt('designer.toolbar.nodeTreeHint')" @click="showNodeTreeDrawer">
         <svg-icon icon-class="node-tree"/>
       </el-button>
@@ -306,28 +306,7 @@ export default {
       activeCodeTab: 'vue',
       activeSFCTab: 'vue2',
 
-      testFormData: {
-        "input50474": "11",
-        "select20475": 4,
-        "edittable104802": {
-          "tableData": [
-            {
-              "VAA01": "a1",
-              "VAA03": "b1",
-              "VAA05": "c1"
-            },
-            {
-              "VAA01": "a2",
-              "VAA03": "b2",
-              "VAA05": "c2"
-            }
-          ]
-        },
-        "checkbox62894": [
-          "MZ00000005"
-        ],
-        "radio110226": 21
-      },
+      testFormData: {},
       testOptionData: {
         'select62173': [
           {label: '01', value: 1},
@@ -390,12 +369,12 @@ export default {
   },
   methods: {
     showToolButton(configName) {
-      /* if (this.designerConfig[configName] === undefined) {
-         return true
-       }
+      if (this.designerConfig[configName] === undefined) {
+        return true
+      }
 
-       return !!this.designerConfig[configName]*/
-      return configName === 'dataSourceButton' || configName === 'previewFormButton'
+      return !!this.designerConfig[configName]
+      // return configName === 'dataSourceButton' || configName === 'previewFormButton'
     },
     showDataSource() {
       this.showDataSourceDialogFlag = true
@@ -830,8 +809,9 @@ export default {
        * 3、获取存储过程的值放入map中
        */
       traverseAllWidgets(this.designer.widgetList, (widget) => {
-
+        // console.log('查看业务数据', widget.id, widget);
         if (!isEmptyObj(widget?.options?.dataTarget?.procedureValue)) {
+
           const {ProcedureName: procedureName, ProcedureID: procedureID} = widget.options?.dataTarget?.procedureValue
 
           if (!procedureMap.has(procedureName)) {
