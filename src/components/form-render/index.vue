@@ -46,9 +46,12 @@ import './container-item/index'
 import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
 import {
   generateId, deepClone, insertCustomCssToHead, insertGlobalFunctionsToHtml, getAllContainerWidgets,
-  getAllFieldWidgets, traverseFieldWidgets, buildDefaultFormJson
+  getAllFieldWidgets, traverseFieldWidgets, buildDefaultFormJson, traverseAllWidgets, isEmptyObj, uuid2
 } from "@/utils/util"
 import i18n, {changeLocale} from "@/utils/i18n"
+import {getProcedureParams} from "@/api/data-schema";
+import {ElMessage} from "element-plus";
+import {buildProcedureSchema} from "@/utils/data-adapter";
 
 export default {
   name: "VFormRender",
@@ -703,8 +706,94 @@ export default {
      */
     setReadMode(readonlyFlag = true) {
       this.readModeFlag = readonlyFlag
-    }
+    },
 
+    submitBussinessData() {
+      const submitDatas = []
+      const procedureMap = new Map()
+      /**
+       * 1、遍历所有业务组件（带dataTarget属性的组件)map={schema={},widgets:[]}
+       * 2、将相同的存储过程合并放入schema中,并且将绑定相同存储过程的组件放入widgets中
+       * 3、获取存储过程的值放入map中
+       */
+      traverseAllWidgets(this.widgetList, (widget) => {
+        // console.log('查看业务数据', widget.id, widget);
+        if (!isEmptyObj(widget?.options?.dataTarget?.procedureValue)) {
+
+          const {ProcedureName: procedureName, ProcedureID: procedureID} = widget.options?.dataTarget?.procedureValue
+
+          if (!procedureMap.has(procedureName)) {
+            procedureMap.set(procedureName, {
+              widgets: [widget]
+            })
+            const procedure = procedureMap.get(procedureName)
+            //获取当前存储过程的数据结构
+            getProcedureParams(procedureName, "", 1).then(res => {
+              const resData = res.Data
+              const submitData = {
+                procedureID,
+                procedureName,
+                params: []
+              }
+              this.getFormData().then(formData => {
+                procedure.widgets.forEach(wi => {
+                  if (wi.formItemFlag) {
+                    wi.options.dataTarget.checkedNodes.forEach(node => {
+                      //验证组件dataTarget中的节点是否存在于当前数据结构(getProcedureParams)中，如果存在则应该进行赋值，否则报错
+                      if (resData.find((data) => data.Param_ID === node.Param_ID)) {
+                        node.Param_VALUE = formData[wi.id]
+                        submitData.params.push(node)
+                      } else {
+                        ElMessage({
+                          message: `参数${node}不存在,请检查数据`, type: 'error', duration: 3 * 1000, showClose: true
+                        })
+                        console.error(`参数${node}不存在,请检查数据`)
+                      }
+                    })
+                  } else if (wi.type === 'edit-table') {
+                    submitData.params = submitData.params.concat(transferTableDataToSubmitData(wi, formData))
+                  }
+                })
+                submitDatas.push(submitData)
+                if (submitDatas.length === procedureMap.size) {
+                  // this.formDataJson = JSON.stringify(submitDatas, null, '  ')
+                  // this.showFormDataDialogFlag = true
+                  console.log(submitDatas)
+                }
+              })
+            })
+          } else {
+            const widgets = procedureMap.get(procedureName)?.widgets
+            if (Array.isArray(widgets)) {
+              widgets.push(widget)
+            }
+          }
+        }
+      })
+
+      //将edittable数据转换为params格式
+      function transferTableDataToSubmitData(wi, formData) {
+        //获取绑定数据结构的列表结构array->item
+        const {tableData} = formData[wi.id]
+        const {dataTarget} = wi.options
+        const params = []
+        tableData.map(row => {
+          const item = deepClone(dataTarget.arraySchema)
+          item.Param_ID = uuid2(16)
+          params.push(item)
+          Object.keys(row).map(key => {
+            const rowData = buildProcedureSchema()
+            rowData.Param_Name = key
+            rowData.Param_VALUE = row[key]
+            rowData.Parent_ID = item.Param_ID
+            rowData.Param_ObjType = 'attribute'
+            params.push(rowData)
+          })
+        })
+        return params
+      }
+
+    }
     //--------------------- 以上为组件支持外部调用的API方法 end ------------------//
 
   },
