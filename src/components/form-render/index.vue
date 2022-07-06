@@ -708,7 +708,7 @@ export default {
       this.readModeFlag = readonlyFlag
     },
 
-    submitBussinessData() {
+    submitBussinessData(submitEvent) {
       const submitDatas = []
       const procedureMap = new Map()
       /**
@@ -758,7 +758,21 @@ export default {
                 if (submitDatas.length === procedureMap.size) {
                   // this.formDataJson = JSON.stringify(submitDatas, null, '  ')
                   // this.showFormDataDialogFlag = true
-                  console.log(submitDatas)
+                  console.log('提交数据', submitDatas)
+                  if (submitEvent) {
+                    submitDatas.map(data => {
+                      submitEvent(data).then(res => {
+                        if (res?.Status) {
+                          ElMessage.success({
+                            message: '保存成功!'
+                          })
+                        } else {
+                          ElMessage.error({message: '保存失败'})
+                          console.log(res);
+                        }
+                      })
+                    })
+                  }
                 }
               })
             })
