@@ -1,8 +1,9 @@
 <template>
-  <el-drawer @opened="onDrawOpen"  v-model="showDataTargetDialog" title="选择需要匹配的数据"
+  <el-drawer @opened="onDrawOpen" v-model="showDataTargetDialog" title="选择需要匹配的数据"
              show-close>
-    <div style="height: 80vh;overflow: auto">
+    <div style="height: 80vh;overflow: auto" v-loading="showProcedureListLoading">
       <procedure-select @onProcedureSelect="onProcedureSelect"
+                        v-model="showProcedureListLoading"
                         :procedureValue="optionModel.dataTarget['procedureValue']"/>
       <!--数据表格采用右键选择列绑定，其他多选方式选择-->
       <!--table树-->
@@ -90,6 +91,7 @@ export default {
     //显示数据目标
     const showDataTargetDialog = ref(false)
     const showLoading = ref(false)
+    const showProcedureListLoading = ref(true)
     const showCheckBox = ref(!isTable(props.selectedWidget.type))
     //展开的节点
     const openNodeSet = reactive(new Set(props.optionModel.dataTarget['expandedNodes']))
@@ -261,6 +263,7 @@ export default {
       treeData,
       menuOptions,
       showCheckBox,
+      showProcedureListLoading,
       isTable,
       checkNode,
       nodeExpand,
