@@ -31,7 +31,7 @@ export default {
   },
   computed: {
     buttonText() {
-      return this.optionModel.bussinessSource.currentNodeKey ? '已绑定' : '编辑'
+      return this.optionModel.bussinessSource.currentNodeKey && this.optionModel.labelKey !== 'label' && this.optionModel.valueKey !== 'value' ? '已绑定' : '编辑'
     }
 
   }

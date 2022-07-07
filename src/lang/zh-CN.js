@@ -238,6 +238,7 @@ export default {
       dataTarget: '数据目标',
       // dataSource:'数据源',
       bussinessSource: '业务数据源',
+      valueSource: '控件值来源',
       cellWidth: '宽度',
       cellHeight: '高度',
       gridColHeight: '栅格列统一高度(px)',

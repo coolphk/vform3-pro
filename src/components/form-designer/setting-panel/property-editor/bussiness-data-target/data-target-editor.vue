@@ -19,7 +19,7 @@ import {getChildren, unflatten} from "@/utils/data-adapter";
 import {ElMessage} from "element-plus";
 import {isEmptyObj, isTable} from "@/utils/util";
 import ContextMenu from "@/components/context-menu"
-import DataTargetDrawer from "@/components/form-designer/setting-panel/property-editor/data-target/dataTarget-drawer";
+import DataTargetDrawer from "@/components/form-designer/setting-panel/property-editor/bussiness-data-target/data-target-drawer";
 
 
 export default {

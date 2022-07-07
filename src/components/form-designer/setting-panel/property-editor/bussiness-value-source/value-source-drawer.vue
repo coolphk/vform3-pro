@@ -11,8 +11,8 @@
             :indent="8"
             :props="{label:'NAME'}"
             :data="treeData"
-            :default-expanded-keys="optionModel.bussinessSource['expandedNodes']"
-            :current-node-key="optionModel.bussinessSource['currentNodeKey']"
+            :default-expanded-keys="optionModel.valueSource['expandedNodes']"
+            :current-node-key="optionModel.valueSource['currentNodeKey']"
             @node-expand="nodeExpand"
             @node-collapse="nodeCollapse"
             @current-change="currentChange"
@@ -36,27 +36,24 @@
           <el-table-column prop="Param_BusiDes" label="业务说明"/>
         </el-table>
         <div class="widget-wrapper">
-          <template v-if="optionModel.labelKey">
-            <span class="label">控件Label：</span><span style="color:darkcyan">{{
-              optionModel.labelKey
-            }}</span>
-            <span class="label" style="margin-left: 8px">控件Value：</span><span style="color:brown">{{
-              optionModel.valueKey
+          <template v-if="optionModel.valueSource">
+            <span class="label">值来源：</span><span style="color:darkcyan">{{
+              optionModel.valueSource.sourceId
             }}</span>
           </template>
-          <template v-if="isTable(selectedWidget.type)">
-            <div class="label">选择要显示的列
-              <span style="margin-left: 8px">
-                  <el-checkbox label="全选"
-                               v-model="checkAll"
-                               :indeterminate="compSelectedColumns.length<tableColumn.length && compSelectedColumns.length!==0"
-                               @change="onCheckAll"/>
-                </span>
-            </div>
-            <el-checkbox-group v-model="compSelectedColumns" style="max-height: 100px;overflow: auto">
-              <el-checkbox v-for="(item) in tableColumn" :label="item"></el-checkbox>
-            </el-checkbox-group>
-          </template>
+          <!--          <template v-if="isTable(selectedWidget.type)">
+                      <div class="label">选择要显示的列
+                        <span style="margin-left: 8px">
+                            <el-checkbox label="全选"
+                                         v-model="checkAll"
+                                         :indeterminate="compSelectedColumns.length<tableColumn.length && compSelectedColumns.length!==0"
+                                         @change="onCheckAll"/>
+                          </span>
+                      </div>
+                      <el-checkbox-group v-model="compSelectedColumns" style="max-height: 100px;overflow: auto">
+                        <el-checkbox v-for="(item) in tableColumn" :label="item"></el-checkbox>
+                      </el-checkbox-group>
+                    </template>-->
         </div>
         <el-table
             v-if="bussinessData.length>0"
@@ -86,7 +83,7 @@ import ContextMenu from "@/components/context-menu/index.vue"
 import {isTable} from "@/utils/util";
 
 export default {
-  name: "bussinessSource-drawer",
+  name: "valueSource-drawer",
   mixins: [i18n, propertyMixin],
   setup(props, ctx) {
     const tree$ = ref()
@@ -96,7 +93,7 @@ export default {
     const tableData = ref([])  //存储过程参数集合
     const tableColumn = ref([]) //列表列的复选框组
     const bussinessData = ref([])
-    const openNodeSet = reactive(new Set(props.optionModel.bussinessSource['expandedNodes']))
+    const openNodeSet = reactive(new Set(props.optionModel.valueSource['expandedNodes']))
     const showMenu = ref(false)
     const currentColumn = ref({})
     const checkAll = ref(false)
@@ -106,16 +103,9 @@ export default {
       title: '操作列表',
       handles: [
         {
-          label: '设为label',
+          label: '设为控件值来源',
           handle() {
-            props.optionModel[`labelKey`] = currentColumn.value?.property
-            showMenu.value = false
-          }
-        },
-        {
-          label: '设为value',
-          handle() {
-            props.optionModel[`valueKey`] = currentColumn.value?.property
+            props.optionModel.valueSource.sourceId = currentColumn.value?.property
             showMenu.value = false
           }
         }
@@ -146,20 +136,20 @@ export default {
         if (isTable(props.selectedWidget.type)) {
           props.optionModel.pagination.pageSize = value
         } else {
-          props.optionModel.bussinessSource.pageSize = value
+          props.optionModel.valueSource.pageSize = value
         }
       },
       get() {
         if (isTable(props.selectedWidget.type)) {
           return props.optionModel?.pagination?.pageSize || 10
         } else {
-          return props.optionModel.bussinessSource.pageSize
+          return props.optionModel.valueSource.pageSize
         }
       }
     })
 
     watch(openNodeSet, (newVal) => {
-      props.optionModel.bussinessSource["expandedNodes"] = Array.from(newVal)
+      props.optionModel.valueSource["expandedNodes"] = Array.from(newVal)
     })
 
     function onCheckAll(value) {
@@ -194,7 +184,7 @@ export default {
 
     function currentChange(node) {
       if (node.type === 'Scripts') {
-        props.optionModel.bussinessSource['currentNodeKey'] = node.ID
+        props.optionModel.valueSource['currentNodeKey'] = node.ID
         props.optionModel.tableColumns && (props.optionModel.tableColumns = [])
         props.optionModel.tableData && (props.optionModel.tableData = [])
         loadScriptsParams(node.ID)
@@ -215,7 +205,7 @@ export default {
     function onDrawOpened() {
       getScriptTree().then(res => {
         treeData.value = unFlatten(res.Data, 'ID')
-        const scriptId = props?.optionModel?.bussinessSource?.currentNodeKey
+        const scriptId = props?.optionModel?.valueSource?.currentNodeKey
         loadScriptsParams(scriptId)
       })
     }
@@ -229,13 +219,13 @@ export default {
       scriptId && getScriptsParams(scriptId).then(res => {
         tableData.value = res?.Data?.Params
         //将当前控件的默认值替换脚本配置页的默认值
-        props.optionModel.bussinessSource['scriptParams'].map(param => {
+        props.optionModel.valueSource['scriptParams'].map(param => {
           const defaultValue = tableData.value.find(item => item.Param_ID === param.Param_ID)
           if (!!param.Param_VALUE && !!defaultValue) {
             defaultValue.Param_VALUE = param.Param_VALUE
           }
         })
-        props.optionModel.bussinessSource['scriptParams'] = tableData.value
+        props.optionModel.valueSource['scriptParams'] = tableData.value
         loadTableData(scriptId, tableData.value)
       })
     }
@@ -261,7 +251,7 @@ export default {
     }
 
     function refreshData() {
-      loadTableData(props?.optionModel?.bussinessSource?.currentNodeKey, tableData.value)
+      loadTableData(props?.optionModel?.valueSource?.currentNodeKey, tableData.value)
     }
 
     function onBusTableContextmenu(row, column, event) {
@@ -275,18 +265,19 @@ export default {
     }
 
     function close() {
+      console.log(22, showDataSource.value = false);
     }
 
     function headerCellStyle({column}) {
       const cellStyle = {}
-      if (column.property === props.optionModel.labelKey) {
+      if (column.property === props.optionModel.valueSource.sourceId) {
         cellStyle['backgroundColor'] = 'darkcyan'
         cellStyle['color'] = 'white'
       }
-      if (column.property === props.optionModel.valueKey) {
+      /*if (column.property === props.optionModel.valueKey) {
         cellStyle['backgroundColor'] = 'brown'
         cellStyle['color'] = 'white'
-      }
+      }*/
       return cellStyle
     }
 
