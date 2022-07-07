@@ -1,6 +1,6 @@
 <template>
   <el-form-item :label="i18nt('designer.setting.bussinessSource')">
-    <el-button @click="showDataSource=true">选择</el-button>
+    <el-button @click="showDataSource=true">{{ buttonText }}</el-button>
     <bussiness-source-drawer v-if="showDataSource" v-model="showDataSource" :designer="designer"
                              :selected-widget="selectedWidget"
                              :option-model="optionModel"/>
@@ -29,7 +29,12 @@ export default {
     selectedWidget: Object,
     optionModel: Object,
   },
+  computed: {
+    buttonText() {
+      return this.optionModel.bussinessSource.currentNodeKey ? '已绑定' : '编辑'
+    }
 
+  }
 }
 </script>
 

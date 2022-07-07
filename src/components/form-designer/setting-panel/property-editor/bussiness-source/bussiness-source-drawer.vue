@@ -58,12 +58,14 @@
             </el-checkbox-group>
           </template>
         </div>
-        <el-table v-if="bussinessData.length>0"
-                  ref="busTable$"
-                  style="width: 800px"
-                  :data="bussinessData"
-                  max-height="600"
-                  @row-contextmenu="onBusTableContextmenu"
+        <el-table
+            v-if="bussinessData.length>0"
+            ref="busTable$"
+            style="width: 800px"
+            :data="bussinessData"
+            :header-cell-style="headerCellStyle"
+            max-height="600"
+            @row-contextmenu="onBusTableContextmenu"
         >
           <el-table-column v-for="(item) in tableColumn" :prop="item" :label="item"/>
         </el-table>
@@ -275,6 +277,19 @@ export default {
       console.log(22, showDataSource.value = false);
     }
 
+    function headerCellStyle({column}) {
+      const cellStyle = {}
+      if (column.property === props.optionModel.labelKey) {
+        cellStyle['backgroundColor'] = 'darkcyan'
+        cellStyle['color'] = 'white'
+      }
+      if (column.property === props.optionModel.valueKey) {
+        cellStyle['backgroundColor'] = 'brown'
+        cellStyle['color'] = 'white'
+      }
+      return cellStyle
+    }
+
     return {
       showDataSource,
       treeData,
@@ -296,7 +311,8 @@ export default {
       refreshData,
       onBusTableContextmenu,
       onCheckAll,
-      close
+      close,
+      headerCellStyle
     }
   },
   props: {

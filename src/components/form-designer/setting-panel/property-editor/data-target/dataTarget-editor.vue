@@ -1,7 +1,7 @@
 <template>
 
   <el-form-item :label="i18nt('designer.setting.dataTarget')">
-    <el-button @click="showDataTargetDialog=true">选择</el-button>
+    <el-button @click="showDataTargetDialog=true">{{ buttonText }}</el-button>
     <data-target-drawer v-if="showDataTargetDialog" v-model="showDataTargetDialog" :selected-widget="selectedWidget"
                         :designer="designer"
                         :option-model="optionModel"></data-target-drawer>
@@ -39,6 +39,11 @@ export default {
     selectedWidget: Object,
     optionModel: Object,
   },
+  computed: {
+    buttonText() {
+      return this.optionModel.dataTarget?.checkedNodes?.length > 0 || !isEmptyObj(this.optionModel.dataTarget?.bindMap) ? '已绑定' : '编辑'
+    }
+  }
 }
 </script>
 
