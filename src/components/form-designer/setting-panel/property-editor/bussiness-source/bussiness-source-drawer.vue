@@ -1,6 +1,8 @@
 <template>
-  <el-drawer @opened="onDrawOpened" v-model="showDataSource" title="选择需要匹配的数据" size="70%"
+  <el-drawer @opened="onDrawOpened" v-model="showDataSource" :title="`请选择${i18nt('designer.setting.bussinessSource')}`"
+             size="70%"
              show-close @close="close">
+
     <div class="bussiness-container">
       <div class="tree_wrap">
         <el-tree
@@ -195,8 +197,13 @@ export default {
     function currentChange(node) {
       if (node.type === 'Scripts') {
         props.optionModel.bussinessSource['currentNodeKey'] = node.ID
-        props.optionModel.tableColumns && (props.optionModel.tableColumns = [])
-        props.optionModel.tableData && (props.optionModel.tableData = [])
+        props.optionModel?.tableColumns && (props.optionModel.tableColumns = [])
+        props.optionModel?.tableData && (props.optionModel.tableData = [])
+        //如果绑定了labelKey与valueKey则清空
+        props.optionModel?.labelKey && (props.optionModel.labelKey = "")
+        props.optionModel?.valueKey && (props.optionModel.valueKey = "")
+        //如果绑定了sourceId则清空
+        props.optionModel?.valueSource?.sourceId && (props.optionModel.valueSource.sourceId = "")
         loadScriptsParams(node.ID)
       }
     }

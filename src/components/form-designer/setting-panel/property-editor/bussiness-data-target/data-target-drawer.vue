@@ -1,5 +1,5 @@
 <template>
-  <el-drawer @opened="onDrawOpen" v-model="showDataTargetDialog" title="选择需要匹配的数据"
+  <el-drawer @opened="onDrawOpen" v-model="showDataTargetDialog" :title="`请选择${i18nt('designer.setting.dataTarget')}`"
              show-close>
     <div style="height: 80vh;overflow: auto" v-loading="showProcedureListLoading">
       <procedure-select @onProcedureSelect="onProcedureSelect"

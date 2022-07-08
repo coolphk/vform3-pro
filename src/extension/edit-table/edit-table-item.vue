@@ -8,7 +8,7 @@
         </el-button>
       </div>
 
-      <el-table :data="widget.options.tableData" row-key="id" :ref="widget.id" border
+      <el-table :data="tableData" row-key="id" :ref="widget.id" border
                 :cell-style="widget.options.cellStyle">
         <el-table-column :label="column.label" :prop="column.prop"
                          v-for="(column,index) in widget.options.tableColumns">
@@ -35,10 +35,12 @@ import containerMixin from "@/components/form-designer/form-widget/container-wid
 import refMixinDesign from "@/components/form-designer/refMixinDesign";
 import FieldComponents from "@/components/form-designer/form-widget/field-widget";
 import {ArrowDown, ArrowUp} from "@element-plus/icons-vue";
+import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+import emitter from "@/utils/emitter";
 
 export default {
   name: "edit-table-item",
-  mixins: [i18n, containerMixin, refMixinDesign],
+  mixins: [i18n, refMixinDesign, fieldMixin, emitter],
   inject: ['refList'],
   setup(props) {
     /**
@@ -70,7 +72,24 @@ export default {
   props: {
     widget: Object
   },
-
+  computed: {
+    tableData: {
+      get() {
+        return this.formModel[this.widget.id];
+      },
+      set(value) {
+        this.formModel[this.widget.id] = value
+      }
+    },
+    field: {
+      get() {
+        return this.widget
+      },
+      set(value) {
+        this.widget = value
+      }
+    }
+  },
   created() {
     this.initRefList()
   },

@@ -1,6 +1,7 @@
 export const editTableSchema = {
   type: 'edit-table',
   category: 'container',
+  formItemFlag: true,
   icon: 'table',
   widgetList: [],
   options: {

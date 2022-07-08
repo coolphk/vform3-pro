@@ -1,5 +1,5 @@
 <template>
-  <el-drawer @opened="onDrawOpened" v-model="showDataSource" title="选择需要匹配的数据" size="70%"
+  <el-drawer @opened="onDrawOpened" v-model="showDataSource" :title="`请选择${i18nt('designer.setting.valueSource')}`" size="70%"
              show-close @close="close">
     <div class="bussiness-container">
       <div class="tree_wrap">

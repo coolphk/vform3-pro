@@ -1,6 +1,8 @@
 <template>
   <div style="margin-bottom: 20px;display:flex;align-items: center;flex-flow: wrap">
-    <div>选择存储过程名称：</div>
+    <div>选择存储过程名称：
+      <el-button type="primary" @click="refreshData">刷新数据</el-button>
+    </div>
     <el-select :autofocus="false" filterable v-model="selectedProcedure" @change="onChange"
                style="width: 400px"
                value-key="ProcedureID">
@@ -33,13 +35,19 @@ function onChange(val) {
   emits('onProcedureSelect', val)
 }
 
+function refreshData() {
+  getProcedureList().then(res => {
+    procedureList.value = res.Data.TableData
+    selectedProcedure.value = props.procedureValue
+  }).catch(error => {
 
-getProcedureList().then(res => {
-  procedureList.value = res.Data.TableData
-  selectedProcedure.value = props.procedureValue
-}).finally(() => {
-  emits('update:modelValue', false)
-})
+  }).finally(() => {
+    console.log(11);
+    emits('update:modelValue', false)
+  })
+}
+
+refreshData()
 
 </script>
 

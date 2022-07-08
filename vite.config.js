@@ -12,6 +12,7 @@ export default defineConfig(({mode}) => {
   const {VITE_APP_BASE_API} = env
   return {
     server: {
+      host: true,
       port: 3030,
       proxy: {
         [VITE_APP_BASE_API]: {

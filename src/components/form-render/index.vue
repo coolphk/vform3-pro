@@ -274,21 +274,20 @@ export default {
             })
           }
         } else {  //自定义容器组件
-
-          if (wItem.type === 'edit-table') {
-            wItem.options.tableData = this.formData[wItem.id]?.tableData || []
-            this.formDataModel[wItem.options.name] = {
-              tableData: wItem.options.tableData,
-              // dataTarget: wItem.options.dataTarget
-            }
-          } else {
-            if (!!wItem.widgetList && (wItem.widgetList.length > 0)) {
-              wItem.widgetList.forEach((childItem) => {
-                this.buildDataFromWidget(childItem)
-              })
-            }
+          /* if (wItem.type === 'edit-table') {
+             wItem.options.tableData = this.formData[wItem.id]
+             /!*this.formDataModel[wItem.options.name] = {
+               tableData: wItem.options.tableData,
+               // dataTarget: wItem.options.dataTarget
+             }*!/
+           } else {*/
+          if (!!wItem.widgetList && (wItem.widgetList.length > 0)) {
+            wItem.widgetList.forEach((childItem) => {
+              this.buildDataFromWidget(childItem)
+            })
           }
         }
+        // }
       } else if (!!wItem.formItemFlag) {
         if (!this.formData.hasOwnProperty(wItem.options.name)) {
           this.formDataModel[wItem.options.name] = wItem.options.defaultValue
@@ -707,88 +706,14 @@ export default {
     setReadMode(readonlyFlag = true) {
       this.readModeFlag = readonlyFlag
     },
-
-    submitBussinessData(submitEvent) {
-      const submitDatas = []
-      const procedureMap = new Map()
-      /**
-       * 1、遍历所有业务组件（带dataTarget属性的组件)map={schema={},widgets:[]}
-       * 2、将相同的存储过程合并放入schema中,并且将绑定相同存储过程的组件放入widgets中
-       * 3、获取存储过程的值放入map中
-       */
-      traverseAllWidgets(this.widgetList, (widget) => {
-        // console.log('查看业务数据', widget.id, widget);
-        if (!isEmptyObj(widget?.options?.dataTarget?.procedureValue)) {
-
-          const {ProcedureName: procedureName, ProcedureID: procedureID} = widget.options?.dataTarget?.procedureValue
-
-          if (!procedureMap.has(procedureName)) {
-            procedureMap.set(procedureName, {
-              widgets: [widget]
-            })
-            const procedure = procedureMap.get(procedureName)
-            //获取当前存储过程的数据结构
-            getProcedureParams(procedureName, "", 1).then(res => {
-              const resData = res.Data
-              const submitData = {
-                procedureID,
-                procedureName,
-                params: []
-              }
-              this.getFormData().then(formData => {
-                procedure.widgets.forEach(wi => {
-                  if (wi.formItemFlag) {
-                    wi.options.dataTarget.checkedNodes.forEach(node => {
-                      //验证组件dataTarget中的节点是否存在于当前数据结构(getProcedureParams)中，如果存在则应该进行赋值，否则报错
-                      if (resData.find((data) => data.Param_ID === node.Param_ID)) {
-                        node.Param_VALUE = formData[wi.id]
-                        submitData.params.push(node)
-                      } else {
-                        ElMessage({
-                          message: `参数${node}不存在,请检查数据`, type: 'error', duration: 3 * 1000, showClose: true
-                        })
-                        console.error(`参数${node}不存在,请检查数据`)
-                      }
-                    })
-                  } else if (wi.type === 'edit-table') {
-                    submitData.params = submitData.params.concat(transferTableDataToSubmitData(wi, formData))
-                  }
-                })
-                submitDatas.push(submitData)
-                if (submitDatas.length === procedureMap.size) {
-                  // this.formDataJson = JSON.stringify(submitDatas, null, '  ')
-                  // this.showFormDataDialogFlag = true
-                  console.log('提交数据', submitDatas)
-                  if (submitEvent) {
-                    submitDatas.map(data => {
-                      submitEvent(data).then(res => {
-                        if (res?.Status) {
-                          ElMessage.success({
-                            message: '保存成功!'
-                          })
-                        } else {
-                          ElMessage.error({message: '保存失败'})
-                          console.log(res);
-                        }
-                      })
-                    })
-                  }
-                }
-              })
-            })
-          } else {
-            const widgets = procedureMap.get(procedureName)?.widgets
-            if (Array.isArray(widgets)) {
-              widgets.push(widget)
-            }
-          }
-        }
-      })
-
+    traverseAllWidgets() {
+      return traverseAllWidgets
+    },
+    getBussinessData() {
       //将edittable数据转换为params格式
       function transferTableDataToSubmitData(wi, formData) {
         //获取绑定数据结构的列表结构array->item
-        const {tableData} = formData[wi.id]
+        const tableData = formData[wi.id]
         const {dataTarget} = wi.options
         const params = []
         tableData.map(row => {
@@ -807,8 +732,103 @@ export default {
         return params
       }
 
+      return new Promise((resolve, reject) => {
+        const submitDatas = [] //提交对象数组结构为[{script_id,params}]
+        const procedureMap = new Map()
+        /**
+         * 1、遍历所有业务组件（带dataTarget属性的组件)map={schema={},widgets:[]}
+         * 2、将相同的存储过程合并放入schema中,并且将绑定相同存储过程的组件放入widgets中
+         * 3、获取存储过程的值放入map中
+         */
+        traverseAllWidgets(this.widgetList, (widget) => {
+
+          if (!isEmptyObj(widget?.options?.dataTarget?.procedureValue)) {
+
+            const {ProcedureName: procedureName, ProcedureID: procedureID} = widget.options?.dataTarget?.procedureValue
+
+            if (!procedureMap.has(procedureName)) {
+              procedureMap.set(procedureName, {
+                widgets: [widget]
+              })
+              const procedure = procedureMap.get(procedureName)
+              //获取当前存储过程的数据结构
+              getProcedureParams(procedureName, "", 1).then(res => {
+                const resData = res.Data
+                const submitData = {
+                  procedureID,
+                  procedureName,
+                  params: []
+                }
+                this.getFormData().then(formData => {
+                  procedure.widgets.forEach(wi => {
+                    if (wi.formItemFlag) {
+                      if (wi.type === 'edit-table') {
+                        submitData.params = submitData.params.concat(transferTableDataToSubmitData(wi, formData))
+                      } else {
+                        wi.options.dataTarget.checkedNodes.forEach(node => {
+                          //验证组件dataTarget中的节点是否存在于当前数据结构中，如果存在则应该进行赋值，否则报错
+                          if (resData.find((data) => data.Param_ID === node.Param_ID)) {
+                            node.Param_VALUE = formData[wi.id]
+                            submitData.params.push(node)
+                          } else {
+                            ElMessage({
+                              message: `参数${node}不存在,请检查数据`, type: 'error', duration: 3 * 1000, showClose: true
+                            })
+                            console.error(`参数${node}不存在,请检查数据`)
+                          }
+                        })
+                      }
+                    }
+                  })
+                  submitDatas.push(submitData)
+                  if (submitDatas.length === procedureMap.size) {
+                    resolve(submitDatas)
+                  }
+                })
+              })
+            } else {
+              const widgets = procedureMap.get(procedureName)?.widgets
+              if (Array.isArray(widgets)) {
+                widgets.push(widget)
+              }
+            }
+          }
+        })
+      })
+    },
+
+    setBussinessData(loadBussinessSource) {
+      traverseAllWidgets(this.widgetList, (widget) => {
+        const {valueSource: vs} = widget.options
+        //如果有绑定值来源，则通过调用值来源设置回显数据
+        if (!!vs?.currentNodeKey && !!vs?.sourceId) {
+          loadBussinessSource({
+            Scripts_ID: vs.currentNodeKey,
+            currentPage: 1,
+            pageSize: vs.pageSize
+          }).then(res => {
+            this.setFieldValue(widget.id, res.Data.TableData[0][vs.sourceId])
+          })
+        } else if (widget.type === 'edit-table') {
+          //如果是编辑表格，则需要读取busSource
+          const bs = widget?.options?.bussinessSource
+          loadBussinessSource({
+            Scripts_ID: bs.currentNodeKey,
+            currentPage: 1,
+            pageSize: bs.pageSize
+          }).then(res => {
+            const columnProps = widget.options.tableColumns.map(column => column.prop)
+            this.setFieldValue([widget.id], res.Data.TableData.map(row => {
+              const filterRow = {}
+              columnProps.map(prop => {
+                filterRow[prop] = row[prop]
+              })
+              return filterRow
+            }));
+          })
+        }
+      })
     }
-    //--------------------- 以上为组件支持外部调用的API方法 end ------------------//
 
   },
 }
