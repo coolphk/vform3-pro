@@ -431,6 +431,7 @@ export const basicFields = [
     icon: 'number-field',
     formItemFlag: true,
     options: {
+
       name: '',
       label: '',
       labelAlign: '',
@@ -463,6 +464,11 @@ export const basicFields = [
       onFocus: '',
       onBlur: '',
       onValidate: '',
+      dataTarget: {
+        checkedNodes: [],
+        expandedNodes: [],
+        procedureValue: {}
+      },
     },
   },
 
