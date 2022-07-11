@@ -9,7 +9,7 @@
       </div>
 
       <el-table :data="tableData" row-key="id" :ref="widget.id" border
-                :cell-style="widget.options.cellStyle">
+                :cell-style="widget.options.cellStyle" @contextmenu="onContextmenu">
         <el-table-column :label="column.label" :prop="column.prop"
                          v-for="(column,index) in widget.options.tableColumns">
           <template #default="scope">
@@ -24,6 +24,7 @@
           </template>
         </el-table-column>
       </el-table>
+      <context-menu :show="menuOptions.show" :options="menuOptions"></context-menu>
     </div>
   </container-item-wrapper>
 </template>
@@ -31,41 +32,46 @@
 <script>
 import ContainerItemWrapper from "@/components/form-render/container-item/container-item-wrapper";
 import i18n from "@/utils/i18n";
-import containerMixin from "@/components/form-designer/form-widget/container-widget/containerMixin";
 import refMixinDesign from "@/components/form-designer/refMixinDesign";
-import FieldComponents from "@/components/form-designer/form-widget/field-widget";
 import {ArrowDown, ArrowUp} from "@element-plus/icons-vue";
 import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
 import emitter from "@/utils/emitter";
+import ContextMenu from "@/components/context-menu"
+import {reactive} from "vue";
 
 export default {
   name: "edit-table-item",
   mixins: [i18n, refMixinDesign, fieldMixin, emitter],
   inject: ['refList'],
-  setup(props) {
-    /**
-     * 添加一个空行
-     */
-    function addData() {
-      const rowData = {}
-      props.widget.options.tableColumns.map((column) => {
-        rowData[column.prop] = ""
-      })
-      props.widget.options.tableData.push(rowData)
-    }
+  setup(props, {attrs}) {
+    const menuOptions = reactive({
+      show: false,
+      x: 0,
+      y: 0,
+      title: '操作表格',
+      handles: [{
+        label: '添加新行',
+        handle: ""
+      }]
+    })
 
     function onDeleteRow(rowIndex) {
-      props.widget.options.tableData.splice(rowIndex, 1)
+      // props.widget.options.tableData.splice(rowIndex, 1)
+      attrs['form-model'][props.widget.id].splice(rowIndex, 1)
+    }
+
+    function onContextmenu(e) {
+
     }
 
     return {
-      addData,
+      menuOptions,
       onDeleteRow
     }
   },
   components: {
+    ContextMenu,
     ContainerItemWrapper,
-    ...FieldComponents,
     ArrowDown,
     ArrowUp
   },
@@ -102,6 +108,25 @@ export default {
     checkContainerMove(evt) {
       return true
     },
+    addData() {
+      const rowData = {}
+      this.widget.options.tableColumns.map((column) => {
+        rowData[column.prop] = ""
+      })
+      if (this.formModel[this.widget.id] === undefined) {
+        this.formModel[this.widget.id] = [rowData]
+      } else {
+        this.formModel[this.widget.id].push(rowData)
+      }
+      this.menuOptions.show = false
+    },
+    onContextmenu(e) {
+      e.preventDefault()
+      this.menuOptions.x = e.x
+      this.menuOptions.y = e.y
+      this.menuOptions.show = true
+      this.menuOptions.handles[0].handle = this.addData
+    }
   }
 }
 </script>

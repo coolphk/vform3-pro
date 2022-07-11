@@ -4,9 +4,6 @@
     <div :key="widget.id" class="collapse-container data-table-container"
          style="display: flex;flex-direction: column"
          :class="{'selected': selected}" @click.stop="selectWidget(widget)">
-      <el-button type="primary" style="margin-left: auto">
-        添加行
-      </el-button>
       <el-table :data="widget.options.tableData" row-key="id" border>
         <el-table-column :label="column.label" :prop="column.prop"
                          v-for="(column,index) in widget.options.tableColumns">
@@ -79,6 +76,9 @@ export default {
     checkContainerMove(evt) {
       return true
     },
+    aa() {
+      console.log(1);
+    }
   }
 }
 </script>

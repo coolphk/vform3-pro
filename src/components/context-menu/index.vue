@@ -32,9 +32,8 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  options: Object
+  options: Object // {x,y,handles:[{label,handle}]}
 })
-const handles = ref([])
 const emits = defineEmits(['update:show'])
 
 onClickOutside(menu$, (evt) => {
