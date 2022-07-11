@@ -464,6 +464,13 @@ export const basicFields = [
       onFocus: '',
       onBlur: '',
       onValidate: '',
+      valueSource: {
+        currentNodeKey: "", //选中的数据源ID
+        scriptParams: [],//脚本参数
+        expandedNodes: [],//展开的节点
+        pageSize: 10,
+        sourceId: "" //当前控件值来源的id
+      },
       dataTarget: {
         checkedNodes: [],
         expandedNodes: [],
@@ -786,6 +793,18 @@ export const basicFields = [
       onFocus: '',
       onBlur: '',
       onValidate: '',
+      valueSource: {
+        currentNodeKey: "", //选中的数据源ID
+        scriptParams: [],//脚本参数
+        expandedNodes: [],//展开的节点
+        pageSize: 10,
+        sourceId: "" //当前控件值来源的id
+      },
+      dataTarget: {
+        checkedNodes: [],
+        expandedNodes: [],
+        procedureValue: {}
+      },
     },
   },
 
