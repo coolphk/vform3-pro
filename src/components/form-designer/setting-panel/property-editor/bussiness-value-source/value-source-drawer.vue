@@ -1,5 +1,6 @@
 <template>
-  <el-drawer @opened="onDrawOpened" v-model="showDataSource" :title="`请选择${i18nt('designer.setting.valueSource')}`" size="70%"
+  <el-drawer @opened="onDrawOpened" v-model="showDataSource" :title="`请选择${i18nt('designer.setting.valueSource')}`"
+             size="70%"
              show-close @close="close">
     <div class="bussiness-container">
       <div class="tree_wrap">
@@ -28,9 +29,9 @@
 
         <el-table :data="tableData" border max-height="200">
           <el-table-column prop="Param_Name" label="参数名" width="150"/>
-          <el-table-column prop="Param_TestVALUE" label="默认值" width="150">
+          <el-table-column prop="Param_TestVALUE" label="测试值" width="150">
             <template #default="{row}">
-              <el-input v-model="row.Param_VALUE"></el-input>
+              <el-input v-model="row.Param_TestVALUE"></el-input>
             </template>
           </el-table-column>
           <el-table-column prop="Param_BusiDes" label="业务说明"/>
@@ -59,9 +60,10 @@
             v-if="bussinessData.length>0"
             ref="busTable$"
             style="width: 800px"
+            max-height="600"
+            border
             :data="bussinessData"
             :header-cell-style="headerCellStyle"
-            max-height="600"
             @row-contextmenu="onBusTableContextmenu"
         >
           <el-table-column v-for="(item) in tableColumn" :prop="item" :label="item"/>

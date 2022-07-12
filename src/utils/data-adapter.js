@@ -70,7 +70,7 @@ export function assembleBussinessParams({scriptId, params, pageSize = 10, curren
     pageSize,
   }
   params.forEach(item => {
-    data[item.Param_Name] = item.Param_VALUE
+    data[item.Param_Name] = item.Param_TestVALUE
   })
   return data
 }

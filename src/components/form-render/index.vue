@@ -94,6 +94,9 @@ export default {
       default: () => {
       },
     },
+    router: {
+      type: Object,
+    }
   },
   provide() {
     return {
@@ -194,7 +197,9 @@ export default {
     getWidgetName(widget) {
       return widget.type + '-widget'
     },
-
+    getRouter() {
+      return this.router
+    },
     initLocale() {
       let curLocale = localStorage.getItem('v_form_locale') || 'zh-CN'
       this.changeLanguage(curLocale)

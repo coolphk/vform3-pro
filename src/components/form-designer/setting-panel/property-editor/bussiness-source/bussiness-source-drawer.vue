@@ -64,9 +64,10 @@
             v-if="bussinessData.length>0"
             ref="busTable$"
             style="width: 800px"
+            border
+            max-height="600"
             :data="bussinessData"
             :header-cell-style="headerCellStyle"
-            max-height="600"
             @row-contextmenu="onBusTableContextmenu"
         >
           <el-table-column v-for="(item) in tableColumn" :prop="item" :label="item"/>

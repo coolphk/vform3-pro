@@ -37,6 +37,8 @@
               <el-option v-for="(item, idx) in cssClassList" :key="idx" :label="item" :value="item"></el-option>
             </el-select>
           </el-form-item>
+          <el-form-item>
+          </el-form-item>
           <!-- -->
           <el-form-item :label="i18nt('designer.setting.globalFunctions')">
             <el-button type="info" icon="el-icon-edit" plain round @click="editGlobalFunctions">{{i18nt('designer.setting.addEventHandler')}}</el-button>
@@ -137,11 +139,14 @@
   import i18n from "@/utils/i18n"
   import CodeEditor from '@/components/code-editor/index'
   import {deepClone, insertCustomCssToHead, insertGlobalFunctionsToHtml} from "@/utils/util"
+  import ValueSourceEditor
+    from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/value-source-editor";
 
   export default {
     name: "form-setting",
     mixins: [i18n],
     components: {
+      ValueSourceEditor,
       CodeEditor,
     },
     props: {

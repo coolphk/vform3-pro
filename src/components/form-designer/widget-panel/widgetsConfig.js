@@ -431,7 +431,6 @@ export const basicFields = [
     icon: 'number-field',
     formItemFlag: true,
     options: {
-
       name: '',
       label: '',
       labelAlign: '',
