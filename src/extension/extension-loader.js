@@ -20,6 +20,7 @@ import AlertWidget from '@/extension/samples/alert/alert-widget'
 import {registerFWGenerator} from '@/utils/sfc-generator'
 import {alertTemplateGenerator} from '@/extension/samples/extension-sfc-generator'
 import editTable from "@/extension/edit-table";
+import dataWrapper from "@/extension/data-wrapper";
 
 export const loadExtension = function (app) {
 
@@ -58,7 +59,7 @@ export const loadExtension = function (app) {
   registerCWGenerator('card', cardTemplateGenerator)  //注册容器组件的代码生成器
   /* -------------------------------------------------- */
   editTable.install(addBasicFieldSchema, app, PERegister)
-
+  dataWrapper.install(addContainerWidgetSchema, app, PERegister)
   /* 容器组件加载完毕 end */
 
   /**
