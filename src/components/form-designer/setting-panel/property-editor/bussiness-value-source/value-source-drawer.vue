@@ -1,7 +1,7 @@
 <template>
   <el-drawer @opened="onDrawOpened" v-model="showDataSource" :title="`请选择${i18nt('designer.setting.valueSource')}`"
              size="70%"
-             show-close @close="close">
+             show-close>
     <div class="bussiness-container">
       <div class="tree_wrap">
         <el-tree
@@ -21,13 +21,13 @@
         </el-tree>
       </div>
       <div class="table_wrap">
-        <div style="margin:10px 0 10px 8px">
-          数据展示条数:
-          <el-input-number v-model="compPageSize"></el-input-number>
-          <el-button type="primary" style="margin-left: 8px" @click="refreshData">刷新数据</el-button>
-        </div>
+        <!--        <div style="margin:10px 0 10px 8px">
+                  数据展示条数:
+                  <el-input-number v-model="compPageSize"></el-input-number>
 
-        <el-table :data="tableData" border max-height="200">
+                </div>-->
+        <el-button type="primary" style="margin-left: 8px" @click="refreshData">刷新数据</el-button>
+        <el-table :data="paramData" border max-height="200">
           <el-table-column prop="Param_Name" label="参数名" width="150"/>
           <el-table-column prop="Param_TestVALUE" label="测试值" width="150">
             <template #default="{row}">
@@ -42,34 +42,31 @@
               optionModel.valueSource.sourceId
             }}</span>
           </template>
-          <!--          <template v-if="isTable(selectedWidget.type)">
-                      <div class="label">选择要显示的列
-                        <span style="margin-left: 8px">
-                            <el-checkbox label="全选"
-                                         v-model="checkAll"
-                                         :indeterminate="compSelectedColumns.length<tableColumn.length && compSelectedColumns.length!==0"
-                                         @change="onCheckAll"/>
-                          </span>
-                      </div>
-                      <el-checkbox-group v-model="compSelectedColumns" style="max-height: 100px;overflow: auto">
-                        <el-checkbox v-for="(item) in tableColumn" :label="item"></el-checkbox>
-                      </el-checkbox-group>
-                    </template>-->
         </div>
         <el-table
-            v-if="bussinessData.length>0"
             ref="busTable$"
             style="width: 800px"
             max-height="600"
             border
-            :data="bussinessData"
-            :header-cell-style="headerCellStyle"
-            @row-contextmenu="onBusTableContextmenu"
+            :data="scriptResponse.data"
         >
-          <el-table-column v-for="(item) in tableColumn" :prop="item" :label="item"/>
+          <el-table-column prop="label" label="列名" width="120"/>
+          <el-table-column prop="value" label="实际值"/>
+
+          <el-table-column>
+            <template #default="scope">
+              <!--              <el-select v-model=""></el-select>-->
+              <div></div>
+            </template>
+          </el-table-column>
         </el-table>
+        <el-pagination
+            v-model="scriptResponse.currentPage"
+            :page-size="scriptResponse.pageSize"
+            :total="scriptResponse.total"
+            @current-change="onCurrentChange"
+        />
       </div>
-      <context-menu v-model:show="showMenu" :options="menuOptions"></context-menu>
     </div>
   </el-drawer>
 </template>
@@ -82,7 +79,7 @@ import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams} from "@/utils/data-adapter";
 import ContextMenu from "@/components/context-menu/index.vue"
-import {isTable} from "@/utils/util";
+import {isTable, traverseFieldWidgets} from "@/utils/util";
 
 export default {
   name: "valueSource-drawer",
@@ -92,47 +89,19 @@ export default {
     const busTable$ = ref()
     const showDataSource = ref(false)
     const treeData = ref([])
-    const tableData = ref([])  //存储过程参数集合
-    const tableColumn = ref([]) //列表列的复选框组
-    const bussinessData = ref([])
+    const paramData = ref([])  //存储过程参数集合
+    const scriptResponse = reactive({
+      data: [],
+      total: 0,
+      currentPage: 1,
+      pageSize: 10
+    }) //脚本查询后返回的数据
+    const bussinessData = ref([]) //最终显示数据
     const openNodeSet = reactive(new Set(props.optionModel.valueSource['expandedNodes']))
-    const showMenu = ref(false)
-    const currentColumn = ref({})
-    const checkAll = ref(false)
-    const menuOptions = reactive({
-      x: 0,
-      y: 0,
-      title: '操作列表',
-      handles: [
-        {
-          label: '设为控件值来源',
-          handle() {
-            props.optionModel.valueSource.sourceId = currentColumn.value?.property
-            showMenu.value = false
-          }
-        }
-      ]
+
+    traverseFieldWidgets(props.selectedWidget.widgetList, (field) => {
+      console.log(field);
     })
-
-    const compSelectedColumns = computed({
-      get: () => {
-        return props.optionModel.tableColumns.map(item => item.prop)
-      },
-      set: (values) => {
-
-        //设置table的列
-        props.optionModel.tableColumns = values.map((prop, index) => ({
-              columnId: ++index,
-              prop,
-              "label": prop,
-              "width": "100",
-              "show": true,
-              "align": "center"
-            })
-        )
-      }
-    })
-
     const compPageSize = computed({
       set(value) {
         if (isTable(props.selectedWidget.type)) {
@@ -150,17 +119,11 @@ export default {
       }
     })
 
+    // const compCurrentDataWidget=
+
     watch(openNodeSet, (newVal) => {
       props.optionModel.valueSource["expandedNodes"] = Array.from(newVal)
     })
-
-    function onCheckAll(value) {
-      if (value)
-        compSelectedColumns.value = tableColumn.value
-      else {
-        compSelectedColumns.value = []
-      }
-    }
 
 
     /***
@@ -187,8 +150,6 @@ export default {
     function currentChange(node) {
       if (node.type === 'Scripts') {
         props.optionModel.valueSource['currentNodeKey'] = node.ID
-        props.optionModel.tableColumns && (props.optionModel.tableColumns = [])
-        props.optionModel.tableData && (props.optionModel.tableData = [])
         loadScriptsParams(node.ID)
       }
     }
@@ -217,18 +178,10 @@ export default {
      * @param scriptId
      */
     function loadScriptsParams(scriptId) {
-      // props.optionModel.tableColumns = []
       scriptId && getScriptsParams(scriptId).then(res => {
-        tableData.value = res?.Data?.Params
-        //将当前控件的默认值替换脚本配置页的默认值
-        props.optionModel.valueSource['scriptParams'].map(param => {
-          const defaultValue = tableData.value.find(item => item.Param_ID === param.Param_ID)
-          if (!!param.Param_VALUE && !!defaultValue) {
-            defaultValue.Param_VALUE = param.Param_VALUE
-          }
-        })
-        props.optionModel.valueSource['scriptParams'] = tableData.value
-        loadTableData(scriptId, tableData.value)
+        paramData.value = res?.Data?.Params
+        props.optionModel.valueSource['scriptParams'] = paramData.value
+        loadTableData(scriptId, paramData.value)
       })
     }
 
@@ -243,32 +196,29 @@ export default {
         params,
         pageSize: compPageSize.value
       })).then(res => {
-        bussinessData.value = res.Data.TableData
-        tableColumn.value = res.Data.TableHeaders
-        /*console.log(tableColumn.value);
-        if (isTable(props.selectedWidget.type)) {
-          props.optionModel.tableData = res.Data.TableData
-        }*/
+        bussinessData.value = res.Data.TableHeaders.map(column => ({
+          label: column,
+          bindWidgetId: "",
+          value: res.Data.TableData?.[0][column]
+        }))
+        onCurrentChange(1)
+        scriptResponse.total = bussinessData.value.length
       })
     }
 
+    function onCurrentChange(currentPage) {
+      scriptResponse.data = pagination(currentPage, scriptResponse.pageSize, bussinessData.value)
+    }
+
+    function pagination(pageNo, pageSize, array) {
+      const offset = (pageNo - 1) * pageSize;
+      return (offset + pageSize >= array.length) ? array.slice(offset, array.length) : array.slice(offset, offset + pageSize);
+    }
+
     function refreshData() {
-      loadTableData(props?.optionModel?.valueSource?.currentNodeKey, tableData.value)
+      loadTableData(props?.optionModel?.valueSource?.currentNodeKey, paramData.value)
     }
 
-    function onBusTableContextmenu(row, column, event) {
-      if (!isTable(props.selectedWidget.type)) {
-        event.preventDefault()
-        showMenu.value = true
-        menuOptions.x = event.x
-        menuOptions.y = event.y
-        currentColumn.value = column
-      }
-    }
-
-    function close() {
-      console.log(22, showDataSource.value = false);
-    }
 
     function headerCellStyle({column}) {
       const cellStyle = {}
@@ -286,26 +236,19 @@ export default {
     return {
       showDataSource,
       treeData,
-      tableData,
-      tableColumn,
+      paramData,
+      scriptResponse,
       bussinessData,
       tree$,
       busTable$,
-      showMenu,
-      menuOptions,
-      compSelectedColumns,
       compPageSize,
-      checkAll,
-      isTable,
       currentChange,
       nodeExpand,
       nodeCollapse,
       onDrawOpened,
       refreshData,
-      onBusTableContextmenu,
-      onCheckAll,
-      close,
-      headerCellStyle
+      headerCellStyle,
+      onCurrentChange
     }
   },
   props: {
