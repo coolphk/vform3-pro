@@ -621,9 +621,9 @@ export const basicFields = [
         pageSize: 10
       },
       dataTarget: {
-        checkedNodes: [],
-        expandedNodes: [],
-        procedureValue: {}
+        checkedNodes: [],//最终选择的目标项
+        expandedNodes: [],//展开的节点
+        procedureValue: {} //选中的存储过程
       },
       name: '',
       label: '',

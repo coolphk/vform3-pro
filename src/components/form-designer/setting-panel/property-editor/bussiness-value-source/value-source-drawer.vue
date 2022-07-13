@@ -54,8 +54,15 @@
           <el-table-column prop="value" label="实际值"/>
 
           <el-table-column>
-            <template #default="scope">
-              <!--              <el-select v-model=""></el-select>-->
+            <template #default="{row}">
+              <el-select v-model="row.bindWidgetId" :value-key="row.bindWidgetId"
+                         clearable
+                         @change="onChangeBindWidget(row)"
+                         @clear="onClearBindWidget(row)"
+              >
+                <el-option v-for="(childWid,index) in compChildrenWidgets" :value="childWid.id"
+                           :label="childWid.options.label"/>
+              </el-select>
               <div></div>
             </template>
           </el-table-column>
@@ -66,6 +73,7 @@
             :total="scriptResponse.total"
             @current-change="onCurrentChange"
         />
+        {{ selectedWidget?.options?.valueSource?.bindMap }}
       </div>
     </div>
   </el-drawer>
@@ -79,7 +87,7 @@ import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams} from "@/utils/data-adapter";
 import ContextMenu from "@/components/context-menu/index.vue"
-import {isTable, traverseFieldWidgets} from "@/utils/util";
+import {inObject, isTable, traverseFieldWidgets} from "@/utils/util";
 
 export default {
   name: "valueSource-drawer",
@@ -99,9 +107,6 @@ export default {
     const bussinessData = ref([]) //最终显示数据
     const openNodeSet = reactive(new Set(props.optionModel.valueSource['expandedNodes']))
 
-    traverseFieldWidgets(props.selectedWidget.widgetList, (field) => {
-      console.log(field);
-    })
     const compPageSize = computed({
       set(value) {
         if (isTable(props.selectedWidget.type)) {
@@ -118,13 +123,29 @@ export default {
         }
       }
     })
-
-    // const compCurrentDataWidget=
+    const compChildrenWidgets = computed(() => {
+      const childrenWidgets = []
+      traverseFieldWidgets(props.selectedWidget.widgetList, (field) => {
+        childrenWidgets.push(field)
+      })
+      return childrenWidgets
+    })
 
     watch(openNodeSet, (newVal) => {
       props.optionModel.valueSource["expandedNodes"] = Array.from(newVal)
     })
 
+
+    /**
+     * dataWrapper绑定组件时触发
+     */
+    function onChangeBindWidget(row) {
+      props.selectedWidget.options.valueSource.bindMap[row.label] = row.bindWidgetId
+    }
+
+    function onClearBindWidget(row) {
+      delete props.optionModel.valueSource.bindMap[row.label]
+    }
 
     /***
      * 将数组转换为children树形结构
@@ -196,11 +217,16 @@ export default {
         params,
         pageSize: compPageSize.value
       })).then(res => {
-        bussinessData.value = res.Data.TableHeaders.map(column => ({
-          label: column,
-          bindWidgetId: "",
-          value: res.Data.TableData?.[0][column]
-        }))
+        bussinessData.value = res.Data.TableHeaders.map(column => {
+          //如果已经选择子控件的dataTarget，则根据选中参数来匹配当前列，如果相等的话默认进行绑定
+          const sameKeyId = compChildrenWidgets.value.find(widget => !!widget.options.dataTarget.checkedNodes.find(node => node.Param_Name === column))?.id
+          sameKeyId && (props.optionModel.valueSource.bindMap[column] = sameKeyId)
+          return {
+            label: column,
+            bindWidgetId: props.optionModel.valueSource.bindMap[column],
+            value: res.Data.TableData?.[0][column]
+          }
+        })
         onCurrentChange(1)
         scriptResponse.total = bussinessData.value.length
       })
@@ -242,13 +268,16 @@ export default {
       tree$,
       busTable$,
       compPageSize,
+      compChildrenWidgets,
+      onChangeBindWidget,
       currentChange,
       nodeExpand,
       nodeCollapse,
       onDrawOpened,
       refreshData,
       headerCellStyle,
-      onCurrentChange
+      onCurrentChange,
+      onClearBindWidget
     }
   },
   props: {

@@ -504,4 +504,21 @@ export function uuid2(len, radix) {
   return uuid.join('');
 }
 
-uuid2(16, 16) // "277571702EE33E11"
+// uuid2(16, 16) // "277571702EE33E11"
+
+/**
+ * 判断一个对象中是否包含某值
+ * @param obj
+ * @param value
+ * @param scope
+ * @returns {string|boolean}
+ */
+export function inObject(obj, value, scope) {
+  if (scope === 'key') {
+    return Object.keys(obj).includes(value)
+  } else if (scope === 'value') {
+    return !!Object.keys(obj).find(key => obj[key] === value)
+  } else {
+    return Object.keys(obj).includes(value) || !!Object.keys(obj).find(key => obj[key] === value)
+  }
+}
