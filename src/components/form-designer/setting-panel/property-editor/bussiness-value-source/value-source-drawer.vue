@@ -288,7 +288,7 @@ export default {
   },
   components: {
     ContextMenu
-  }
+  },
 }
 
 </script>

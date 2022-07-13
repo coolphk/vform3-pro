@@ -41,7 +41,7 @@ import {reactive} from "vue";
 
 export default {
   name: "edit-table-item",
-  mixins: [i18n, refMixinDesign, fieldMixin, emitter],
+  mixins: [i18n,  fieldMixin, emitter],
   inject: ['refList'],
   setup(props, {attrs}) {
     const menuOptions = reactive({

@@ -4,7 +4,7 @@ import {loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams} from "@/utils/data-adapter";
 
 export default {
-  inject: ['refList', 'getFormConfig', 'globalOptionData', 'globalModel', 'getOptionData', 'getGlobalDsv', 'getReadMode'],
+  inject: ['refList', 'getFormConfig', 'globalOptionData', 'globalModel', 'getOptionData', 'getGlobalDsv', 'getReadMode',/*'getDataWrapperBindMap'*/],
   data() {
     return {
       fieldReadonlyFlag: false

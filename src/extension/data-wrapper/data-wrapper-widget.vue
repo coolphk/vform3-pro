@@ -44,6 +44,8 @@ import containerMixin from "@/components/form-designer/form-widget/container-wid
 import ContainerWrapper from "@/components/form-designer/form-widget/container-widget/container-wrapper"
 import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
 import refMixinDesign from "@/components/form-designer/refMixinDesign"
+import {loadBussinessSource} from "@/api/bussiness-source";
+import {assembleBussinessParams} from "@/utils/data-adapter";
 
 export default {
   name: "data-wrapper-widget",
@@ -106,7 +108,7 @@ export default {
   //width: 100%;
   padding: 8px;
   border: 1px dashed #336699;
-  min-height:68px;
+  min-height: 68px;
 
   :deep(.ghost) {
     content: '';
