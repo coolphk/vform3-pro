@@ -35,6 +35,7 @@
             </template>
           </el-table-column>
           <el-table-column prop="Param_BusiDes" label="业务说明"/>
+          <el-table-column></el-table-column>
         </el-table>
         <div class="widget-wrapper">
           <template v-if="optionModel.valueSource">
@@ -87,7 +88,7 @@ import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams} from "@/utils/data-adapter";
 import ContextMenu from "@/components/context-menu/index.vue"
-import {inObject, isTable, traverseFieldWidgets} from "@/utils/util";
+import {inObject, isTable, traverseFieldWidgets, traverseFieldWidgetsOfContainer} from "@/utils/util";
 
 export default {
   name: "valueSource-drawer",
@@ -133,8 +134,14 @@ export default {
 
     watch(openNodeSet, (newVal) => {
       props.optionModel.valueSource["expandedNodes"] = Array.from(newVal)
+
     })
 
+    console.log();
+
+    function getScriptParamOraginal() {
+      // traverseAllWidgets()
+    }
 
     /**
      * dataWrapper绑定组件时触发
@@ -221,10 +228,11 @@ export default {
           //如果已经选择子控件的dataTarget，则根据选中参数来匹配当前列，如果相等的话默认进行绑定
           const sameKeyId = compChildrenWidgets.value.find(widget => !!widget.options.dataTarget.checkedNodes.find(node => node.Param_Name === column))?.id
           sameKeyId && (props.optionModel.valueSource.bindMap[column] = sameKeyId)
+          console.log(111, sameKeyId);
           return {
             label: column,
             bindWidgetId: props.optionModel.valueSource.bindMap[column],
-            value: res.Data.TableData?.[0][column]
+            value: res.Data.TableData?.[0]?.[column]
           }
         })
         onCurrentChange(1)

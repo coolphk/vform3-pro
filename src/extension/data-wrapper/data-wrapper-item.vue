@@ -58,18 +58,34 @@ export default {
     this.setFormDataWithValueSource()
   },
   methods: {
-    setFormDataWithValueSource() {
+    setFormDataWithValueSource(params) {
       const vs = this.widget?.options?.valueSource
-      vs && loadBussinessSource(assembleBussinessParams({
-        scriptId: vs.currentNodeKey,
-        params: vs.scriptParams
-      })).then(res => {
-        const formData = {}
-        Object.keys(vs.bindMap).map(key => {
-          formData[vs.bindMap[key]] = res.Data.TableData[0][key]
+      if (params) {
+        loadBussinessSource({
+          Scripts_ID: vs.currentNodeKey,
+          currentPage: 1,
+          pageSize: 10,
+          ...params
+        }).then(res => {
+          console.log('params', res);
+          const formData = {}
+          Object.keys(vs.bindMap).map(key => {
+            formData[vs.bindMap[key]] = res.Data.TableData[0][key]
+          })
+          this.getFormRef().setFormData(formData)
         })
-        this.getFormRef().setFormData(formData)
-      })
+      } /*else {
+        vs && loadBussinessSource(assembleBussinessParams({
+          scriptId: vs.currentNodeKey,
+          params: vs.scriptParams
+        })).then(res => {
+          const formData = {}
+          Object.keys(vs.bindMap).map(key => {
+            formData[vs.bindMap[key]] = res.Data.TableData[0][key]
+          })
+          this.getFormRef().setFormData(formData)
+        })
+      }*/
     }
   }
 }

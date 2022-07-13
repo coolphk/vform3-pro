@@ -88,7 +88,7 @@
             </el-button>
             <el-button @click="showPreviewDialogFlag = false">{{ i18nt('designer.hint.closePreview') }}</el-button>
             <el-button type="primary" @click="getBussinessData">查看业务数据</el-button>
-            <el-button type="primary" @click="setBussinessData">设置表单值</el-button>
+            <el-button type="primary" @click="setBussinessData">保存业务数据</el-button>
             <el-button v-if="false" @click="testSetFormJson">setFormJson</el-button>
           </div>
         </template>
@@ -810,6 +810,7 @@ export default {
     },
     setBussinessData() {
       this.$refs.preForm.setBussinessData(loadBussinessSource)
+
       /*
             traverseAllWidgets(this.designer.widgetList, (widget) => {
               const {valueSource: vs} = widget.options

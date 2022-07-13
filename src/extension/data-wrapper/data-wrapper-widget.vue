@@ -83,22 +83,9 @@ export default {
     //
   },
   methods: {
-
-    onSubFormDragAdd(evt, subList) {
-      const newIndex = evt.newIndex
-      if (!!subList[newIndex]) {
-        this.designer.setSelected(subList[newIndex])
-      }
-
-      this.designer.emitHistoryChange()
-      console.log('test', 'onSubFormDragAdd')
-      this.designer.emitEvent('field-selected', this.widget)
-    },
-
-    onSubFormDragEnd(evt) {
-      console.log('sub form drag end: ', evt)
-    },
-
+    getRefList() {
+      return this.refList
+    }
   }
 }
 </script>
