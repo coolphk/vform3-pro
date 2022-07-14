@@ -58,7 +58,7 @@ function isArray(obj) {
  * 将数组转换为children树形结构
  * @param arr
  * @param idKey
- * @param attr
+ * @param attr 需要新加入的属性对象
  * @param rootParentId 根节点的parentId
  * @returns {(Map<any, any>|*)[]}
  */

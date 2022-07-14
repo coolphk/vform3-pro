@@ -34,10 +34,11 @@
               <el-input v-model="row.Param_TestVALUE"></el-input>
             </template>
           </el-table-column>
-          <el-table-column prop="Param_BusiDes" label="业务说明"/>
-          <el-table-column>
+          <el-table-column prop="Param_BusiDes" label="业务说明" width="150"/>
+          <el-table-column label="关联组件">
             <template #default="{row}">
-              <el-cascader v-model="row.bindWidget"></el-cascader>
+              <el-cascader v-model="row.bindWidget" :options="paramBindWidgets"
+                           @change="onCascaderChange(row,$event)"></el-cascader>
             </template>
           </el-table-column>
         </el-table>
@@ -99,6 +100,7 @@ import {
   traverseFieldWidgets,
   traverseFieldWidgetsOfContainer
 } from "@/utils/util";
+import useBindParam from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/useBindParam";
 
 export default {
   name: "valueSource-drawer",
@@ -109,6 +111,7 @@ export default {
     const showDataSource = ref(false)
     const treeData = ref([])
     const paramData = ref([])  //存储过程参数集合
+    const paramBindWidgets = useBindParam(props.designer.widgetList) //存储过程参数需要绑定的组件列表
     const scriptResponse = reactive({
       data: [],
       total: 0,
@@ -144,19 +147,7 @@ export default {
 
     watch(openNodeSet, (newVal) => {
       props.optionModel.valueSource["expandedNodes"] = Array.from(newVal)
-
     })
-
-    console.log(11, props.designer);
-
-    function getAllWidgets() {
-      const bindWidgets = []
-      traverseAllWidgets(props.designer.widgetList, (widget) => {
-        if (widget.formItemFlag || widget.tableFlag) {
-          bindWidgets.push(widget)
-        }
-      })
-    }
 
     /**
      * dataWrapper绑定组件时触发
@@ -165,11 +156,23 @@ export default {
       props.selectedWidget.options.valueSource.bindMap[row.label] = row.bindWidgetId
     }
 
+    /**
+     * 脚本参数绑定组件选择事件
+     * @param row
+     * @param value
+     */
+    function onCascaderChange(row, value) {
+      console.log(props.designer);
+      console.log(row);
+      console.log(value);
+
+      props.designer.formWidget.getWidgetRef(value[0]).widget.options.onOperationButtonClick =
+          `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({${row.Param_Name}:row['${value[1]}']})`
+    }
+
     function onClearBindWidget(row) {
       delete props.optionModel.valueSource.bindMap[row.label]
     }
-
-
 
     function currentChange(node) {
       if (node.type === 'Scripts') {
@@ -205,7 +208,7 @@ export default {
       scriptId && getScriptsParams(scriptId).then(res => {
         paramData.value = res?.Data?.Params.map(item => ({
           ...item,
-          bindWidget: {}
+          bindWidget: []
         }))
         props.optionModel.valueSource['scriptParams'] = paramData.value
         loadTableData(scriptId, paramData.value)
@@ -224,7 +227,7 @@ export default {
         pageSize: compPageSize.value
       })).then(res => {
         bussinessData.value = res.Data.TableHeaders.map(column => {
-          //如果已经选择子控件的dataTarget，则根据选中参数来匹配当前列，如果相等的话默认进行绑定
+          //如果已经选择子控件的dataTarget，则根据选中参数来匹配当前列，相等的话默认进行绑定
           const sameKeyId = compChildrenWidgets.value.find(widget => !!widget.options.dataTarget.checkedNodes.find(node => node.Param_Name === column))?.id
           sameKeyId && (props.optionModel.valueSource.bindMap[column] = sameKeyId)
           // console.log(111, sameKeyId);
@@ -276,6 +279,7 @@ export default {
       busTable$,
       compPageSize,
       compChildrenWidgets,
+      paramBindWidgets,
       onChangeBindWidget,
       currentChange,
       nodeExpand,
@@ -284,7 +288,8 @@ export default {
       refreshData,
       headerCellStyle,
       onCurrentChange,
-      onClearBindWidget
+      onClearBindWidget,
+      onCascaderChange
     }
   },
   props: {

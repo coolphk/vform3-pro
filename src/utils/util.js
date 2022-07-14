@@ -379,13 +379,11 @@ export function translateOptionItems(rawData, widgetType, labelKey, valueKey) {
     rawData.forEach(ri => {
       const label = ri[labelKey]
       const value = ri[valueKey]
-      if (label && value) {
+      if (isNotNull(label) && isNotNull(value)) {
         result.push({
           label,
           value
         })
-      } else {
-
       }
     })
   }
