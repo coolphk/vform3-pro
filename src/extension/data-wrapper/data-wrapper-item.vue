@@ -67,9 +67,15 @@ export default {
           pageSize: 10,
           ...params
         }).then(res => {
-          console.log('params', res);
+          console.log('params', res, vs);
+
           const formData = {}
+          vs.originalData = {
+            scriptId: vs.currentNodeKey,
+            schema: res.Data.TableData[0]
+          }
           Object.keys(vs.bindMap).map(key => {
+            // vs.valueSource.dataTemplate = res.Data.TableData[0]
             formData[vs.bindMap[key]] = res.Data.TableData[0][key]
           })
           this.getFormRef().setFormData(formData)

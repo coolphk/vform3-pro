@@ -52,6 +52,7 @@ import i18n, {changeLocale} from "@/utils/i18n"
 import {getProcedureParams} from "@/api/data-schema";
 import {ElMessage} from "element-plus";
 import {buildProcedureSchema} from "@/utils/data-adapter";
+import {loadBussinessSource} from "@/api/bussiness-source";
 
 export default {
   name: "VFormRender",
@@ -739,19 +740,28 @@ export default {
 
       return new Promise((resolve, reject) => {
         const submitDatas = [] //提交对象数组结构为[{script_id,params}]
-        const procedureMap = new Map()
+        const procedureMap = new Map() //将所有控件按存储过程名称分组
+        const originalData = {}
         /**
-         * 1、遍历所有业务组件（带dataTarget属性的组件)map={schema={},widgets:[]}
-         * 2、将相同的存储过程合并放入schema中,并且将绑定相同存储过程的组件放入widgets中
-         * 3、获取存储过程的值放入map中
+         * 1、遍历所有业务组件（带dataTarget属性的组件)procedureMap={widgets:[]}
+         * 2、将相同的存储过程合并放入procedureMap中,并且将属于同一存储过程的组件放入widgets中
          */
         traverseAllWidgets(this.widgetList, (widget) => {
-
+          if (widget.type === 'data-wrapper') {
+            console.log(111, widget.options.valueSource.originalData);
+            /*originalData[widget.options.valueSource.originalData.scriptId] = {
+              ...originalData[widget.options.valueSource.originalData.scriptId],
+              ...widget.options.valueSource.originalData.schema
+            }*/
+            originalData[widget.options.valueSource.originalData.scriptId] = widget.options.valueSource.originalData.schema
+          }
           if (!isEmptyObj(widget?.options?.dataTarget?.procedureValue)) {
 
+            //获取当前被遍历组件所对应的存储过程信息
             const {ProcedureName: procedureName, ProcedureID: procedureID} = widget.options?.dataTarget?.procedureValue
 
             if (!procedureMap.has(procedureName)) {
+
               procedureMap.set(procedureName, {
                 widgets: [widget]
               })
@@ -759,13 +769,14 @@ export default {
               //获取当前存储过程的数据结构
               getProcedureParams(procedureName, "", 1).then(res => {
                 const resData = res.Data
+                console.log('getProcedureParams', resData, widget?.options?.dataTarget);
                 const submitData = {
                   procedureID,
                   procedureName,
-                  params: []
+                  params: [],
                 }
-                this.getFormData().then(formData => {
-                  procedure.widgets.forEach(wi => {
+                this.getFormData().then(formData => { //获取当前表单组件值
+                  procedure.widgets.forEach(wi => {   //遍历某个存储过程下的组件
                     if (wi.formItemFlag) {
                       if (wi.type === 'edit-table') {
                         submitData.params = submitData.params.concat(transferTableDataToSubmitData(wi, formData))
@@ -777,9 +788,12 @@ export default {
                             submitData.params.push(node)
                           } else {
                             ElMessage({
-                              message: `参数${node}不存在,请检查数据`, type: 'error', duration: 3 * 1000, showClose: true
+                              message: `参数${node.Param_Name}不存在,请检查数据`,
+                              type: 'error',
+                              duration: 3 * 1000,
+                              showClose: true
                             })
-                            console.error(`参数${node}不存在,请检查数据`)
+                            console.error(`参数${node.Param_Name}不存在,请检查数据`, node)
                           }
                         })
                       }

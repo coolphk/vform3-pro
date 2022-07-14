@@ -224,7 +224,7 @@ export default {
     function loadTreeData(val) {
       showLoading.value = true
       getProcedureParams(val.ProcedureName, "", 1).then((res) => {
-        const tree = unFlatten(res.Data, 'Param_ID')
+        const tree = unFlatten(res.Data.sort((a, b) => b.Param_Des.localeCompare(a.Param_Des)), 'Param_ID')
         treeData.value = [{
           Param_ID: val.ProcedureID,
           Param_Name: val.ProcedureName,
