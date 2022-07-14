@@ -116,6 +116,7 @@ export const containers = [
     category: 'container',
     icon: 'data-table',
     widgetList: [],
+    tableFlag: true,
     options: {
       name: '',
       label: 'data-table',

@@ -44,15 +44,38 @@ function isArray(obj) {
   return Object.prototype.toString.call(obj) === '[object Array]'
 }
 
-export function unflatten(arr, node) {
+/*export function unflatten(arr, node) {
   if (node.HaveChild === "1") {
     node['children'] = getChildren(arr, node.Param_ID)
   }
+}*/
+
+/*export function getChildren(arr, parentId) {
+  return arr.filter(item => item.Parent_ID === parentId)
+}*/
+
+/***
+ * 将数组转换为children树形结构
+ * @param arr
+ * @param idKey
+ * @param attr
+ * @param rootParentId 根节点的parentId
+ * @returns {(Map<any, any>|*)[]}
+ */
+export function unFlatten(arr, idKey = 'ID', attr = {}, rootParentId = '0000') {
+  arr.forEach(item => {
+    item['children'] = getChildren(arr, item[idKey])
+    Object.keys(attr).forEach(key => {
+      item[key] = attr[key]
+    })
+  })
+  return getChildren(arr, rootParentId)
 }
 
-export function getChildren(arr, parentId) {
-  return arr.filter(item => item.Parent_ID === parentId)
+export function getChildren(arr, parentValue, parentKey = 'Parent_ID',) {
+  return arr.filter(item => item[parentKey] === parentValue)
 }
+
 
 export function transferData(object) {
   return {

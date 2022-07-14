@@ -81,7 +81,7 @@ import propertyMixin from "@/components/form-designer/setting-panel/property-edi
 import {reactive, ref, toRaw, watch} from "vue";
 import {isEmptyObj, isTable} from "@/utils/util";
 import {getProcedureParams} from "@/api/data-schema";
-import {getChildren, unflatten} from "@/utils/data-adapter";
+import {unFlatten} from "@/utils/data-adapter";
 
 export default {
   name: "dataTarget-drawer",
@@ -224,15 +224,11 @@ export default {
     function loadTreeData(val) {
       showLoading.value = true
       getProcedureParams(val.ProcedureName, "", 1).then((res) => {
-        // treeData.value = res.data.Data
-        res.Data.map(item => {
-          unflatten(res.Data, item)
-        })
-
+        const tree = unFlatten(res.Data, 'Param_ID')
         treeData.value = [{
           Param_ID: val.ProcedureID,
           Param_Name: val.ProcedureName,
-          children: getChildren(res.Data, '0000')
+          children: tree
         }]
         showLoading.value = false
       })

@@ -35,7 +35,11 @@
             </template>
           </el-table-column>
           <el-table-column prop="Param_BusiDes" label="业务说明"/>
-          <el-table-column></el-table-column>
+          <el-table-column>
+            <template #default="{row}">
+              <el-cascader v-model="row.bindWidget"></el-cascader>
+            </template>
+          </el-table-column>
         </el-table>
         <div class="widget-wrapper">
           <template v-if="optionModel.valueSource">
@@ -86,9 +90,15 @@ import i18n from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin";
 import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams} from "@/utils/data-adapter";
+import {assembleBussinessParams, unFlatten} from "@/utils/data-adapter";
 import ContextMenu from "@/components/context-menu/index.vue"
-import {inObject, isTable, traverseFieldWidgets, traverseFieldWidgetsOfContainer} from "@/utils/util";
+import {
+  inObject,
+  isTable,
+  traverseAllWidgets,
+  traverseFieldWidgets,
+  traverseFieldWidgetsOfContainer
+} from "@/utils/util";
 
 export default {
   name: "valueSource-drawer",
@@ -137,10 +147,15 @@ export default {
 
     })
 
-    console.log();
+    console.log(11, props.designer);
 
-    function getScriptParamOraginal() {
-      // traverseAllWidgets()
+    function getAllWidgets() {
+      const bindWidgets = []
+      traverseAllWidgets(props.designer.widgetList, (widget) => {
+        if (widget.formItemFlag || widget.tableFlag) {
+          bindWidgets.push(widget)
+        }
+      })
     }
 
     /**
@@ -154,26 +169,7 @@ export default {
       delete props.optionModel.valueSource.bindMap[row.label]
     }
 
-    /***
-     * 将数组转换为children树形结构
-     * @param arr
-     * @param idKey
-     * @param attr
-     * @returns {(Map<any, any>|*)[]}
-     */
-    function unFlatten(arr, idKey = 'ID', attr = {}) {
-      arr.forEach(item => {
-        item['children'] = getChildren(arr, item[idKey])
-        Object.keys(attr).forEach(key => {
-          item[key] = attr[key]
-        })
-      })
-      return getChildren(arr, '0000')
-    }
 
-    function getChildren(arr, parentValue, parentKey = 'Parent_ID',) {
-      return arr.filter(item => item[parentKey] === parentValue)
-    }
 
     function currentChange(node) {
       if (node.type === 'Scripts') {
@@ -207,7 +203,10 @@ export default {
      */
     function loadScriptsParams(scriptId) {
       scriptId && getScriptsParams(scriptId).then(res => {
-        paramData.value = res?.Data?.Params
+        paramData.value = res?.Data?.Params.map(item => ({
+          ...item,
+          bindWidget: {}
+        }))
         props.optionModel.valueSource['scriptParams'] = paramData.value
         loadTableData(scriptId, paramData.value)
       })
@@ -228,7 +227,7 @@ export default {
           //如果已经选择子控件的dataTarget，则根据选中参数来匹配当前列，如果相等的话默认进行绑定
           const sameKeyId = compChildrenWidgets.value.find(widget => !!widget.options.dataTarget.checkedNodes.find(node => node.Param_Name === column))?.id
           sameKeyId && (props.optionModel.valueSource.bindMap[column] = sameKeyId)
-          console.log(111, sameKeyId);
+          // console.log(111, sameKeyId);
           return {
             label: column,
             bindWidgetId: props.optionModel.valueSource.bindMap[column],

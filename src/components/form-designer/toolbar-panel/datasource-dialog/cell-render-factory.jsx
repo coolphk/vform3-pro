@@ -1,7 +1,7 @@
 import CodeEditor from "@/components/code-editor";
 import {delProcedureParams, getProcedureParams, updateProcedureParams, xmlToJson} from "@/api/data-schema";
 import {Delete, Plus, Select} from "@element-plus/icons-vue";
-import {getChildren, transferData, unflatten} from "@/utils/data-adapter";
+import {getChildren, transferData, unFlatten} from "@/utils/data-adapter";
 import {ref} from "vue";
 import {deepClone, uuid2} from "@/utils/util";
 import {ElMessage} from "element-plus";
@@ -81,10 +81,10 @@ export const operationRender = (selectedProcedure, tableData, expandedKeys = [])
     if (!schema) {
       // console.log(1);
       const res = (await getProcedureParams(selectedProcedure.value.ProcedureName, rowData.Param_ID, '1'))?.data.Data
-      res.forEach(item => {
+      /*res.forEach(item => {
         unflatten(res, item)
-      })
-      rowData.children = res
+      })*/
+      rowData.children = unFlatten(res, 'Param_ID')
       schema = res
     }
 

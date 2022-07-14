@@ -11,15 +11,10 @@
 
 <script>
 import i18n from "@/utils/i18n"
-import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin"
-import {computed, nextTick, onMounted, reactive, ref, toRaw, watch} from "vue";
-import {getProcedureParams} from "@/api/data-schema";
-import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource-dialog/procedure-select";
-import {getChildren, unflatten} from "@/utils/data-adapter";
-import {ElMessage} from "element-plus";
-import {isEmptyObj, isTable} from "@/utils/util";
-import ContextMenu from "@/components/context-menu"
-import DataTargetDrawer from "@/components/form-designer/setting-panel/property-editor/bussiness-data-target/data-target-drawer";
+import {ref} from "vue";
+import {isEmptyObj} from "@/utils/util";
+import DataTargetDrawer
+  from "@/components/form-designer/setting-panel/property-editor/bussiness-data-target/data-target-drawer";
 
 
 export default {
