@@ -153,7 +153,7 @@ export default {
      * dataWrapper绑定组件时触发
      */
     function onChangeBindWidget(row) {
-      props.selectedWidget.options.valueSource.bindMap[row.label] = row.bindWidgetId
+      props.selectedWidget.options.valueSource.bindMap[row.prop] = row.bindWidgetId
     }
 
     /**

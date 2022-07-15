@@ -49,11 +49,12 @@ import {
   getAllFieldWidgets, traverseFieldWidgets, buildDefaultFormJson, traverseAllWidgets, isEmptyObj, uuid2
 } from "@/utils/util"
 import i18n, {changeLocale} from "@/utils/i18n"
-import {getProcedureParams} from "@/api/data-schema";
+import {execProcedure, getProcedureParams} from "@/api/data-schema";
 import {ElMessage} from "element-plus";
-import {buildProcedureSchema} from "@/utils/data-adapter";
+import {buildProcedureSchema, getKeyByValue} from "@/utils/data-adapter";
 import {loadBussinessSource} from "@/api/bussiness-source";
-import useParamsInFormData from "@/components/form-render/useParamsInFormData";
+import useParamsInFormData from "./composible/useParamsInFormData";
+import useWidgetsGroupByProcedure from "./composible/useWidgetsGroupByProcedure";
 
 export default {
   name: "VFormRender",
@@ -718,62 +719,78 @@ export default {
     },
     getBussinessData() {
 
+      const procedureMap = new Map() //将所有控件按存储过程名称分组
+      /**
+       * 1、遍历所有业务组件（带dataTarget属性的组件)procedureMap={widgets:[]}
+       * 2、将相同的存储过程合并放入procedureMap中,并且将属于同一存储过程的组件放入widgets中
+       */
+      traverseAllWidgets(this.widgetList, async (formWidget) => {
+        if (formWidget.type === 'data-wrapper') {
+          // console.log(111, formWidget.options.valueSource.originalData);
+          const {schema: wrapperSchema} = formWidget.options.valueSource.originalData
+          const wrapperProMap = new Map() //当前数据容器对应的map
+          traverseAllWidgets(formWidget.widgetList, (widget) => {
+            useWidgetsGroupByProcedure(wrapperProMap, widget)
+          })
+          const formData = await this.getFormData()
+          wrapperProMap.forEach((value, key) => {
+            this.getFormData().then(formData => { //获取当前表单组件值
+              // console.log(formData);
+              console.log('bindMap', formWidget.options.valueSource.bindMap)
 
-      return new Promise((resolve, reject) => {
-        const submitDatas = [] //提交对象数组结构为[{script_id,params}]
-        const procedureMap = new Map() //将所有控件按存储过程名称分组
-        const originalData = {}
-        /**
-         * 1、遍历所有业务组件（带dataTarget属性的组件)procedureMap={widgets:[]}
-         * 2、将相同的存储过程合并放入procedureMap中,并且将属于同一存储过程的组件放入widgets中
-         */
-        traverseAllWidgets(this.widgetList, (widget) => {
-          if (widget.type === 'data-wrapper') {
-            console.log(111, widget.options.valueSource.originalData);
-            /*originalData[widget.options.valueSource.originalData.scriptId] = {
-              ...originalData[widget.options.valueSource.originalData.scriptId],
-              ...widget.options.valueSource.originalData.schema
-            }*/
-            traverseAllWidgets(widget.widgetList,(wrapperSubWidget)=>{
-
-            })
-          }
-          if (!isEmptyObj(widget?.options?.dataTarget?.procedureValue)) {
-
-            //获取当前被遍历组件所对应的存储过程信息
-            const {ProcedureName: procedureName, ProcedureID: procedureID} = widget.options?.dataTarget?.procedureValue
-
-            if (!procedureMap.has(procedureName)) {
-              procedureMap.set(procedureName, {
-                widgets: [widget]
+              Object.keys(formData).map(key => {
+                wrapperSchema[getKeyByValue(formWidget.options.valueSource.bindMap, key)] = formData[key]
               })
-              const procedure = procedureMap.get(procedureName)
-              //获取当前存储过程的数据结构
-              getProcedureParams(procedureName, "", 1).then(res => {
-                const resData = res.Data
-                console.log('getProcedureParams', resData, widget?.options?.dataTarget);
-                const submitData = {
-                  procedureID,
-                  procedureName,
-                  params: [],
-                }
-                this.getFormData().then(formData => { //获取当前表单组件值
-                  submitData.params = useParamsInFormData(procedure.widgets, formData, resData)
-                  submitDatas.push(submitData)
-                  if (submitDatas.length === procedureMap.size) {
-                    resolve(submitDatas)
-                  }
+              console.log(wrapperSchema);
+
+              getProcedureParams(key, "", 1).then(res => {
+                console.log(res);
+                res.Data.map(param => {
+                  param.Param_VALUE = wrapperSchema[param.Param_Name]
+                })
+                execProcedure({
+                  procedureID: value.id,
+                  procedureName: key,
+                  params: res.Data
+                }).then(res => {
+                  console.log(333, res);
+                }).catch(err => {
+                  console.log(444, err);
                 })
               })
-            } else {
-              const widgets = procedureMap.get(procedureName)?.widgets
-              if (Array.isArray(widgets)) {
-                widgets.push(widget)
-              }
-            }
-          }
-        })
+              /*submitData.params = useParamsInFormData(value.widgets, formData, resData)
+              submitDatas.push(submitData)
+              if (submitDatas.length === procedureMap.size) {
+                resolve(submitDatas)
+              }*/
+            })
+          })
+        } else {
+          useWidgetsGroupByProcedure(procedureMap, formWidget)
+        }
       })
+      console.log(procedureMap);
+      /*procedureMap.forEach((value, key) => {
+        const procedure = procedureMap.get(key)
+        console.log(procedure);
+        //获取当前存储过程的数据结构
+        getProcedureParams(key, "", 1).then(res => {
+          const resData = res.Data
+          const submitData = {
+            procedureID,
+            procedureName,
+            params: [],
+          }
+          this.getFormData().then(formData => { //获取当前表单组件值
+            submitData.params = useParamsInFormData(procedure.widgets, formData, resData)
+            submitDatas.push(submitData)
+            if (submitDatas.length === procedureMap.size) {
+              resolve(submitDatas)
+            }
+          })
+        })
+      })*/
+      // })
     },
 
     setBussinessData(loadBussinessSource) {

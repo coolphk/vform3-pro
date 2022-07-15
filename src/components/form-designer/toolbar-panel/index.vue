@@ -803,10 +803,11 @@ export default {
       })
     },
     getBussinessData() {
-      this.$refs.preForm.getBussinessData().then(res => {
+      /*this.$refs.preForm.getBussinessData().then(res => {
         this.formDataJson = JSON.stringify(res, null, '  ')
         this.showFormDataDialogFlag = true
-      })
+      })*/
+      this.$refs.preForm.getBussinessData()
     },
 
     saveBussinessData() {
