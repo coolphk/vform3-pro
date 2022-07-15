@@ -53,6 +53,7 @@ import {getProcedureParams} from "@/api/data-schema";
 import {ElMessage} from "element-plus";
 import {buildProcedureSchema} from "@/utils/data-adapter";
 import {loadBussinessSource} from "@/api/bussiness-source";
+import useParamsInFormData from "@/components/form-render/useParamsInFormData";
 
 export default {
   name: "VFormRender",
@@ -716,27 +717,7 @@ export default {
       return traverseAllWidgets
     },
     getBussinessData() {
-      //将edittable数据转换为params格式
-      function transferTableDataToSubmitData(wi, formData) {
-        //获取绑定数据结构的列表结构array->item
-        const tableData = formData[wi.id]
-        const {dataTarget} = wi.options
-        const params = []
-        tableData.map(row => {
-          const item = deepClone(dataTarget.arraySchema)
-          item.Param_ID = uuid2(16)
-          params.push(item)
-          Object.keys(row).map(key => {
-            const rowData = buildProcedureSchema()
-            rowData.Param_Name = key
-            rowData.Param_VALUE = row[key]
-            rowData.Parent_ID = item.Param_ID
-            rowData.Param_ObjType = 'attribute'
-            params.push(rowData)
-          })
-        })
-        return params
-      }
+
 
       return new Promise((resolve, reject) => {
         const submitDatas = [] //提交对象数组结构为[{script_id,params}]
@@ -753,7 +734,9 @@ export default {
               ...originalData[widget.options.valueSource.originalData.scriptId],
               ...widget.options.valueSource.originalData.schema
             }*/
-            originalData[widget.options.valueSource.originalData.scriptId] = widget.options.valueSource.originalData.schema
+            traverseAllWidgets(widget.widgetList,(wrapperSubWidget)=>{
+
+            })
           }
           if (!isEmptyObj(widget?.options?.dataTarget?.procedureValue)) {
 
@@ -761,7 +744,6 @@ export default {
             const {ProcedureName: procedureName, ProcedureID: procedureID} = widget.options?.dataTarget?.procedureValue
 
             if (!procedureMap.has(procedureName)) {
-
               procedureMap.set(procedureName, {
                 widgets: [widget]
               })
@@ -776,29 +758,7 @@ export default {
                   params: [],
                 }
                 this.getFormData().then(formData => { //获取当前表单组件值
-                  procedure.widgets.forEach(wi => {   //遍历某个存储过程下的组件
-                    if (wi.formItemFlag) {
-                      if (wi.type === 'edit-table') {
-                        submitData.params = submitData.params.concat(transferTableDataToSubmitData(wi, formData))
-                      } else {
-                        wi.options.dataTarget.checkedNodes.forEach(node => {
-                          //验证组件dataTarget中的节点是否存在于当前数据结构中，如果存在则应该进行赋值，否则报错
-                          if (resData.find((data) => data.Param_ID === node.Param_ID)) {
-                            node.Param_VALUE = formData[wi.id]
-                            submitData.params.push(node)
-                          } else {
-                            ElMessage({
-                              message: `参数${node.Param_Name}不存在,请检查数据`,
-                              type: 'error',
-                              duration: 3 * 1000,
-                              showClose: true
-                            })
-                            console.error(`参数${node.Param_Name}不存在,请检查数据`, node)
-                          }
-                        })
-                      }
-                    }
-                  })
+                  submitData.params = useParamsInFormData(procedure.widgets, formData, resData)
                   submitDatas.push(submitData)
                   if (submitDatas.length === procedureMap.size) {
                     resolve(submitDatas)
