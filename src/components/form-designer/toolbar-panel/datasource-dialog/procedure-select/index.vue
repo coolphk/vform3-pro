@@ -36,15 +36,7 @@ function onChange(val) {
 }
 
 function refreshData() {
-  getProcedureList().then(res => {
-    procedureList.value = res.Data.TableData
-    selectedProcedure.value = props.procedureValue
-  }).catch(error => {
 
-  }).finally(() => {
-    console.log(11);
-    emits('update:modelValue', false)
-  })
 }
 
 refreshData()
