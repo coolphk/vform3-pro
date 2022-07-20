@@ -185,8 +185,10 @@ export default {
 
     function loadTreeData(val) {
       getProcedureParams(val.ProcedureName, "", 1).then((res) => {
-        const tree = unFlatten(res.Data.sort((a, b) => a.Param_Des.localeCompare(b.Param_Des)), 'Param_ID')
-        console.log('tree', tree);
+        const tree = unFlatten(res.Data.sort((a, b) => a.Param_Des.localeCompare(b.Param_Des)), 'Param_ID',{
+          procedureId:val.ProcedureID,
+          procedureName:val.ProcedureName
+        })
         treeData.value.push({
           Param_ID: val.ProcedureID,
           Param_Name: val.ProcedureName,

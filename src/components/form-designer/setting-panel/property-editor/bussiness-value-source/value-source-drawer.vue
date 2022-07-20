@@ -9,27 +9,12 @@
       <div class="tree-wrapper">
         <div class="tree-title">请选择数据绑定来源</div>
         <div class="tree-body">
-          <el-auto-resizer>
-            <template #default="{ height, width }">
-              <el-tree-v2
-                  ref="tree$"
-                  node-key="ID"
-                  show-checkbox
-                  :height="height"
-                  :highlight-current="true"
-                  :indent="8"
-                  :props="{label:'NAME',children:'children',value:'ID'}"
-                  :data="treeData"
-                  :default-expanded-keys="optionModel.valueSource['expandedNodes']"
-                  :current-node-key="optionModel.valueSource['currentNodeKey']"
-                  @node-expand="nodeExpand"
-                  @node-collapse="nodeCollapse"
-                  @current-change="currentChange"
-                  @check-change="onValueSourceCheckChange"
-              >
-              </el-tree-v2>
-            </template>
-          </el-auto-resizer>
+          <v-source-tree
+              ref="vsTree$"
+              :value-source="optionModel.valueSource"
+              @loadDataFinished="loadDataFinished"
+              @removePartialBussinessData="removePartialBussinessData"
+          />
         </div>
       </div>
 
@@ -41,21 +26,23 @@
                 </div>-->
         <el-button type="primary" style="margin-left: 8px" @click="refreshData">刷新数据</el-button>
         <!--        参数列表-->
-        <!--        <el-table :data="paramData" border max-height="200">
-                  <el-table-column prop="Param_Name" label="参数名" width="150"/>
-                  <el-table-column prop="Param_TestVALUE" label="测试值" width="150">
-                    <template #default="{row}">
-                      <el-input v-model="row.Param_TestVALUE"></el-input>
-                    </template>
-                  </el-table-column>
-                  <el-table-column prop="Param_BusiDes" label="业务说明" width="150"/>
-                  <el-table-column label="关联组件">
-                    <template #default="{row}">
-                      <el-cascader v-model="row.bindWidget" :options="paramBindWidgets"
-                                   @change="onCascaderChange(row,$event)"></el-cascader>
-                    </template>
-                  </el-table-column>
-                </el-table>-->
+        <el-table :data="paramData" border max-height="200">
+          <el-table-column prop="scriptId" label="id"/>
+          <el-table-column prop="scriptName" label="脚本名称"/>
+          <el-table-column prop="Param_Name" label="参数名" width="150"/>
+          <el-table-column prop="Param_TestVALUE" label="测试值" width="150">
+            <template #default="{row}">
+              <el-input v-model="row.Param_TestVALUE"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column prop="Param_BusiDes" label="业务说明" width="150"/>
+          <el-table-column label="关联组件">
+            <template #default="{row}">
+              <el-cascader v-model="row.bindWidget" :options="paramBindWidgets"
+                           @change="onCascaderChange(row,$event)"></el-cascader>
+            </template>
+          </el-table-column>
+        </el-table>
         <div class="widget-wrapper">
           <template v-if="optionModel.valueSource">
             <span class="label">绑定关系表：</span><span style="color:darkcyan">{{
@@ -77,12 +64,13 @@
 
           <el-table-column label="对应组件" width="150">
             <template #default="{row}">
-              <el-select v-model="row.bindWidgetId" :value-key="row.bindWidgetId"
+              {{ row.label }}
+              <el-select v-model="bindMap[row.label].widgetId"
                          clearable
                          style="width: 120px"
-                         @change="onChangeBindWidget(row)"
-                         @clear="onClearBindWidget(row)"
+                         @clear="onClearBindWidget(row.label)"
               >
+                <!--                @change="onChangeBindWidget(row)"-->
                 <el-option v-for="(childWid,index) in compChildrenWidgets" :value="childWid.id"
                            :label="childWid.options.label"/>
               </el-select>
@@ -113,7 +101,7 @@
             :total="scriptResponse.total"
             @current-change="onCurrentChange"
         />
-        {{ bindMap }}
+        {{ optionModel.valueSource.bindMap }}
       </div>
       <div class="tree-wrapper" style="border-left: none;height: 100%;">
         <div class="tree-title">请选择要绑定的数据目标</div>
@@ -136,16 +124,19 @@ import ContextMenu from "@/components/context-menu/index.vue"
 import {isTable, traverseFieldWidgets} from "@/utils/util";
 import useBindParam from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/useBindParam";
 import VDataTarget
-  from "./components/v-data-target/index";
+  from "./components/v-data-target";
+import VSourceTree
+  from "./components/v-source-tree";
+import {ElMessage} from "element-plus";
 
 export default {
   name: "valueSource-drawer",
   mixins: [i18n, propertyMixin],
   setup(props, ctx) {
-    const tree$ = ref()
+    const vsTree$ = ref()
     const busTable$ = ref()
     const showDataSource = ref(false)
-    const treeData = ref([])
+
     const paramData = ref([])  //存储过程参数集合
     const paramBindWidgets = useBindParam(props.designer.widgetList) //存储过程参数需要绑定的组件列表
     const scriptResponse = reactive({
@@ -155,14 +146,11 @@ export default {
       currentPage: 1,
       pageSize: 10
     }) //根据脚本参数查询的实际的数据，并进行分页
-    const bussinessData = ref([])
-    const openNodeSet = reactive(new Set(props.optionModel.valueSource['expandedNodes']))
+    const bussinessData = ref([]) //绑定表格数据
+
     const tableDragGroup = { //绑定表格中拖拽容器
       name: 'itxst',
       put: (to, from, toEl) => {
-        // console.log(to, toEl);
-        console.log(33, to.el.dataset)
-        console.log(bindMap[to.el.dataset.key].params)
         return bindMap[to.el.dataset.key].params.length === 0
         // return true
       },
@@ -185,6 +173,11 @@ export default {
         }
       }
     })
+
+    /**
+     * 获取当前dataWrapper组件的全部子组件
+     * @type {ComputedRef<*[]>}
+     */
     const compChildrenWidgets = computed(() => {
       const childrenWidgets = []
       traverseFieldWidgets(props.selectedWidget.widgetList, (field) => {
@@ -193,9 +186,6 @@ export default {
       return childrenWidgets
     })
 
-    watch(openNodeSet, (newVal) => {
-      props.optionModel.valueSource["expandedNodes"] = Array.from(newVal)
-    })
 
     watch(bindMap, (newVal) => {
       const boundMap = {}
@@ -228,8 +218,8 @@ export default {
           `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({${row.Param_Name}:row['${value[1]}']})`
     }
 
-    function onClearBindWidget(row) {
-      delete props.optionModel.valueSource.bindMap[row.label]
+    function onClearBindWidget(key) {
+      bindMap[key].widgetId = ""
     }
 
     function currentChange(node) {
@@ -239,41 +229,35 @@ export default {
       }
     }
 
-    function nodeExpand(data) {
-      console.log(111);
-      openNodeSet.add(data.ID)
-    }
-
-    function nodeCollapse(data) {
-      openNodeSet.delete(data.ID)
-    }
 
     /**
      * 抽屉展开时刷新左侧树,获取脚本数据源
      */
     function onDrawOpened() {
-      getScriptTree().then(res => {
+      /*getScriptTree().then(res => {
         treeData.value = unFlatten(res.Data, 'ID')
-        console.log(222, treeData.value);
         const scriptId = props?.optionModel?.valueSource?.currentNodeKey
         loadScriptsParams(scriptId)
-      })
+      })*/
     }
 
     /**
      * 根据脚本ID获取脚本参数
-     * @param scriptId
+     * @param script
      */
-    function loadScriptsParams(scriptId) {
-      scriptId && getScriptsParams(scriptId).then(res => {
-        paramData.value = res?.Data?.Params.map(item => ({
-          ...item,
-        }))
-        // props.optionModel.valueSource['scriptParams'][scriptId] = paramData.value
-
-        loadTableData(scriptId, paramData.value)
+    function loadScriptsParams(script) {
+      script && getScriptsParams(script.ID).then(res => {
+        res?.Data?.Params.map(item => {
+          paramData.value.push({
+            scriptName: script.NAME,
+            scriptId: script.ID,
+            ...item
+          })
+        })
+        loadTableData(script.ID, res?.Data?.Params)
       })
     }
+
 
     /**
      * 根据id与参数从通用接口读取数据
@@ -286,29 +270,40 @@ export default {
         params,
         pageSize: compPageSize.value
       })).then(res => {
+        //标记数据在整合数据中的位置
         scriptResponse.dataRange[scriptId] ? scriptResponse.dataRange[scriptId]['start'] = bussinessData.value.length : scriptResponse.dataRange[scriptId] = {start: bussinessData.value.length}
-
-        bussinessData.value = bussinessData.value.concat(res.Data.TableHeaders.map(column => {
-          bindMap[column] = {
-            widget: {},
-            params: []
-          }
-          return {
-            label: column,
-            value: res.Data.TableData?.[0]?.[column],
-            bindWidgetId: "",
-            dataTarget: {
-              checkedNodes: [],
-              expandedNodes: [],
-              procedureValue: {}
+        const columns = res.Data.TableHeaders
+        if (bussinessDataHasRepeatParam(columns, scriptId)) {
+          ElMessage.error({
+            message: '当前脚本有重复的字段，无法合并'
+          })
+          vsTree$.value.tree$.setChecked(scriptId, false)
+          removeScriptParam(scriptId)
+        } else {
+          bussinessData.value = bussinessData.value.concat(columns.map(column => {
+            //给绑定MAP建立初始值key
+            bindMap[column] = {
+              widgetId: "",
+              params: []
             }
-          }
-        }))
-        scriptResponse.dataRange[scriptId]['end'] = res.Data.TableHeaders.length
-        onCurrentChange(1)
-
+            return {
+              label: column,
+              value: res.Data.TableData?.[0]?.[column],
+            }
+          }))
+          scriptResponse.dataRange[scriptId]['end'] = res.Data.TableHeaders.length
+          onCurrentChange(1)
+        }
       })
-      console.log(333, bindMap);
+    }
+
+    function bussinessDataHasRepeatParam(columns) {
+      return columns.some(column => bussinessData.value.findIndex(item => item.label === column) > -1)
+      /*if () {
+
+        return true
+      }
+    })*/
     }
 
     function onCurrentChange(currentPage) {
@@ -325,19 +320,42 @@ export default {
       loadTableData(props?.optionModel?.valueSource?.currentNodeKey, paramData.value)
     }
 
-    function onValueSourceCheckChange(data, checked) {
+    function loadDataFinished(vsData) {
+      loadScriptsParams(vsData)
+    }
+
+    function removePartialBussinessData(script) {
+      //删除绑定数据中的参数
+      const {start, end} = scriptResponse.dataRange[script.ID]
+      const deleteBusDatas = bussinessData.value.splice(start, end)
+      deleteBusDatas.map(({label: bindMapKey}) => {
+        delete bindMap[bindMapKey]
+      })
+      console.log(22, bussinessData.value);
+      removeScriptParam(script.ID)
+      onCurrentChange(scriptResponse.currentPage)
+    }
+
+    /**
+     * 删除脚本参数
+     */
+    function removeScriptParam(scriptId) {
+      /*paramData.value.map(item => {
+        if (item.scriptId === scriptId) {
+          paramData.value.splice(item, 1)
+        }
+      })*/
+      const start = paramData.value.findIndex(item => item.scriptId === scriptId)
+      start > -1 && paramData.value.splice(start, 1)
+    }
+
+    /*function onValueSourceCheckChange(data, checked) {
       if (checked) {
         loadScriptsParams(data.ID)
       } else {
-        const {start, end} = scriptResponse.dataRange[data.ID]
-        const deleteParms = bussinessData.value.splice(start, end)
-        console.log(deleteParms);
-        deleteParms.map(({label: bindMapKey}) => {
-          delete bindMap[bindMapKey]
-        })
-        onCurrentChange(scriptResponse.currentPage)
+
       }
-    }
+    }*/
 
     /**
      * 将存储过程参数拖拽至绑定表格时触发
@@ -357,27 +375,31 @@ export default {
     }
 
     return {
+      vsTree$,
       showDataSource,
-      treeData,
+      // treeData,
       paramData,
       scriptResponse,
       bussinessData,
-      tree$,
+
       busTable$,
       compPageSize,
       compChildrenWidgets,
       paramBindWidgets,
       tableDragGroup,
       bindMap,
+      loadDataFinished,
+      removePartialBussinessData,
       onChangeBindWidget,
+      onCascaderChange,
       currentChange,
-      nodeExpand,
-      nodeCollapse,
+      // nodeExpand,
+      // nodeCollapse,
       onDrawOpened,
       refreshData,
       onCurrentChange,
       onClearBindWidget,
-      onValueSourceCheckChange,
+      // onValueSourceCheckChange,
       onDragAdd,
       removeBindParam
     }
@@ -389,7 +411,7 @@ export default {
     showDataSource: Boolean
   },
   components: {
-    ContextMenu, VDataTarget
+    ContextMenu, VDataTarget, VSourceTree
   },
 }
 
