@@ -26,7 +26,7 @@
           <draggable :list="[data]" :group="treeDragGroup" item-key="Param_ID">
             <template #item="{element,index}">
               <div>
-                {{ element.Param_Name }}
+                {{ element.Param_Name }}{{ element.Param_Des ? `【${element.Param_Des}】` : '' }}
               </div>
             </template>
           </draggable>
@@ -185,9 +185,9 @@ export default {
 
     function loadTreeData(val) {
       getProcedureParams(val.ProcedureName, "", 1).then((res) => {
-        const tree = unFlatten(res.Data.sort((a, b) => a.Param_Des.localeCompare(b.Param_Des)), 'Param_ID',{
-          procedureId:val.ProcedureID,
-          procedureName:val.ProcedureName
+        const tree = unFlatten(res.Data.sort((a, b) => a.Param_Des.localeCompare(b.Param_Des)), 'Param_ID', {
+          procedureId: val.ProcedureID,
+          procedureName: val.ProcedureName
         })
         treeData.value.push({
           Param_ID: val.ProcedureID,

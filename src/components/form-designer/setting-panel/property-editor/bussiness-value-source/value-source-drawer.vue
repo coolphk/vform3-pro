@@ -1,5 +1,5 @@
 <template>
-  <el-dialog @opened="onDrawOpened" v-model="showDataSource" :title="`请选择${i18nt('designer.setting.valueSource')}`"
+  <el-dialog v-model="showDataSource" :title="`请选择${i18nt('designer.setting.valueSource')}`"
              show-close
              :append-to-body="true"
              :close-on-press-escape="false"
@@ -19,12 +19,6 @@
       </div>
 
       <div class="table-wrapper">
-        <!--        <div style="margin:10px 0 10px 8px">
-                  数据展示条数:
-                  <el-input-number v-model="compPageSize"></el-input-number>
-
-                </div>-->
-        <el-button type="primary" style="margin-left: 8px" @click="refreshData">刷新数据</el-button>
         <!--        参数列表-->
         <el-table :data="paramData" border max-height="200">
           <el-table-column prop="scriptId" label="id"/>
@@ -59,18 +53,17 @@
             border
             :data="scriptResponse.data"
         >
+          <el-table-column prop="scriptName" label="脚本名称"/>
           <el-table-column prop="label" label="列名" width="120"/>
           <el-table-column prop="value" label="实际值" width="120"/>
 
           <el-table-column label="对应组件" width="150">
             <template #default="{row}">
-              {{ row.label }}
               <el-select v-model="bindMap[row.label].widgetId"
                          clearable
                          style="width: 120px"
                          @clear="onClearBindWidget(row.label)"
               >
-                <!--                @change="onChangeBindWidget(row)"-->
                 <el-option v-for="(childWid,index) in compChildrenWidgets" :value="childWid.id"
                            :label="childWid.options.label"/>
               </el-select>
@@ -118,21 +111,19 @@
 import i18n from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin";
 import {computed, reactive, ref, watch} from "vue";
-import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams, unFlatten} from "@/utils/data-adapter";
+import {getScriptsParams, loadBussinessSource} from "@/api/bussiness-source";
+import {assembleBussinessParams} from "@/utils/data-adapter";
 import ContextMenu from "@/components/context-menu/index.vue"
 import {isTable, traverseFieldWidgets} from "@/utils/util";
 import useBindParam from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/useBindParam";
-import VDataTarget
-  from "./components/v-data-target";
-import VSourceTree
-  from "./components/v-source-tree";
+import VDataTarget from "./components/v-data-target";
+import VSourceTree from "./components/v-source-tree";
 import {ElMessage} from "element-plus";
 
 export default {
   name: "valueSource-drawer",
   mixins: [i18n, propertyMixin],
-  setup(props, ctx) {
+  setup(props) {
     const vsTree$ = ref()
     const busTable$ = ref()
     const showDataSource = ref(false)
@@ -152,11 +143,14 @@ export default {
       name: 'itxst',
       put: (to, from, toEl) => {
         return bindMap[to.el.dataset.key].params.length === 0
-        // return true
+
       },
       pull: false
     }
+    //脚本字段、组件、存储过程绑定关系
     const bindMap = reactive({})
+
+    //每页显示条数
     const compPageSize = computed({
       set(value) {
         if (isTable(props.selectedWidget.type)) {
@@ -188,21 +182,27 @@ export default {
 
 
     watch(bindMap, (newVal) => {
-      const boundMap = {}
+      let boundMap = {}
+      //过滤出已经绑定的数据，存入组件bindMap
       Object.keys(newVal).map(key => {
         if (newVal[key].params.length > 0) {
+          const params = newVal[key].params.map((
+              {
+                Param_ID, Param_Name, procedureId, procedureName
+              }
+          ) => ({
+            Param_ID,
+            Param_Name,
+            procedureId,
+            procedureName
+          }))
           boundMap[key] = newVal[key]
+          boundMap[key].params = params
         }
       })
       props.optionModel.valueSource.bindMap = boundMap
+      boundMap = null
     })
-
-    /**
-     * dataWrapper绑定组件时触发
-     */
-    function onChangeBindWidget(row) {
-      props.selectedWidget.options.valueSource.bindMap[row.prop] = row.bindWidgetId
-    }
 
     /**
      * 脚本参数绑定组件选择事件
@@ -213,33 +213,18 @@ export default {
       console.log(props.designer);
       console.log(row);
       console.log(value);
-
       props.designer.formWidget.getWidgetRef(value[0]).widget.options.onOperationButtonClick =
           `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({${row.Param_Name}:row['${value[1]}']})`
     }
 
+    /**
+     * 绑定组件清空方法
+     * @param key
+     */
     function onClearBindWidget(key) {
       bindMap[key].widgetId = ""
     }
 
-    function currentChange(node) {
-      if (node.type === 'Scripts') {
-        props.optionModel.valueSource['currentNodeKey'] = node.ID
-        loadScriptsParams(node.ID)
-      }
-    }
-
-
-    /**
-     * 抽屉展开时刷新左侧树,获取脚本数据源
-     */
-    function onDrawOpened() {
-      /*getScriptTree().then(res => {
-        treeData.value = unFlatten(res.Data, 'ID')
-        const scriptId = props?.optionModel?.valueSource?.currentNodeKey
-        loadScriptsParams(scriptId)
-      })*/
-    }
 
     /**
      * 根据脚本ID获取脚本参数
@@ -247,24 +232,17 @@ export default {
      */
     function loadScriptsParams(script) {
       script && getScriptsParams(script.ID).then(res => {
-        res?.Data?.Params.map(item => {
-          paramData.value.push({
-            scriptName: script.NAME,
-            scriptId: script.ID,
-            ...item
-          })
-        })
-        loadTableData(script.ID, res?.Data?.Params)
+        loadTableData(script, res?.Data?.Params)
       })
     }
 
 
     /**
      * 根据id与参数从通用接口读取数据
-     * @param scriptId
+     * @param script
      * @param params
      */
-    function loadTableData(scriptId, params) {
+    function loadTableData({ID: scriptId, NAME: scriptName}, params) {
       loadBussinessSource(assembleBussinessParams({
         scriptId,
         params,
@@ -273,37 +251,56 @@ export default {
         //标记数据在整合数据中的位置
         scriptResponse.dataRange[scriptId] ? scriptResponse.dataRange[scriptId]['start'] = bussinessData.value.length : scriptResponse.dataRange[scriptId] = {start: bussinessData.value.length}
         const columns = res.Data.TableHeaders
+        //如果当前绑定数据中包含新选择的项，删除相关参数，否则才给绑定表格加薪数据
         if (bussinessDataHasRepeatParam(columns, scriptId)) {
           ElMessage.error({
             message: '当前脚本有重复的字段，无法合并'
           })
           vsTree$.value.tree$.setChecked(scriptId, false)
-          removeScriptParam(scriptId)
         } else {
+          //合并参数
+          paramData.value = paramData.value.concat(params.map(param => ({
+            scriptName: scriptName,
+            scriptId: scriptId,
+            ...param
+          })))
+
+          //合并数据
           bussinessData.value = bussinessData.value.concat(columns.map(column => {
             //给绑定MAP建立初始值key
+
             bindMap[column] = {
+              scriptId,
+              scriptName,
               widgetId: "",
               params: []
             }
             return {
               label: column,
               value: res.Data.TableData?.[0]?.[column],
+              scriptName
             }
-          }))
+          }).sort((a, b) => a.label.localeCompare(b.label)))
           scriptResponse.dataRange[scriptId]['end'] = res.Data.TableHeaders.length
           onCurrentChange(1)
         }
       })
     }
 
+    /**
+     * 判断当前数据是否包含新选中脚本的列
+     * @param columns
+     * @returns {*}
+     */
     function bussinessDataHasRepeatParam(columns) {
-      return columns.some(column => bussinessData.value.findIndex(item => item.label === column) > -1)
-      /*if () {
-
-        return true
-      }
-    })*/
+      return columns.some(column => {
+        if (bussinessData.value.findIndex(item => item.label === column) > -1) {
+          console.log(column);
+          return true
+        } else {
+          return false
+        }
+      })
     }
 
     function onCurrentChange(currentPage) {
@@ -324,6 +321,7 @@ export default {
       loadScriptsParams(vsData)
     }
 
+    //脚本树勾选取消时删除相关数据，包括绑定数据、脚本参数
     function removePartialBussinessData(script) {
       //删除绑定数据中的参数
       const {start, end} = scriptResponse.dataRange[script.ID]
@@ -331,7 +329,6 @@ export default {
       deleteBusDatas.map(({label: bindMapKey}) => {
         delete bindMap[bindMapKey]
       })
-      console.log(22, bussinessData.value);
       removeScriptParam(script.ID)
       onCurrentChange(scriptResponse.currentPage)
     }
@@ -340,22 +337,9 @@ export default {
      * 删除脚本参数
      */
     function removeScriptParam(scriptId) {
-      /*paramData.value.map(item => {
-        if (item.scriptId === scriptId) {
-          paramData.value.splice(item, 1)
-        }
-      })*/
       const start = paramData.value.findIndex(item => item.scriptId === scriptId)
       start > -1 && paramData.value.splice(start, 1)
     }
-
-    /*function onValueSourceCheckChange(data, checked) {
-      if (checked) {
-        loadScriptsParams(data.ID)
-      } else {
-
-      }
-    }*/
 
     /**
      * 将存储过程参数拖拽至绑定表格时触发
@@ -376,13 +360,11 @@ export default {
 
     return {
       vsTree$,
+      busTable$,
       showDataSource,
-      // treeData,
       paramData,
       scriptResponse,
       bussinessData,
-
-      busTable$,
       compPageSize,
       compChildrenWidgets,
       paramBindWidgets,
@@ -390,16 +372,10 @@ export default {
       bindMap,
       loadDataFinished,
       removePartialBussinessData,
-      onChangeBindWidget,
       onCascaderChange,
-      currentChange,
-      // nodeExpand,
-      // nodeCollapse,
-      onDrawOpened,
       refreshData,
       onCurrentChange,
       onClearBindWidget,
-      // onValueSourceCheckChange,
       onDragAdd,
       removeBindParam
     }
