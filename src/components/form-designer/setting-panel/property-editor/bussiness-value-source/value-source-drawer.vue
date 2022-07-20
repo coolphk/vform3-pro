@@ -59,10 +59,10 @@
 
           <el-table-column label="对应组件" width="150">
             <template #default="{row}">
-              <el-select v-model="bindMap[row.label].widgetId"
+              <el-select v-model="getBindMapWithRow(row).widgetId"
                          clearable
                          style="width: 120px"
-                         @clear="onClearBindWidget(row.label)"
+                         @clear="onClearBindWidget(row)"
               >
                 <el-option v-for="(childWid,index) in compChildrenWidgets" :value="childWid.id"
                            :label="childWid.options.label"/>
@@ -72,11 +72,10 @@
           <el-table-column width="250">
             <template #default="{row}">
               <draggable
-                  v-if="bindMap[row.label]"
                   class="el-card"
                   style="min-height: 22px"
-                  :data-key="row.label"
-                  :list="bindMap[row.label].params" item-key="Param_ID" :group="tableDragGroup"
+                  :data-row="row"
+                  :list="getBindMapWithRow(row).params" item-key="Param_ID" :group="tableDragGroup"
                   @add="onDragAdd(row,$event)"
               >
                 <template #item="{element,index}">
@@ -112,7 +111,7 @@ import i18n from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin";
 import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams} from "@/utils/data-adapter";
+import {assembleBussinessParams, traverseObj} from "@/utils/data-adapter";
 import ContextMenu from "@/components/context-menu/index.vue"
 import {isTable, traverseFieldWidgets} from "@/utils/util";
 import useBindParam from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/useBindParam";
@@ -142,12 +141,13 @@ export default {
     const tableDragGroup = { //绑定表格中拖拽容器
       name: 'itxst',
       put: (to, from, toEl) => {
-        return bindMap[to.el.dataset.key].params.length === 0
+        console.log(11, to.el.dataset.row)
+        // return bindMap[to.el.dataset.key].params.length === 0
 
       },
       pull: false
     }
-    //脚本字段、组件、存储过程绑定关系
+    //脚本字段、组件、存储过程绑定关系 {scriptId:{column:{widgetId,params}}
     const bindMap = reactive({})
 
     //每页显示条数
@@ -183,22 +183,24 @@ export default {
 
     watch(bindMap, (newVal) => {
       let boundMap = {}
-      //过滤出已经绑定的数据，存入组件bindMap
-      Object.keys(newVal).map(key => {
-        if (newVal[key].params.length > 0) {
-          const params = newVal[key].params.map((
-              {
-                Param_ID, Param_Name, procedureId, procedureName
-              }
-          ) => ({
-            Param_ID,
-            Param_Name,
-            procedureId,
-            procedureName
-          }))
-          boundMap[key] = newVal[key]
-          boundMap[key].params = params
-        }
+
+      //筛选出已经绑定过的数据，存入组件bindMap
+      traverseObj(newVal, (key, value) => {
+        boundMap[key] = {}
+        traverseObj(value, (ckey, cvalue) => {
+          if (Object.hasOwn(cvalue, 'params') && cvalue.params.length > 0) {
+            boundMap[key][ckey] = cvalue
+            const params = cvalue?.params.map(({
+                                                 Param_ID, Param_Name, procedureId, procedureName
+                                               }) => ({
+              Param_ID,
+              Param_Name,
+              procedureId,
+              procedureName
+            }))
+            boundMap[key][ckey].params = params
+          }
+        })
       })
       props.optionModel.valueSource.bindMap = boundMap
       boundMap = null
@@ -219,10 +221,10 @@ export default {
 
     /**
      * 绑定组件清空方法
-     * @param key
+     * @param row
      */
-    function onClearBindWidget(key) {
-      bindMap[key].widgetId = ""
+    function onClearBindWidget(row) {
+      getBindMapWithRow(row).widgetId = ""
     }
 
 
@@ -252,38 +254,40 @@ export default {
         scriptResponse.dataRange[scriptId] ? scriptResponse.dataRange[scriptId]['start'] = bussinessData.value.length : scriptResponse.dataRange[scriptId] = {start: bussinessData.value.length}
         const columns = res.Data.TableHeaders
         //如果当前绑定数据中包含新选择的项，删除相关参数，否则才给绑定表格加薪数据
-        if (bussinessDataHasRepeatParam(columns, scriptId)) {
-          ElMessage.error({
-            message: '当前脚本有重复的字段，无法合并'
-          })
-          vsTree$.value.tree$.setChecked(scriptId, false)
-        } else {
-          //合并参数
-          paramData.value = paramData.value.concat(params.map(param => ({
-            scriptName: scriptName,
-            scriptId: scriptId,
-            ...param
-          })))
+        // if (bussinessDataHasRepeatParam(columns, scriptId)) {
+        //   ElMessage.error({
+        //     message: '当前脚本有重复的字段，无法合并'
+        //   })
+        //   vsTree$.value.tree$.setChecked(scriptId, false)
+        // } else {
+        //合并参数
+        paramData.value = paramData.value.concat(params.map(param => ({
+          scriptName: scriptName,
+          scriptId: scriptId,
+          ...param
+        })))
 
-          //合并数据
-          bussinessData.value = bussinessData.value.concat(columns.map(column => {
-            //给绑定MAP建立初始值key
-
-            bindMap[column] = {
-              scriptId,
-              scriptName,
-              widgetId: "",
-              params: []
-            }
-            return {
-              label: column,
-              value: res.Data.TableData?.[0]?.[column],
-              scriptName
-            }
-          }).sort((a, b) => a.label.localeCompare(b.label)))
-          scriptResponse.dataRange[scriptId]['end'] = res.Data.TableHeaders.length
-          onCurrentChange(1)
+        //合并数据
+        bindMap[scriptId] = {
+          scriptName
         }
+        bussinessData.value = bussinessData.value.concat(columns.map(column => {
+          //给绑定MAP建立初始值key
+          bindMap[scriptId][column] = {
+            widgetId: "",
+            params: []
+          }
+          return {
+            label: column,
+            value: res.Data.TableData?.[0]?.[column],
+            scriptName,
+            scriptId
+          }
+        }).sort((a, b) => a.label.localeCompare(b.label)))
+        console.log('bindMap', bindMap);
+        scriptResponse.dataRange[scriptId]['end'] = res.Data.TableHeaders.length
+        onCurrentChange(1)
+        // }
       })
     }
 
@@ -358,6 +362,12 @@ export default {
       bindMap[bindMapKey].params = []
     }
 
+    function getBindMapWithRow(row) {
+      const ss = bindMap[row.scriptId][row.label]
+      console.log(ss);
+      return ss
+    }
+
     return {
       vsTree$,
       busTable$,
@@ -377,7 +387,8 @@ export default {
       onCurrentChange,
       onClearBindWidget,
       onDragAdd,
-      removeBindParam
+      removeBindParam,
+      getBindMapWithRow
     }
   },
   props: {
