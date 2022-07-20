@@ -88,17 +88,19 @@
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column width="150">
+          <el-table-column width="250">
             <template #default="{row}">
-              <draggable class="el-card"
-                         style="height: 22px"
-                         :data-key="row.label"
-                         :list="bindMap[row.label].params" item-key="Param_ID" :group="tableDragGroup"
-                         @add="onDragAdd(row,$event)"
+              <draggable
+                  v-if="bindMap[row.label]"
+                  class="el-card"
+                  style="min-height: 22px"
+                  :data-key="row.label"
+                  :list="bindMap[row.label].params" item-key="Param_ID" :group="tableDragGroup"
+                  @add="onDragAdd(row,$event)"
               >
                 <template #item="{element,index}">
-                  <div data-label="111">
-                    {{ element.Param_Name }}
+                  <div style="margin: 2px">
+                    <el-button size="small" @click="removeBindParam(row['label'])">{{ element.Param_Name }}</el-button>
                   </div>
                 </template>
               </draggable>
@@ -111,7 +113,7 @@
             :total="scriptResponse.total"
             @current-change="onCurrentChange"
         />
-        {{ selectedWidget?.options?.valueSource?.bindMap }}
+        {{ bindMap }}
       </div>
       <div class="tree-wrapper" style="border-left: none;height: 100%;">
         <div class="tree-title">请选择要绑定的数据目标</div>
@@ -193,6 +195,16 @@ export default {
 
     watch(openNodeSet, (newVal) => {
       props.optionModel.valueSource["expandedNodes"] = Array.from(newVal)
+    })
+
+    watch(bindMap, (newVal) => {
+      const boundMap = {}
+      Object.keys(newVal).map(key => {
+        if (newVal[key].params.length > 0) {
+          boundMap[key] = newVal[key]
+        }
+      })
+      props.optionModel.valueSource.bindMap = boundMap
     })
 
     /**
@@ -318,13 +330,30 @@ export default {
         loadScriptsParams(data.ID)
       } else {
         const {start, end} = scriptResponse.dataRange[data.ID]
-        bussinessData.value.splice(start, end)
+        const deleteParms = bussinessData.value.splice(start, end)
+        console.log(deleteParms);
+        deleteParms.map(({label: bindMapKey}) => {
+          delete bindMap[bindMapKey]
+        })
         onCurrentChange(scriptResponse.currentPage)
       }
     }
 
+    /**
+     * 将存储过程参数拖拽至绑定表格时触发
+     * @param row
+     * @param evt
+     */
     function onDragAdd(row, evt) {
       // console.log(row, evt);
+    }
+
+    /**
+     * 删除已经绑定的存储过程参数
+     * @param bindMapKey
+     */
+    function removeBindParam(bindMapKey) {
+      bindMap[bindMapKey].params = []
     }
 
     return {
@@ -349,7 +378,8 @@ export default {
       onCurrentChange,
       onClearBindWidget,
       onValueSourceCheckChange,
-      onDragAdd
+      onDragAdd,
+      removeBindParam
     }
   },
   props: {
