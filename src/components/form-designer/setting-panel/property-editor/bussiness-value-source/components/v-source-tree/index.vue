@@ -75,7 +75,6 @@ function onCheckChange(data, checked) {
 }
 
 function onCheck(data, {checkedNodes}) {
-  console.log(checkedNodes);
   props.valueSource.checkedNodes = checkedNodes
 }
 </script>

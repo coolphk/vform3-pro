@@ -39,9 +39,13 @@
         </el-table>
         <div class="widget-wrapper">
           <template v-if="optionModel.valueSource">
-            <span class="label">绑定关系表：</span><span style="color:darkcyan">{{
-              optionModel.valueSource.sourceId
-            }}</span>
+            <div>
+              <div class="label">绑定关系表：</div>
+              <div style="display: flex">
+                列名搜索:
+                <el-input style="width: 120px" v-model="inputColumnValue"/>
+              </div>
+            </div>
           </template>
         </div>
 
@@ -127,7 +131,7 @@ export default {
     const vsTree$ = ref()
     const busTable$ = ref()
     const showDataSource = ref(false)
-
+    const inputColumnValue = ref("")
     const paramData = ref([])  //存储过程参数集合
     const paramBindWidgets = useBindParam(props.designer.widgetList) //存储过程参数需要绑定的组件列表
     const scriptResponse = reactive({
@@ -142,7 +146,6 @@ export default {
     const tableDragGroup = { //绑定表格中拖拽容器
       name: 'itxst',
       put: (to, from, toEl) => {
-        console.log(11, to.el.dataset.row)
         const row = JSON.parse(to.el.dataset.row)
         return getBindMapWithRow(row).params.length === 0
 
@@ -182,11 +185,18 @@ export default {
       return childrenWidgets
     })
 
+    const compBussinessData = computed(() => {
+      return bussinessData.value.filter((data) => !inputColumnValue.value || data.label.toLowerCase().includes(inputColumnValue.value.toLowerCase()))
+    })
+
+    watch(inputColumnValue, (newVal) => {
+      onCurrentChange(1)
+    })
 
     watch(bindMap, (newVal) => {
       let boundMap = {}
 
-      //筛选出已经绑定过的数据，存入组件bindMap
+      //从bindMap中筛选出已经绑定过的数据，存入组件valueSource.bindMap
       traverseObj(newVal, (key, value) => {
         boundMap[key] = {}
         traverseObj(value, (ckey, cvalue) => {
@@ -203,6 +213,7 @@ export default {
             boundMap[key][ckey].params = params
           }
         })
+        isEmptyObj(boundMap[key]) && delete boundMap[key]
       })
       props.optionModel.valueSource.bindMap = boundMap
       boundMap = null
@@ -219,6 +230,10 @@ export default {
       console.log(value);
       props.designer.formWidget.getWidgetRef(value[0]).widget.options.onOperationButtonClick =
           `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({${row.Param_Name}:row['${value[1]}']})`
+    }
+
+    function filterBussinessData() {
+
     }
 
     /**
@@ -252,8 +267,7 @@ export default {
         params,
         pageSize: compPageSize.value
       })).then(res => {
-        //标记数据在整合数据中的位置
-        scriptResponse.dataRange[scriptId] ? scriptResponse.dataRange[scriptId]['start'] = bussinessData.value.length : scriptResponse.dataRange[scriptId] = {start: bussinessData.value.length}
+
         const columns = res.Data.TableHeaders
         //合并参数
         paramData.value = paramData.value.concat(params.map(param => ({
@@ -262,10 +276,12 @@ export default {
           ...param
         })))
 
-        //合并数据
+        //初始化绑定关系，如果有旧的绑定关系，则读取旧的为初始值
         const vsBindMap = props.optionModel.valueSource.bindMap
         bindMap[scriptId] = isEmptyObj(vsBindMap[scriptId]) ? {scriptName} : vsBindMap[scriptId]
 
+        //标记数据在整合数据中的位置
+        scriptResponse.dataRange[scriptId] ? scriptResponse.dataRange[scriptId]['start'] = bussinessData.value.length : scriptResponse.dataRange[scriptId] = {start: bussinessData.value.length}
         bussinessData.value = bussinessData.value.concat(columns.map(column => {
           //给绑定MAP建立初始值key
           bindMap[scriptId][column] = vsBindMap[scriptId]?.[column] ? vsBindMap[scriptId][column] : {
@@ -286,8 +302,9 @@ export default {
     }
 
     function onCurrentChange(currentPage) {
-      scriptResponse.data = pagination(currentPage > bussinessData.value.length ? bussinessData.value.length : currentPage, scriptResponse.pageSize, bussinessData.value)
-      scriptResponse.total = bussinessData.value.length
+      // scriptResponse.data = pagination(currentPage > bussinessData.value.length ? bussinessData.value.length : currentPage, scriptResponse.pageSize, bussinessData.value)
+      scriptResponse.data = pagination(currentPage > compBussinessData.value.length ? compBussinessData.value.length : currentPage, scriptResponse.pageSize, compBussinessData.value)
+      scriptResponse.total = compBussinessData.value.length
     }
 
     function pagination(pageNo, pageSize, array) {
@@ -309,9 +326,15 @@ export default {
       if (!isEmptyObj(scriptResponse.dataRange)) {
         const {start, end} = scriptResponse.dataRange[script.ID]
         const deleteBusDatas = bussinessData.value.splice(start, end)
+        traverseObj(scriptResponse.dataRange, (key, item) => {
+          if (item.start >= end) {
+            item.start = item.start - end + start
+          }
+        })
         deleteBusDatas.map(({label: bindMapKey}) => {
           delete bindMap[bindMapKey]
         })
+        delete scriptResponse.dataRange[script.ID]
         removeScriptParam(script.ID)
         removeBindMap(script.ID)
         onCurrentChange(scriptResponse.currentPage)
@@ -355,6 +378,7 @@ export default {
       paramBindWidgets,
       tableDragGroup,
       bindMap,
+      inputColumnValue,
       loadDataFinished,
       removePartialBussinessData,
       onCascaderChange,
