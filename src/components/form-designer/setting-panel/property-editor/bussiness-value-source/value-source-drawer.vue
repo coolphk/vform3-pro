@@ -74,7 +74,7 @@
               <draggable
                   class="el-card"
                   style="min-height: 22px"
-                  :data-row="row"
+                  :data-row="JSON.stringify(row)"
                   :list="getBindMapWithRow(row).params" item-key="Param_ID" :group="tableDragGroup"
                   @add="onDragAdd(row,$event)"
               >
@@ -113,7 +113,7 @@ import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams, traverseObj} from "@/utils/data-adapter";
 import ContextMenu from "@/components/context-menu/index.vue"
-import {isTable, traverseFieldWidgets} from "@/utils/util";
+import {deepClone, isTable, traverseFieldWidgets} from "@/utils/util";
 import useBindParam from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/useBindParam";
 import VDataTarget from "./components/v-data-target";
 import VSourceTree from "./components/v-source-tree";
@@ -142,7 +142,8 @@ export default {
       name: 'itxst',
       put: (to, from, toEl) => {
         console.log(11, to.el.dataset.row)
-        // return bindMap[to.el.dataset.key].params.length === 0
+        const row = JSON.parse(to.el.dataset.row)
+        return getBindMapWithRow(row).params.length === 0
 
       },
       pull: false
@@ -189,7 +190,7 @@ export default {
         boundMap[key] = {}
         traverseObj(value, (ckey, cvalue) => {
           if (Object.hasOwn(cvalue, 'params') && cvalue.params.length > 0) {
-            boundMap[key][ckey] = cvalue
+            boundMap[key][ckey] = deepClone(cvalue)
             const params = cvalue?.params.map(({
                                                  Param_ID, Param_Name, procedureId, procedureName
                                                }) => ({
