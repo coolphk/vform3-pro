@@ -1,5 +1,5 @@
 <template>
-  <div style="margin:8px 8px 0 8px;display: flex;flex-direction: column;height: 100%">
+  <div style=" width:20vw;margin:8px 8px 0 8px;display: flex;flex-direction: column;height: 100%">
     <div>
       <el-select
           ref="select$"
@@ -14,13 +14,15 @@
       </el-select>
     </div>
 
-    <div style="width:360px;height:100%; margin-top: 8px;" class="el-card">
+    <div style="flex:1; margin-top: 8px;" class="el-card">
       <el-tree
           node-key="Param_ID"
-          style="height: 700px;overflow: auto;"
+          style="height: 100%;overflow: auto;"
           :indent="8"
           :data="treeData"
           :props="treeProps"
+          :default-expanded-keys="dataTarget.expandedKeys"
+          @node-expand="onNodeExpand"
       >
         <template #default="{node,data}">
           <draggable :list="[data]" :group="treeDragGroup" item-key="Param_ID">
@@ -33,7 +35,6 @@
         </template>
       </el-tree>
     </div>
-
   </div>
 
 </template>
@@ -43,11 +44,9 @@ import ProcedureSelect from "@/components/form-designer/toolbar-panel/datasource
 import ContextMenu from "@/components/context-menu";
 import i18n from "@/utils/i18n";
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin";
-import {onMounted, reactive, ref, toRaw, watch} from "vue";
-import {isEmptyObj, isTable} from "@/utils/util";
+import {reactive, ref, watch} from "vue";
 import {getProcedureList, getProcedureParams} from "@/api/data-schema";
 import {unFlatten} from "@/utils/data-adapter";
-import {onClickOutside} from "@vueuse/core";
 
 export default {
   name: "VDataTarget",
@@ -58,7 +57,7 @@ export default {
     const showLoading = ref(false)
     const showProcedureListLoading = ref(true)
     //展开的节点
-    const openNodeSet = reactive(new Set(props.dataTarget['expandedNodes']))
+    const openNodeSet = reactive(new Set(props.dataTarget['expandedKeys']))
     const select$ = ref()
     //树组件引用
     const tree$ = ref("")
@@ -75,26 +74,30 @@ export default {
     const treeData = ref([]) //存储过程具体内容树
     //存储过程下拉列表
     const procedureList = ref([])
-    const selectedProcedures = ref([])
+    const selectedProcedures = ref(props.dataTarget.selectedProcedures)
 
     watch(openNodeSet, (newVal) => {
-      props.dataTarget["expandedNodes"] = Array.from(newVal)
+      props.dataTarget["expandedKeys"] = Array.from(newVal)
     })
 
     watch(selectedProcedures, (newVal, oldVal) => {
-      //如果new length> old length代表是添加数据，双重遍历筛选出新选择的脚本，然后读取脚本参数
-      if (newVal.length > oldVal.length) {
-        newVal.map(nv => {
-          if (oldVal.findIndex((ov) => nv.ProcedureID === ov.ProcedureID) === -1) {
-            loadTreeData(nv)
-          }
-        })
-      } else {
-        oldVal.map(ov => {
-          if (newVal.findIndex((nv) => nv.ProcedureID === ov.ProcedureID) === -1) {
-            treeData.value.splice(treeData.value.findIndex(param => param.Param_ID === ov.ProcedureID), 1)
-          }
-        })
+      //如果new length> old length代表是添加数据，取出新选择的脚本，然后读取脚本参数,
+      //否则是取消选择脚本，则删除掉树里面相应的数据
+      if (newVal && oldVal) {
+        if (newVal.length > oldVal.length) {
+          newVal.map(nv => {
+            if (oldVal.findIndex((ov) => nv.ProcedureID === ov.ProcedureID) === -1) {
+              loadTreeData(nv)
+            }
+          })
+        } else {
+          oldVal.map(ov => {
+            if (newVal.findIndex((nv) => nv.ProcedureID === ov.ProcedureID) === -1) {
+              treeData.value.splice(treeData.value.findIndex(param => param.Param_ID === ov.ProcedureID), 1)
+            }
+          })
+        }
+        props.dataTarget.selectedProcedures = newVal
       }
     })
 
@@ -102,58 +105,8 @@ export default {
       console.log(putList[evt.newIndex]);
     }
 
-    // 选择存储过程，通过过程名称加载存储过程参数，并设置树形组件默认展开根节点
-    function onProcedureSelect(val) {
-      console.log(22, val, selectedProcedures.value);
-
-      //切换存储过程时清空展开的节点
-      /*openNodeSet.clear()
-      props.dataTarget['procedureValue'] = val
-      props.dataTarget.checkedNodes = []
-      loadTreeData(val)*/
-    }
-
-    function checkNode(data, {checkedNodes}) {
-
-      // console.log('selectedWidget', props.selectedWidget);
-      /*if (props.selectedWidget.type === 'edit-table') {
-        if (!_isArrayChild(data)) {
-          ElMessage.error(`${translate('extension.widgetLabel.' + props.selectedWidget.type)}只能选择数组子节点!`)
-          tree$.value.setChecked(data, false, true)
-          return;
-
-        }
-      } else {*/
-      if (!isTable(props.selectedWidget.type)) {
-        // if (data?.Param_ObjType !== 'attribute') {
-        //   ElMessage.error('您选择的不是叶节点')
-        //   tree$.value.setChecked(data, false, true)
-        // return
-        // }
-        // props.dataTarget['checkedNodes'] = checkedNodes
-        /*console.log(checkedNodes);
-        console.log(checkedNodes.filter(node => {
-          // node.data.Param_ID === data.Param_ID)
-          console.log(node);
-        }))*/
-        props.dataTarget['checkedNodes'] = [data]
-        tree$.value.setCheckedKeys([data.Param_ID])
-      }
-    }
-
-    function nodeExpand(data, val) {
-      console.log('nodeExpand_data', data, tree$.value);
-      const {Param_ID, Param_Name, isProcedure} = data
-      openNodeSet.add(Param_ID)
-      if (Param_ID !== 'root0') {
-        if (isProcedure) {
-          getProcedureParams(Param_Name, "", 1).then(res => {
-            const parent = treeData.value[0].children.find(item => item.Param_ID === data.Param_ID)
-            parent.children = res.Data
-          })
-          treeData.value = [...treeData.value]
-        }
-      }
+    function onNodeExpand(data, val) {
+      openNodeSet.add(data.Param_ID)
     }
 
     /**
@@ -162,15 +115,6 @@ export default {
      * @param node
      */
     function nodeCollapse(data, node) {
-      console.log(node);
-      const traverse = (node) => {
-        const nodes = node.children.filter(item => item.expanded)
-        nodes.map(item => {
-          openNodeSet.delete(item.key)
-          traverse(item)
-        })
-      }
-      traverse(node)
       openNodeSet.delete(data.Param_ID)
     }
 
@@ -197,26 +141,27 @@ export default {
       })
     }
 
-    loadProcedureList()
-    loadTreeData({ProcedureID: 1775695957, ProcedureName: 'HOPatient_VAE1_Update'})
+    (function initData() {
+      loadProcedureList()
+      props.dataTarget.selectedProcedures.map(({ProcedureID, ProcedureName}) => {
+        loadTreeData({ProcedureID, ProcedureName})
+      })
+    })()
+
+
     return {
-      // showDataTargetDialog,
       showLoading,
       treeProps,
       tree$,
       treeData,
       select$,
-      // showCheckBox,
       procedureList,
       selectedProcedures,
       showProcedureListLoading,
       treeDragGroup,
       putList,
-      isTable,
-      checkNode,
-      nodeExpand,
+      onNodeExpand,
       nodeCollapse,
-      onProcedureSelect,
       onDragAdd
     }
   },

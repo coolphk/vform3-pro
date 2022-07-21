@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="showDataSource" :title="`请选择${i18nt('designer.setting.valueSource')}`"
+  <el-dialog v-model="showDataSource" title="请配置数据绑定关系"
              show-close
              :append-to-body="true"
              :close-on-press-escape="false"
@@ -76,11 +76,10 @@
                   style="min-height: 22px"
                   :data-row="JSON.stringify(row)"
                   :list="getBindMapWithRow(row).params" item-key="Param_ID" :group="tableDragGroup"
-                  @add="onDragAdd(row,$event)"
               >
                 <template #item="{element,index}">
                   <div style="margin: 2px">
-                    <el-button size="small" @click="removeBindParam(row['label'])">{{ element.Param_Name }}</el-button>
+                    <el-button size="small" @click="removeBindParam(row)">{{ element.Param_Name }}</el-button>
                   </div>
                 </template>
               </draggable>
@@ -94,6 +93,8 @@
             @current-change="onCurrentChange"
         />
         {{ optionModel.valueSource.bindMap }}
+        <!--        <hr/>
+                {{ bindMap }}-->
       </div>
       <div class="tree-wrapper" style="border-left: none;height: 100%;">
         <div class="tree-title">请选择要绑定的数据目标</div>
@@ -113,7 +114,7 @@ import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams, traverseObj} from "@/utils/data-adapter";
 import ContextMenu from "@/components/context-menu/index.vue"
-import {deepClone, isTable, traverseFieldWidgets} from "@/utils/util";
+import {deepClone, isEmptyObj, isTable, traverseFieldWidgets} from "@/utils/util";
 import useBindParam from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/useBindParam";
 import VDataTarget from "./components/v-data-target";
 import VSourceTree from "./components/v-source-tree";
@@ -225,7 +226,7 @@ export default {
      * @param row
      */
     function onClearBindWidget(row) {
-      getBindMapWithRow(row).widgetId = ""
+      getBindMapWithRow(row).widgetId = undefined
     }
 
 
@@ -254,13 +255,6 @@ export default {
         //标记数据在整合数据中的位置
         scriptResponse.dataRange[scriptId] ? scriptResponse.dataRange[scriptId]['start'] = bussinessData.value.length : scriptResponse.dataRange[scriptId] = {start: bussinessData.value.length}
         const columns = res.Data.TableHeaders
-        //如果当前绑定数据中包含新选择的项，删除相关参数，否则才给绑定表格加薪数据
-        // if (bussinessDataHasRepeatParam(columns, scriptId)) {
-        //   ElMessage.error({
-        //     message: '当前脚本有重复的字段，无法合并'
-        //   })
-        //   vsTree$.value.tree$.setChecked(scriptId, false)
-        // } else {
         //合并参数
         paramData.value = paramData.value.concat(params.map(param => ({
           scriptName: scriptName,
@@ -269,15 +263,16 @@ export default {
         })))
 
         //合并数据
-        bindMap[scriptId] = {
-          scriptName
-        }
+        const vsBindMap = props.optionModel.valueSource.bindMap
+        bindMap[scriptId] = isEmptyObj(vsBindMap[scriptId]) ? {scriptName} : vsBindMap[scriptId]
+
         bussinessData.value = bussinessData.value.concat(columns.map(column => {
           //给绑定MAP建立初始值key
-          bindMap[scriptId][column] = {
+          bindMap[scriptId][column] = vsBindMap[scriptId]?.[column] ? vsBindMap[scriptId][column] : {
             widgetId: "",
             params: []
           }
+
           return {
             label: column,
             value: res.Data.TableData?.[0]?.[column],
@@ -285,26 +280,8 @@ export default {
             scriptId
           }
         }).sort((a, b) => a.label.localeCompare(b.label)))
-        console.log('bindMap', bindMap);
         scriptResponse.dataRange[scriptId]['end'] = res.Data.TableHeaders.length
         onCurrentChange(1)
-        // }
-      })
-    }
-
-    /**
-     * 判断当前数据是否包含新选中脚本的列
-     * @param columns
-     * @returns {*}
-     */
-    function bussinessDataHasRepeatParam(columns) {
-      return columns.some(column => {
-        if (bussinessData.value.findIndex(item => item.label === column) > -1) {
-          console.log(column);
-          return true
-        } else {
-          return false
-        }
       })
     }
 
@@ -329,13 +306,16 @@ export default {
     //脚本树勾选取消时删除相关数据，包括绑定数据、脚本参数
     function removePartialBussinessData(script) {
       //删除绑定数据中的参数
-      const {start, end} = scriptResponse.dataRange[script.ID]
-      const deleteBusDatas = bussinessData.value.splice(start, end)
-      deleteBusDatas.map(({label: bindMapKey}) => {
-        delete bindMap[bindMapKey]
-      })
-      removeScriptParam(script.ID)
-      onCurrentChange(scriptResponse.currentPage)
+      if (!isEmptyObj(scriptResponse.dataRange)) {
+        const {start, end} = scriptResponse.dataRange[script.ID]
+        const deleteBusDatas = bussinessData.value.splice(start, end)
+        deleteBusDatas.map(({label: bindMapKey}) => {
+          delete bindMap[bindMapKey]
+        })
+        removeScriptParam(script.ID)
+        removeBindMap(script.ID)
+        onCurrentChange(scriptResponse.currentPage)
+      }
     }
 
     /**
@@ -346,27 +326,21 @@ export default {
       start > -1 && paramData.value.splice(start, 1)
     }
 
-    /**
-     * 将存储过程参数拖拽至绑定表格时触发
-     * @param row
-     * @param evt
-     */
-    function onDragAdd(row, evt) {
-      // console.log(row, evt);
-    }
 
     /**
      * 删除已经绑定的存储过程参数
-     * @param bindMapKey
+     * @param row
      */
-    function removeBindParam(bindMapKey) {
-      bindMap[bindMapKey].params = []
+    function removeBindParam(row) {
+      getBindMapWithRow(row).params = []
+    }
+
+    function removeBindMap(scriptId) {
+      delete bindMap[scriptId]
     }
 
     function getBindMapWithRow(row) {
-      const ss = bindMap[row.scriptId][row.label]
-      console.log(ss);
-      return ss
+      return bindMap?.[row.scriptId]?.[row.label]
     }
 
     return {
@@ -387,7 +361,6 @@ export default {
       refreshData,
       onCurrentChange,
       onClearBindWidget,
-      onDragAdd,
       removeBindParam,
       getBindMapWithRow
     }
@@ -416,7 +389,6 @@ export default {
     flex-direction: column;
     border: var(--el-border);
     height: 100%;
-    flex: 0 0 20%;
 
     .tree-title {
       padding-left: 10px;
@@ -425,7 +397,7 @@ export default {
     }
 
     .tree-body {
-      flex: 1 1 80%
+      height: calc(100% - 30px);
     }
   }
 

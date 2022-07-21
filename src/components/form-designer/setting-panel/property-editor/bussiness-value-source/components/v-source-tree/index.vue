@@ -1,24 +1,28 @@
 <template>
-  <el-auto-resizer>
-    <template #default="{ height, width }">
-      <el-tree-v2
-          ref="tree$"
-          node-key="ID"
-          show-checkbox
-          :height="height"
-          :highlight-current="true"
-          :indent="8"
-          :props="{label:'NAME',children:'children',value:'ID'}"
-          :data="treeData"
-          :default-expanded-keys="props.valueSource['expandedNodes']"
-          @node-expand="onNodeExpand"
-          @node-collapse="onNodeCollapse"
-          @check-change="onCheckChange"
+  <div style="width: 20vw;height: 100%">
+    <el-auto-resizer>
+      <template #default="{ height, width }">
+        <el-tree-v2
+            ref="tree$"
+            node-key="ID"
+            show-checkbox
+            :height="height"
+            :highlight-current="true"
+            :indent="8"
+            :props="{label:'NAME',children:'children',value:'ID'}"
+            :data="treeData"
+            :default-expanded-keys="props.valueSource['expandedKeys']"
+            :default-checked-keys="props.valueSource['checkedNodes'].map(node=>node.ID)"
+            @node-expand="onNodeExpand"
+            @node-collapse="onNodeCollapse"
+            @check-change="onCheckChange"
+            @check="onCheck"
 
-      >
-      </el-tree-v2>
-    </template>
-  </el-auto-resizer>
+        >
+        </el-tree-v2>
+      </template>
+    </el-auto-resizer>
+  </div>
 </template>
 
 <script setup>
@@ -33,7 +37,7 @@ const emits = defineEmits(['loadDataFinished', 'removePartialBussinessData'])
 
 const tree$ = ref()
 const treeData = ref([])   //数据源treeData
-const openNodeSet = reactive(new Set(props.valueSource['expandedNodes']))
+const openNodeSet = reactive(new Set(props.valueSource['expandedKeys']))
 const checkedNodes = []
 defineExpose({
   tree$
@@ -42,11 +46,16 @@ getScriptTree().then(res => {
   treeData.value = unFlatten(res.Data, 'ID')
   /*const scriptId = props?.optionModel?.valueSource?.currentNodeKey
   loadScriptsParams(scriptId)*/
-  // emits('loadDataFinished',)
+  props.valueSource.checkedNodes.map(node => {
+    if (node.type === 'Scripts') {
+      emits('loadDataFinished', node)
+    }
+  })
+
 })
 
 watch(openNodeSet, (newVal) => {
-  props.valueSource["expandedNodes"] = Array.from(newVal)
+  props.valueSource["expandedKeys"] = Array.from(newVal)
 })
 
 function onNodeExpand(data) {
@@ -63,6 +72,11 @@ function onCheckChange(data, checked) {
   } else {
     emits('removePartialBussinessData', data)
   }
+}
+
+function onCheck(data, {checkedNodes}) {
+  console.log(checkedNodes);
+  props.valueSource.checkedNodes = checkedNodes
 }
 </script>
 
