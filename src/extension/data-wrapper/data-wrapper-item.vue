@@ -55,9 +55,13 @@ export default {
     this.initRefList()
   },
   mounted() {
-    this.setFormDataWithValueSource()
+    // this.setFormDataWithValueSource()
   },
   methods: {
+    /**
+     * 根据valueSource获取表单数据并赋值，
+     * @param params
+     */
     setFormDataWithValueSource(params) {
       const vs = this.widget?.options?.valueSource
       if (params) {
@@ -74,9 +78,10 @@ export default {
             scriptId: vs.currentNodeKey,
             schema: res.Data.TableData[0]
           }
+          console.log(vs.bindMap);
           Object.keys(vs.bindMap).map(key => {
             // vs.valueSource.dataTemplate = res.Data.TableData[0]
-            formData[vs.bindMap[key]] = res.Data.TableData[0][key]
+            // formData[vs.bindMap[key]] = res.Data.TableData[0][key]
           })
           this.getFormRef().setFormData(formData)
         })

@@ -63,7 +63,7 @@
 
           <el-table-column label="对应组件" width="150">
             <template #default="{row}">
-              <el-select v-model="getBindMapWithRow(row).widgetId"
+              <el-select v-model="row.widgetId"
                          clearable
                          style="width: 120px"
                          @clear="onClearBindWidget(row)"
@@ -78,8 +78,10 @@
               <draggable
                   class="el-card"
                   style="min-height: 22px"
-                  :data-row="JSON.stringify(row)"
-                  :list="getBindMapWithRow(row).params" item-key="Param_ID" :group="tableDragGroup"
+                  item-key="Param_ID"
+                  :list="row.params"
+                  :group="tableDragGroup"
+                  @add="handleBindMap(row)"
               >
                 <template #item="{element,index}">
                   <div style="margin: 2px">
@@ -145,11 +147,7 @@ export default {
 
     const tableDragGroup = { //绑定表格中拖拽容器
       name: 'itxst',
-      put: (to, from, toEl) => {
-        const row = JSON.parse(to.el.dataset.row)
-        return getBindMapWithRow(row).params.length === 0
-
-      },
+      put: true,
       pull: false
     }
     //脚本字段、组件、存储过程绑定关系 {scriptId:{column:{widgetId,params}}
@@ -193,7 +191,7 @@ export default {
       onCurrentChange(1)
     })
 
-    watch(bindMap, (newVal) => {
+    /*watch(bindMap, (newVal) => {
       let boundMap = {}
 
       //从bindMap中筛选出已经绑定过的数据，存入组件valueSource.bindMap
@@ -217,7 +215,7 @@ export default {
       })
       props.optionModel.valueSource.bindMap = boundMap
       boundMap = null
-    })
+    })*/
 
     /**
      * 脚本参数绑定组件选择事件
@@ -232,8 +230,21 @@ export default {
           `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({${row.Param_Name}:row['${value[1]}']})`
     }
 
-    function filterBussinessData() {
-
+    function handleBindMap(row) {
+      const vsBind = props.optionModel.valueSource.bindMap
+      vsBind[row.scriptId] = {
+        ...vsBind[row.scriptId],
+        [row.label]: {
+          widgetId: row.widgetId,
+          params: row.params.map(param => ({
+            "Param_ID": param.Param_ID,
+            "Param_Name": param.Param_Name,
+            "procedureId": param.procedureId,
+            "procedureName": param.procedureName
+          }))
+        },
+        scriptName: row.scriptName
+      }
     }
 
     /**
@@ -278,22 +289,24 @@ export default {
 
         //初始化绑定关系，如果有旧的绑定关系，则读取旧的为初始值
         const vsBindMap = props.optionModel.valueSource.bindMap
-        bindMap[scriptId] = isEmptyObj(vsBindMap[scriptId]) ? {scriptName} : vsBindMap[scriptId]
+        // bindMap[scriptId] = isEmptyObj(vsBindMap[scriptId]) ? {scriptName} : vsBindMap[scriptId]
 
         //标记数据在整合数据中的位置
         scriptResponse.dataRange[scriptId] ? scriptResponse.dataRange[scriptId]['start'] = bussinessData.value.length : scriptResponse.dataRange[scriptId] = {start: bussinessData.value.length}
         bussinessData.value = bussinessData.value.concat(columns.map(column => {
           //给绑定MAP建立初始值key
-          bindMap[scriptId][column] = vsBindMap[scriptId]?.[column] ? vsBindMap[scriptId][column] : {
+          /*bindMap[scriptId][column] = vsBindMap[scriptId]?.[column] ? vsBindMap[scriptId][column] : {
             widgetId: "",
             params: []
-          }
+          }*/
 
           return {
             label: column,
             value: res.Data.TableData?.[0]?.[column],
             scriptName,
-            scriptId
+            scriptId,
+            widgetId: "",
+            params: []
           }
         }).sort((a, b) => a.label.localeCompare(b.label)))
         scriptResponse.dataRange[scriptId]['end'] = res.Data.TableHeaders.length
@@ -379,6 +392,7 @@ export default {
       tableDragGroup,
       bindMap,
       inputColumnValue,
+      handleBindMap,
       loadDataFinished,
       removePartialBussinessData,
       onCascaderChange,
