@@ -201,6 +201,7 @@ export default {
       console.log(props.designer);
       console.log(row);
       console.log(value);
+      props.optionModel.valueSource.bindMap[row.scriptId]['scriptParams'] = value
       props.designer.formWidget.getWidgetRef(value[0]).widget.options.onOperationButtonClick =
           `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
             ${row.scriptId}:{
@@ -266,17 +267,17 @@ export default {
         params,
         pageSize: compPageSize.value
       })).then(res => {
-
+        //初始化绑定关系，如果有旧的绑定关系，则读取旧的为初始值
+        const vsBindMap = props.optionModel.valueSource.bindMap
         const columns = res.Data.TableHeaders
         //合并参数
         paramData.value = paramData.value.concat(params.map(param => ({
           scriptName: scriptName,
           scriptId: scriptId,
+          bindWidget: vsBindMap[scriptId]['scriptParams'],
           ...param
         })))
 
-        //初始化绑定关系，如果有旧的绑定关系，则读取旧的为初始值
-        const vsBindMap = props.optionModel.valueSource.bindMap
 
         //标记数据在整合数据中的位置
         scriptResponse.dataRange[scriptId] ? scriptResponse.dataRange[scriptId]['start'] = bussinessData.value.length : scriptResponse.dataRange[scriptId] = {start: bussinessData.value.length}
