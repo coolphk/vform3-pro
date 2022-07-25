@@ -66,6 +66,7 @@
               <el-select v-model="row.widgetId"
                          clearable
                          style="width: 120px"
+                         @change="onBindWidgetChange(row)"
                          @clear="onClearBindWidget(row)"
               >
                 <el-option v-for="(childWid,index) in compChildrenWidgets" :value="childWid.id"
@@ -85,7 +86,10 @@
               >
                 <template #item="{element,index}">
                   <div style="margin: 2px">
-                    <el-button size="small" @click="removeBindParam(row)">{{ element.Param_Name }}</el-button>
+                    <el-button size="small" @click="removeBindParam(row,element.Param_ID)">{{
+                        element.Param_Name
+                      }}
+                    </el-button>
                   </div>
                 </template>
               </draggable>
@@ -99,8 +103,6 @@
             @current-change="onCurrentChange"
         />
         {{ optionModel.valueSource.bindMap }}
-        <!--        <hr/>
-                {{ bindMap }}-->
       </div>
       <div class="tree-wrapper" style="border-left: none;height: 100%;">
         <div class="tree-title">请选择要绑定的数据目标</div>
@@ -150,8 +152,6 @@ export default {
       put: true,
       pull: false
     }
-    //脚本字段、组件、存储过程绑定关系 {scriptId:{column:{widgetId,params}}
-    const bindMap = reactive({})
 
     //每页显示条数
     const compPageSize = computed({
@@ -191,32 +191,6 @@ export default {
       onCurrentChange(1)
     })
 
-    /*watch(bindMap, (newVal) => {
-      let boundMap = {}
-
-      //从bindMap中筛选出已经绑定过的数据，存入组件valueSource.bindMap
-      traverseObj(newVal, (key, value) => {
-        boundMap[key] = {}
-        traverseObj(value, (ckey, cvalue) => {
-          if (Object.hasOwn(cvalue, 'params') && cvalue.params.length > 0) {
-            boundMap[key][ckey] = deepClone(cvalue)
-            const params = cvalue?.params.map(({
-                                                 Param_ID, Param_Name, procedureId, procedureName
-                                               }) => ({
-              Param_ID,
-              Param_Name,
-              procedureId,
-              procedureName
-            }))
-            boundMap[key][ckey].params = params
-          }
-        })
-        isEmptyObj(boundMap[key]) && delete boundMap[key]
-      })
-      props.optionModel.valueSource.bindMap = boundMap
-      boundMap = null
-    })*/
-
     /**
      * 脚本参数绑定组件选择事件
      * @param row
@@ -230,6 +204,11 @@ export default {
           `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({${row.Param_Name}:row['${value[1]}']})`
     }
 
+    /**
+     * 根据数据上的绑定值给绑定关系赋值
+     *
+     * @param row
+     */
     function handleBindMap(row) {
       const vsBind = props.optionModel.valueSource.bindMap
       vsBind[row.scriptId] = {
@@ -252,9 +231,12 @@ export default {
      * @param row
      */
     function onClearBindWidget(row) {
-      getBindMapWithRow(row).widgetId = undefined
+      getBindMapValueWithRow(row) && (getBindMapValueWithRow(row).widgetId = "")
     }
 
+    function onBindWidgetChange(row) {
+      getBindMapValueWithRow(row) && (getBindMapValueWithRow(row).widgetId = row.widgetId)
+    }
 
     /**
      * 根据脚本ID获取脚本参数
@@ -289,24 +271,18 @@ export default {
 
         //初始化绑定关系，如果有旧的绑定关系，则读取旧的为初始值
         const vsBindMap = props.optionModel.valueSource.bindMap
-        // bindMap[scriptId] = isEmptyObj(vsBindMap[scriptId]) ? {scriptName} : vsBindMap[scriptId]
 
         //标记数据在整合数据中的位置
         scriptResponse.dataRange[scriptId] ? scriptResponse.dataRange[scriptId]['start'] = bussinessData.value.length : scriptResponse.dataRange[scriptId] = {start: bussinessData.value.length}
         bussinessData.value = bussinessData.value.concat(columns.map(column => {
-          //给绑定MAP建立初始值key
-          /*bindMap[scriptId][column] = vsBindMap[scriptId]?.[column] ? vsBindMap[scriptId][column] : {
-            widgetId: "",
-            params: []
-          }*/
-
+          //给绑定MAP建立初始值key,如果已经存在bindmap中，则直接获取bindmap中值
           return {
             label: column,
             value: res.Data.TableData?.[0]?.[column],
             scriptName,
             scriptId,
-            widgetId: "",
-            params: []
+            widgetId: vsBindMap?.[scriptId]?.[column]?.widgetId ?? "",
+            params: vsBindMap?.[scriptId]?.[column]?.params ?? []
           }
         }).sort((a, b) => a.label.localeCompare(b.label)))
         scriptResponse.dataRange[scriptId]['end'] = res.Data.TableHeaders.length
@@ -345,7 +321,7 @@ export default {
           }
         })
         deleteBusDatas.map(({label: bindMapKey}) => {
-          delete bindMap[bindMapKey]
+          delete props.optionModel.valueSource.bindMap[bindMapKey]
         })
         delete scriptResponse.dataRange[script.ID]
         removeScriptParam(script.ID)
@@ -364,19 +340,31 @@ export default {
 
 
     /**
-     * 删除已经绑定的存储过程参数
+     * 点击参数按钮时，删除已经绑定的存储过程参数
      * @param row
+     * @param paramId
      */
-    function removeBindParam(row) {
-      getBindMapWithRow(row).params = []
+    function removeBindParam(row, paramId) {
+      const bindMap = props.optionModel.valueSource.bindMap
+      const params = getBindMapValueWithRow(row).params
+      const startIndex = params.findIndex(item => item.Param_ID === paramId)
+      params.splice(startIndex, 1) //删除绑定关系中对应的存储过程参数
+      row.params.splice(startIndex, 1) //删除绑定列表中对应的存储过程参数
+      if (params.length === 0) {
+        //联动删除，如果参数全部被删除，则删除该键值，如果键值为空，则删除该脚本
+        delete bindMap[row.scriptId][row.label]
+        if (Object.keys(bindMap[row.scriptId]).length === 1 && Object.hasOwn(bindMap[row.scriptId], 'scriptName')) {
+          delete props.optionModel.valueSource.bindMap[row.scriptId]
+        }
+      }
     }
 
     function removeBindMap(scriptId) {
-      delete bindMap[scriptId]
+      delete props.optionModel.valueSource.bindMap[scriptId]
     }
 
-    function getBindMapWithRow(row) {
-      return bindMap?.[row.scriptId]?.[row.label]
+    function getBindMapValueWithRow(row) {
+      return props.optionModel.valueSource.bindMap?.[row.scriptId]?.[row.label]
     }
 
     return {
@@ -390,17 +378,16 @@ export default {
       compChildrenWidgets,
       paramBindWidgets,
       tableDragGroup,
-      bindMap,
       inputColumnValue,
       handleBindMap,
       loadDataFinished,
       removePartialBussinessData,
       onCascaderChange,
+      onBindWidgetChange,
       refreshData,
       onCurrentChange,
       onClearBindWidget,
-      removeBindParam,
-      getBindMapWithRow
+      removeBindParam
     }
   },
   props: {
