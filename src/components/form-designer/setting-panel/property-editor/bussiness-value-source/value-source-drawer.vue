@@ -21,8 +21,8 @@
       <div class="table-wrapper">
         <!--        参数列表-->
         <el-table :data="paramData" border max-height="200">
-          <el-table-column prop="scriptId" label="id"/>
-          <el-table-column prop="scriptName" label="脚本名称"/>
+          <el-table-column prop="scriptId" label="id" width="150"/>
+          <el-table-column prop="scriptName" label="脚本名称" width="150"/>
           <el-table-column prop="Param_Name" label="参数名" width="150"/>
           <el-table-column prop="Param_TestVALUE" label="测试值" width="150">
             <template #default="{row}">
@@ -30,10 +30,11 @@
             </template>
           </el-table-column>
           <el-table-column prop="Param_BusiDes" label="业务说明" width="150"/>
-          <el-table-column label="关联组件">
+          <el-table-column label="关联组件" width="200">
             <template #default="{row}">
-              <el-cascader v-model="row.bindWidget" :options="paramBindWidgets"
+              <el-cascader style="width: 160px" v-model="row.bindWidget" :options="paramBindWidgets"
                            @change="onCascaderChange(row,$event)"></el-cascader>
+
             </template>
           </el-table-column>
         </el-table>
@@ -201,7 +202,12 @@ export default {
       console.log(row);
       console.log(value);
       props.designer.formWidget.getWidgetRef(value[0]).widget.options.onOperationButtonClick =
-          `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({${row.Param_Name}:row['${value[1]}']})`
+          `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
+            ${row.scriptId}:{
+              scriptName:'${row.scriptName}',
+              params:{${row.Param_Name}:row['${value[1]}']}
+            }
+          })`
     }
 
     /**

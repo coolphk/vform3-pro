@@ -33,7 +33,7 @@ import i18n from "@/utils/i18n";
 import refMixinDesign from "@/components/form-designer/refMixinDesign";
 import FieldComponents from "@/components/form-designer/form-widget/field-widget";
 import {loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams} from "@/utils/data-adapter";
+import {assembleBussinessParams, traverseObj} from "@/utils/data-adapter";
 import ContainerItemWrapper from "@/components/form-render/container-item/container-item-wrapper";
 import containerItemMixin from "@/components/form-render/container-item/containerItemMixin";
 import refMixin from "@/components/form-render/refMixin";
@@ -60,32 +60,56 @@ export default {
   methods: {
     /**
      * 根据valueSource获取表单数据并赋值，
-     * @param params
+     * @param scripts
      */
-    setFormDataWithValueSource(params) {
+    setFormDataWithValueSource(scripts) {
       const vs = this.widget?.options?.valueSource
-      if (params) {
+      console.log(222, vs);
+      console.log(333, scripts);
+      const allBussinessData = {}
+      const formData = {}
+      traverseObj(vs.bindMap, (Scripts_ID, value) => {
         loadBussinessSource({
-          Scripts_ID: vs.currentNodeKey,
+          Scripts_ID,
           currentPage: 1,
           pageSize: 10,
-          ...params
+          ...scripts[Scripts_ID]?.params
         }).then(res => {
-          console.log('params', res, vs);
-
-          const formData = {}
-          vs.originalData = {
-            scriptId: vs.currentNodeKey,
-            schema: res.Data.TableData[0]
-          }
-          console.log(vs.bindMap);
-          Object.keys(vs.bindMap).map(key => {
-            // vs.valueSource.dataTemplate = res.Data.TableData[0]
-            // formData[vs.bindMap[key]] = res.Data.TableData[0][key]
+          traverseObj(res.Data.TableData[0], (key, value) => {
+            vs.bindMap[Scripts_ID][key] && (vs.bindMap[Scripts_ID][key]['value'] = value)
+            if (vs.bindMap[Scripts_ID]?.[key]?.widgetId) {
+              formData[vs.bindMap[Scripts_ID][key].widgetId] = value
+            }
           })
           this.getFormRef().setFormData(formData)
+          console.log(formData)
+          console.log(vs.bindMap)
         })
-      } /*else {
+      })
+
+
+      /*      if (params) {
+              loadBussinessSource({
+                Scripts_ID: vs.currentNodeKey,
+                currentPage: 1,
+                pageSize: 10,
+                ...params
+              }).then(res => {
+                console.log('params', res, vs);
+
+                const formData = {}
+                vs.originalData = {
+                  scriptId: vs.currentNodeKey,
+                  schema: res.Data.TableData[0]
+                }
+                console.log(vs.bindMap);
+                Object.keys(vs.bindMap).map(key => {
+                  // vs.valueSource.dataTemplate = res.Data.TableData[0]
+                  // formData[vs.bindMap[key]] = res.Data.TableData[0][key]
+                })
+                this.getFormRef().setFormData(formData)
+              })
+            }*/ /*else {
         vs && loadBussinessSource(assembleBussinessParams({
           scriptId: vs.currentNodeKey,
           params: vs.scriptParams
