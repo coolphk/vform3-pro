@@ -121,8 +121,20 @@ export function buildProcedureSchema() {
   }
 }
 
-export function buildExecProcedureSchema() {
-
+export function filterPostParam(param) {
+  return {
+    "Param_ID": param.Param_ID,
+    "Param_Name": param.Param_Name,
+    "Param_ObjType": param.Param_ObjType,
+    "Param_Type": param.Param_Type,
+    "Param_MaxLen": param.Param_MaxLen,
+    "Param_isOUT": param.Param_isOUT,
+    "Param_isXML": param.Param_isXML,
+    "Param_TestVALUE": param.Param_TestVALUE,
+    "Parent_ID": param.Parent_ID,
+    "HaveChild": param.HaveChild,
+    "ROWNR": param.ROWNR,
+  }
 }
 
 export function getKeyByValue(obj, value) {

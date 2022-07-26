@@ -121,7 +121,7 @@ import i18n from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin";
 import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams, traverseObj} from "@/utils/data-adapter";
+import {assembleBussinessParams, filterPostParam, traverseObj} from "@/utils/data-adapter";
 import ContextMenu from "@/components/context-menu/index.vue"
 import {deepClone, isEmptyObj, isTable, traverseFieldWidgets} from "@/utils/util";
 import useBindParam from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/useBindParam";
@@ -223,8 +223,7 @@ export default {
         [row.label]: {
           widgetId: row.widgetId,
           params: row.params.map(param => ({
-            "Param_ID": param.Param_ID,
-            "Param_Name": param.Param_Name,
+            ...filterPostParam(param),
             "procedureId": param.procedureId,
             "procedureName": param.procedureName
           }))

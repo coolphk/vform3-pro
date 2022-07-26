@@ -45,16 +45,27 @@ import emitter from '@/utils/emitter'
 import './container-item/index'
 import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
 import {
-  generateId, deepClone, insertCustomCssToHead, insertGlobalFunctionsToHtml, getAllContainerWidgets,
-  getAllFieldWidgets, traverseFieldWidgets, buildDefaultFormJson, traverseAllWidgets, isEmptyObj, uuid2
+  generateId,
+  deepClone,
+  insertCustomCssToHead,
+  insertGlobalFunctionsToHtml,
+  getAllContainerWidgets,
+  getAllFieldWidgets,
+  traverseFieldWidgets,
+  buildDefaultFormJson,
+  traverseAllWidgets,
+  isEmptyObj,
+  uuid2,
+  traverseContainWidgets
 } from "@/utils/util"
 import i18n, {changeLocale} from "@/utils/i18n"
 import {execProcedure, getProcedureParams} from "@/api/data-schema";
 import {ElMessage} from "element-plus";
-import {buildProcedureSchema, getKeyByValue} from "@/utils/data-adapter";
+import {buildProcedureSchema, filterPostParam, getKeyByValue, traverseObj} from "@/utils/data-adapter";
 import {loadBussinessSource} from "@/api/bussiness-source";
 import useParamsInFormData from "./composible/useParamsInFormData";
 import useWidgetsGroupByProcedure from "./composible/useWidgetsGroupByProcedure";
+import useTransferFormDataToPostData from "@/components/form-render/composible/useTransferFormDataToPostData";
 
 export default {
   name: "VFormRender",
@@ -717,13 +728,41 @@ export default {
     traverseAllWidgets() {
       return traverseAllWidgets
     },
-    getBussinessData() {
+    async getBussinessData() {
+      const formData = await this.getFormData()
+      const postData = useTransferFormDataToPostData(formData, this.widgetList)
 
-      const procedureMap = new Map() //将所有控件按存储过程名称分组
-      /**
+      traverseObj(postData, (procedureId, procedure) => {
+        getProcedureParams(procedure.procedureName, "", 1).then(res => {
+          const submitData = res.Data
+          const postParams = submitData.map(item => {
+            const newItem = procedure.params.find(postItem => postItem.Param_ID === item.Param_ID)
+            const param = newItem ?? item
+            return filterPostParam(param)
+          })
+          console.log('postParams', postParams);
+          execProcedure({
+            procedureID: procedureId,
+            procedureName: procedure.procedureName,
+            params: postParams
+          }).then(res => {
+            console.log('execProcedure', res);
+          })
+        })
+
+        /*execProcedure({
+          procedureID: procedureId,
+          procedureName: procedure.procedureName,
+          params: procedure.params
+        }).then(res => {
+          console.log(res);
+        })*/
+      })
+      /*const procedureMap = new Map() //将所有控件按存储过程名称分组
+      /!**
        * 1、遍历所有业务组件（带dataTarget属性的组件)procedureMap={widgets:[]}
        * 2、将相同的存储过程合并放入procedureMap中,并且将属于同一存储过程的组件放入widgets中
-       */
+       *!/
       traverseAllWidgets(this.widgetList, async (formWidget) => {
         if (formWidget.type === 'data-wrapper') {
           // console.log(111, formWidget.options.valueSource.originalData);
@@ -758,11 +797,11 @@ export default {
                   console.log(444, err);
                 })
               })
-              /*submitData.params = useParamsInFormData(value.widgets, formData, resData)
+              /!*submitData.params = useParamsInFormData(value.widgets, formData, resData)
               submitDatas.push(submitData)
               if (submitDatas.length === procedureMap.size) {
                 resolve(submitDatas)
-              }*/
+              }*!/
             })
           })
         } else {
@@ -770,31 +809,12 @@ export default {
         }
       })
       console.log(procedureMap);
-      /*procedureMap.forEach((value, key) => {
-        const procedure = procedureMap.get(key)
-        console.log(procedure);
-        //获取当前存储过程的数据结构
-        getProcedureParams(key, "", 1).then(res => {
-          const resData = res.Data
-          const submitData = {
-            procedureID,
-            procedureName,
-            params: [],
-          }
-          this.getFormData().then(formData => { //获取当前表单组件值
-            submitData.params = useParamsInFormData(procedure.widgets, formData, resData)
-            submitDatas.push(submitData)
-            if (submitDatas.length === procedureMap.size) {
-              resolve(submitDatas)
-            }
-          })
-        })
-      })*/
-      // })
+     */
     },
 
-    setBussinessData(loadBussinessSource) {
-      traverseAllWidgets(this.widgetList, (widget) => {
+    setBussinessData() {
+
+      /*traverseAllWidgets(this.widgetList, (widget) => {
         const {valueSource: vs} = widget.options
         //如果有绑定值来源，则通过调用值来源设置回显数据
         if (!!vs?.currentNodeKey && !!vs?.sourceId) {
@@ -823,9 +843,8 @@ export default {
             }));
           })
         }
-      })
+      })*/
     }
-
   },
 }
 </script>

@@ -66,7 +66,6 @@ export default {
       const vs = this.widget?.options?.valueSource
       console.log(222, vs);
       console.log(333, scripts);
-      const allBussinessData = {}
       const formData = {}
       traverseObj(vs.bindMap, (Scripts_ID, value) => {
         loadBussinessSource({
@@ -75,52 +74,17 @@ export default {
           pageSize: 10,
           ...scripts[Scripts_ID]?.params
         }).then(res => {
+          //读取数据赋值到form表单中，并给bindMap设置默认值
           traverseObj(res.Data.TableData[0], (key, value) => {
-            vs.bindMap[Scripts_ID][key] && (vs.bindMap[Scripts_ID][key]['value'] = value)
+            vs.bindMap[Scripts_ID][key] && (vs.bindMap[Scripts_ID][key]['paramValue'] = value)
             if (vs.bindMap[Scripts_ID]?.[key]?.widgetId) {
               formData[vs.bindMap[Scripts_ID][key].widgetId] = value
             }
           })
           this.getFormRef().setFormData(formData)
-          console.log(formData)
           console.log(vs.bindMap)
         })
       })
-
-
-      /*      if (params) {
-              loadBussinessSource({
-                Scripts_ID: vs.currentNodeKey,
-                currentPage: 1,
-                pageSize: 10,
-                ...params
-              }).then(res => {
-                console.log('params', res, vs);
-
-                const formData = {}
-                vs.originalData = {
-                  scriptId: vs.currentNodeKey,
-                  schema: res.Data.TableData[0]
-                }
-                console.log(vs.bindMap);
-                Object.keys(vs.bindMap).map(key => {
-                  // vs.valueSource.dataTemplate = res.Data.TableData[0]
-                  // formData[vs.bindMap[key]] = res.Data.TableData[0][key]
-                })
-                this.getFormRef().setFormData(formData)
-              })
-            }*/ /*else {
-        vs && loadBussinessSource(assembleBussinessParams({
-          scriptId: vs.currentNodeKey,
-          params: vs.scriptParams
-        })).then(res => {
-          const formData = {}
-          Object.keys(vs.bindMap).map(key => {
-            formData[vs.bindMap[key]] = res.Data.TableData[0][key]
-          })
-          this.getFormRef().setFormData(formData)
-        })
-      }*/
     }
   }
 }
