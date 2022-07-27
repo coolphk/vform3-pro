@@ -1,4 +1,4 @@
-import {uuid2} from "@/utils/util";
+import {isEmptyObj, uuid2} from "@/utils/util";
 
 let id = 0
 
@@ -142,6 +142,7 @@ export function getKeyByValue(obj, value) {
 }
 
 export function traverseObj(obj, handle) {
+  if (isEmptyObj(obj)) return
   Object.keys(obj).map(key => {
     handle(key, obj[key])
   })

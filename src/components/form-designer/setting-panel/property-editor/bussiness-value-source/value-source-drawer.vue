@@ -32,8 +32,12 @@
           <el-table-column prop="Param_BusiDes" label="业务说明" width="150"/>
           <el-table-column label="关联组件" width="200">
             <template #default="{row}">
-              <el-cascader style="width: 160px" v-model="row.bindWidget" :options="paramBindWidgets"
-                           @change="onCascaderChange(row,$event)"></el-cascader>
+              <el-cascader style="width: 160px"
+                           v-model="row.bindWidget"
+                           clearable
+                           :options="paramBindWidgets"
+                           @change="onCascaderChange(row,$event)"
+              />
 
             </template>
           </el-table-column>
@@ -206,18 +210,30 @@ watch(inputColumnValue, (newVal) => {
  * @param value
  */
 function onCascaderChange(row, value) {
-  console.log(props.designer);
-  console.log(row);
-  console.log(value);
-  compBindMap.value[row.scriptId] ? compBindMap.value[row.scriptId]['scriptParams'] = value : props.optionModel.valueSource.bindMap = {[row.scriptId]: {'scriptParams': value}}
+  if (value) {
+    compBindMap.value[row.scriptId] ? compBindMap.value[row.scriptId]['scriptParams'] = {
+      ...compBindMap.value[row.scriptId]['scriptParams'],
+      [row.Param_Name]: value,
+    } : props.optionModel.valueSource.bindMap = {
+      ...compBindMap.value,
+      [row.scriptId]: {
+        'scriptParams': {
+          [row.Param_Name]: value,
+        }
+      }
+    }
 
-  props.designer.formWidget.getWidgetRef(value[0]).widget.options.onOperationButtonClick =
-      `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
+    props.designer.formWidget.getWidgetRef(value[0]).widget.options.onOperationButtonClick =
+        `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
             ${row.scriptId}:{
               scriptName:'${row.scriptName}',
               params:{${row.Param_Name}:row['${value[1]}']}
             }
           })`
+  } else {
+    console.log(row);
+    delete compBindMap.value[row.scriptId]['scriptParams']
+  }
 }
 
 /**
@@ -282,7 +298,7 @@ function loadTableData({ID: scriptId, NAME: scriptName}, params) {
     paramData.value = paramData.value.concat(params.map(param => ({
       scriptName: scriptName,
       scriptId: scriptId,
-      bindWidget: vsBindMap?.[scriptId]?.['scriptParams'],
+      bindWidget: vsBindMap?.[scriptId]?.['scriptParams']?.[param.Param_Name],
       ...param
     })))
 
@@ -376,7 +392,7 @@ function removeBindParam(row, paramId) {
  * @param scriptId
  */
 function removeBindMap(scriptId) {
-  if (isObj(scriptId)) {
+  if (isObj(scriptId) || scriptId === undefined) {
     traverseObj(compBindMap.value, (key, value) => {
       traverseObj(value, (sk, sv) => {
         if (sk !== 'scriptParams') {
@@ -411,6 +427,7 @@ function getBindMapValueWithRow(row) {
  * 根据字段名自动绑定数据,遍历存储过程参数和数据源脚本字段，找到名称相同的进行绑定
  */
 function autoBindData() {
+  removeBindMap()
   //遍历数据源脚本字段
   bussinessData.value.map(sp => {
     //遍历存储过程参数
@@ -421,6 +438,7 @@ function autoBindData() {
           props.optionModel.valueSource.bindMap = {
             ...compBindMap.value,
             [sp.scriptId]: {
+              'scriptName': sp.scriptName,
               ...compBindMap.value[sp.scriptId],
               [sp.label]: {
                 params: compBindMap.value[sp.scriptId]?.[sp.label]?.['params'] ? [

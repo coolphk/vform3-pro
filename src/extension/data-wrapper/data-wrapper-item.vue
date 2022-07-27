@@ -63,6 +63,7 @@ export default {
      * @param scripts
      */
     setFormDataWithValueSource(scripts) {
+      debugger
       const vs = this.widget?.options?.valueSource
       console.log(222, vs);
       console.log(333, scripts);
@@ -75,7 +76,7 @@ export default {
           ...scripts[Scripts_ID]?.params
         }).then(res => {
           //读取数据赋值到form表单中，并给bindMap设置默认值
-          traverseObj(res.Data.TableData[0], (key, value) => {
+          traverseObj(res.Data.TableData?.[0], (key, value) => {
             if (vs.bindMap[Scripts_ID][key]) {
               vs.bindMap[Scripts_ID][key]['paramValue'] = value
             }
