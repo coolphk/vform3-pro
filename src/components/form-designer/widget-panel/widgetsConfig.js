@@ -319,18 +319,6 @@ export const basicFields = [
     icon: 'text-field',
     formItemFlag: true,
     options: {
-      valueSource: {
-        currentNodeKey: "", //选中的数据源ID
-        scriptParams: [],//脚本参数
-        expandedNodes: [],//展开的节点
-        pageSize: 10,
-        sourceId: "" //当前控件值来源的id
-      },
-      dataTarget: {
-        checkedNodes: [],
-        expandedNodes: [],
-        procedureValue: {}
-      },
       name: '',
       label: '',
       labelAlign: '',
@@ -379,18 +367,6 @@ export const basicFields = [
     icon: 'textarea-field',
     formItemFlag: true,
     options: {
-      valueSource: {
-        currentNodeKey: "", //选中的数据源ID
-        scriptParams: [],//脚本参数
-        expandedNodes: [],//展开的节点
-        pageSize: 10,
-        sourceId: "" //当前控件值来源的id
-      },
-      dataTarget: {
-        checkedNodes: [],
-        expandedNodes: [],
-        procedureValue: {}
-      },
       name: '',
       label: '',
       labelAlign: '',
@@ -464,18 +440,6 @@ export const basicFields = [
       onFocus: '',
       onBlur: '',
       onValidate: '',
-      valueSource: {
-        currentNodeKey: "", //选中的数据源ID
-        scriptParams: [],//脚本参数
-        expandedNodes: [],//展开的节点
-        pageSize: 10,
-        sourceId: "" //当前控件值来源的id
-      },
-      dataTarget: {
-        checkedNodes: [],
-        expandedNodes: [],
-        procedureValue: {}
-      },
     },
   },
 
@@ -484,23 +448,11 @@ export const basicFields = [
     icon: 'radio-field',
     formItemFlag: true,
     options: {
-      valueSource: {
-        currentNodeKey: "", //选中的数据源ID
-        scriptParams: [],//脚本参数
-        expandedNodes: [],//展开的节点
-        pageSize: 10,
-        sourceId: "" //当前控件值来源的id
-      },
       bussinessSource: {
         currentNodeKey: "",
         scriptParams: [],
         expandedNodes: [],
         pageSize: 10
-      },
-      dataTarget: {
-        checkedNodes: [],
-        expandedNodes: [],
-        procedureValue: {}
       },
       name: '',
       label: '',
@@ -582,18 +534,6 @@ export const basicFields = [
       onMounted: '',
       onChange: '',
       onValidate: '',
-      valueSource: {
-        currentNodeKey: "", //选中的数据源ID
-        scriptParams: [],//脚本参数
-        expandedNodes: [],//展开的节点
-        pageSize: 10,
-        sourceId: "" //当前控件值来源的id
-      },
-      dataTarget: {
-        checkedNodes: [],
-        expandedNodes: [],
-        procedureValue: {}
-      },
       bussinessSource: {
         currentNodeKey: "",
         scriptParams: [],
@@ -608,23 +548,11 @@ export const basicFields = [
     icon: 'select-field',
     formItemFlag: true,
     options: {
-      valueSource: {
-        currentNodeKey: "", //选中的数据源ID
-        scriptParams: [],//脚本参数
-        expandedNodes: [],//展开的节点
-        pageSize: 10,
-        sourceId: "" //当前控件值来源的id
-      },
       bussinessSource: {
         currentNodeKey: "", //选中的数据源ID
         scriptParams: [],//脚本参数
         expandedNodes: [],//展开的节点
         pageSize: 10
-      },
-      dataTarget: {
-        checkedNodes: [],//存储过程参数
-        expandedNodes: [],//展开的节点
-        procedureValue: {} //选中的存储过程 {ProcedureName,ProcedureID}
       },
       name: '',
       label: '',
@@ -792,19 +720,7 @@ export const basicFields = [
       onChange: '',
       onFocus: '',
       onBlur: '',
-      onValidate: '',
-      valueSource: {
-        currentNodeKey: "", //选中的数据源ID
-        scriptParams: [],//脚本参数
-        expandedNodes: [],//展开的节点
-        pageSize: 10,
-        sourceId: "" //当前控件值来源的id
-      },
-      dataTarget: {
-        checkedNodes: [],
-        expandedNodes: [],
-        procedureValue: {}
-      },
+      onValidate: ''
     },
   },
 
