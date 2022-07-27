@@ -76,7 +76,10 @@ export default {
         }).then(res => {
           //读取数据赋值到form表单中，并给bindMap设置默认值
           traverseObj(res.Data.TableData[0], (key, value) => {
-            vs.bindMap[Scripts_ID][key] && (vs.bindMap[Scripts_ID][key]['paramValue'] = value)
+            if (vs.bindMap[Scripts_ID][key]) {
+              vs.bindMap[Scripts_ID][key]['paramValue'] = value
+            }
+
             if (vs.bindMap[Scripts_ID]?.[key]?.widgetId) {
               formData[vs.bindMap[Scripts_ID][key].widgetId] = value
             }

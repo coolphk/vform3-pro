@@ -16,6 +16,7 @@ function transferFormDataToPostData(formData, widgetList) {
   traverseContainWidgets(widgetList, (widget) => {
     if (widget.type === 'data-wrapper') {
       const bindMap = widget.options.valueSource.bindMap
+      console.log('transferFormDataToPostData', bindMap);
       traverseObj(bindMap, (key, value) => {
         traverseObj(value, (sk, sv) => {
           sv?.params?.map(param => {

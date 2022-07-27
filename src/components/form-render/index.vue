@@ -731,14 +731,22 @@ export default {
     async getBussinessData() {
       const formData = await this.getFormData()
       const postData = useTransferFormDataToPostData(formData, this.widgetList)
-
       traverseObj(postData, (procedureId, procedure) => {
         getProcedureParams(procedure.procedureName, "", 1).then(res => {
           const submitData = res.Data
-          const postParams = submitData.map(item => {
+          console.log('getProcedureParams', submitData);
+          //获取xml结构
+          let postParams = submitData.filter(item => item.Param_ObjType === 'object' || item.Param_ObjType === 'array' || item.Param_isXML === '1')
+
+          //将绑定关系中参数的值赋给存储过程中的参数
+          submitData.map(item => {
             const newItem = procedure.params.find(postItem => postItem.Param_ID === item.Param_ID)
-            const param = newItem ?? item
-            return filterPostParam(param)
+            if (newItem)
+              postParams.push(newItem)
+          })
+          //过滤无用字段，减少提交数据大小
+          postParams = postParams.map(item => {
+            return filterPostParam(item)
           })
           console.log('postParams', postParams);
           execProcedure({

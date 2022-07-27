@@ -6,7 +6,7 @@
  * remark: 如果要分发VForm源码，需在本文件顶部保留此文件头信息！！
  */
 
-import {deepClone, generateId, getDefaultFormConfig, overwriteObj} from "@/utils/util"
+import {deepClone, generateId, getDefaultFormConfig, overwriteObj, traverseAllWidgets} from "@/utils/util"
 import {
   containers,
   advancedFields,
@@ -698,11 +698,15 @@ export function createDesigner(vueInstance) {
         })
 
         return newTable
+      } else if (containWidget.type === 'data-wrapper') {
+
       } else {  //其他容器组件不支持clone操作
         return null
       }
     },
-
+    cloneContianerWithSubWidget(container) {
+      traverseAllWidgets(container.widgetList)
+    },
     moveUpWidget(parentList, indexOfParentList) {
       if (!!parentList) {
         if (indexOfParentList === 0) {
