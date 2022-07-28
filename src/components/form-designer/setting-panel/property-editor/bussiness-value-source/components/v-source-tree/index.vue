@@ -67,7 +67,6 @@ function onNodeCollapse(data) {
 }
 
 function onCheckChange(data, checked) {
-  console.log(11, data);
   if (data.type === 'Scripts') {
     if (checked) {
       emits('loadDataFinished', data)

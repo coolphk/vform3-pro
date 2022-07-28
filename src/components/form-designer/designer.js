@@ -699,7 +699,30 @@ export function createDesigner(vueInstance) {
 
         return newTable
       } else if (containWidget.type === 'data-wrapper') {
+        let newDataWrapper = deepClone(containWidget)
 
+        newDataWrapper.key = generateId()
+        newDataWrapper.id = newDataWrapper.type + generateId()
+        newDataWrapper.options.name = newDataWrapper.id
+        traverseAllWidgets(newDataWrapper.widgetList, (widget) => {
+          widget.key = generateId()
+          widget.id = widget.type + generateId()
+          widget.options.name = widget.id
+        })
+        console.log('original', containWidget);
+        console.log('new', newDataWrapper);
+        /*newDataWrapper.id = newDataWrapper.type + generateId()
+        newDataWrapper.options.name = newDataWrapper.id
+        containWidget.cols.forEach(gridCol => {
+          let newGridCol = deepClone(this.getContainerByType('grid-col'))
+          let tmpId = generateId()
+          newGridCol.id = 'grid-col-' + tmpId
+          newGridCol.options.name = 'gridCol' + tmpId
+          newGridCol.options.span = gridCol.options.span
+          newDataWrapper.cols.push(newGridCol)
+        })*/
+
+        return newDataWrapper
       } else {  //其他容器组件不支持clone操作
         return null
       }
@@ -736,6 +759,7 @@ export function createDesigner(vueInstance) {
     copyNewFieldWidget(origin) {
       let newWidget = deepClone(origin)
       let tempId = generateId()
+      newWidget.key = generateId()
       newWidget.id = newWidget.type.replace(/-/g, '') + tempId
       //console.log('test id===', newWidget.id)
       newWidget.options.name = newWidget.id
@@ -747,6 +771,7 @@ export function createDesigner(vueInstance) {
 
     copyNewContainerWidget(origin) {
       let newCon = deepClone(origin)
+      newCon.key = generateId()
       newCon.id = newCon.type.replace(/-/g, '') + generateId()
       newCon.options.name = newCon.id
       if (newCon.type === 'grid') {
