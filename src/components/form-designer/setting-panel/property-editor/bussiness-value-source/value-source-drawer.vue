@@ -233,6 +233,9 @@ function onCascaderChange(row, value) {
           })`
   } else {
     delete compBindMap.value[row.scriptId]['scriptParams']
+    if (isEmptyObj(compBindMap.value[row.scriptId])) {
+      delete compBindMap.value[row.scriptId]
+    }
   }
 }
 
