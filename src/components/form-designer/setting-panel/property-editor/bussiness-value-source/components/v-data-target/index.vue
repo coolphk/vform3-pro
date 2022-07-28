@@ -27,7 +27,7 @@
         <template #default="{node,data}">
           <draggable :list="[data]" :group="treeDragGroup" item-key="Param_ID">
             <template #item="{element,index}">
-              <div>
+              <div :style="{color:data.isBound?'red':'#606266'}">
                 {{ element.Param_Name }}{{ element.Param_Des ? `【${element.Param_Des}】` : '' }}
               </div>
             </template>
@@ -42,11 +42,13 @@
 <script setup>
 import {reactive, ref, watch} from "vue";
 import {getProcedureList, getProcedureParams} from "@/api/data-schema";
-import {unFlatten} from "@/utils/data-adapter";
+import {traverseObj, traverseTreeData, unFlatten} from "@/utils/data-adapter";
+import useTransferFormDataToPostData from "@/components/form-render/composible/useTransferFormDataToPostData";
 
 const props = defineProps({
   dataTarget: Object,
-  modelValue: Object
+  modelValue: Object,
+  bindMap: Object
 })
 
 const emits = defineEmits(['update:modelValue'])
@@ -99,6 +101,50 @@ watch(selectedProcedures, (newVal, oldVal) => {
   }
 })
 
+watch(() => props.bindMap, () => {
+  changeBoundProcedureStyle()
+}, {deep: true})
+
+function changeBoundProcedureStyle() {
+  const postData = changeBindMapToProcedureIdAsKey(props.bindMap)
+  traverseObj(postData, (key, value) => {
+    value.params.map(param => {
+      traverseTreeData(treeData.value, (data) => {
+        if (param.Param_ID === data.Param_ID) {
+          data.isBound = true
+        }
+      })
+    })
+  })
+  traverseTreeData(treeData.value, (data) => {
+    traverseObj(postData, (key, value) => {
+      if (!value.params.find(item => item.Param_ID === data.Param_ID)) {
+        data.isBound = false
+      }
+    })
+  })
+}
+
+function changeBindMapToProcedureIdAsKey(bindMap) {
+  const postData = {}
+  traverseObj(bindMap, (key, value) => {
+    traverseObj(value, (sk, sv) => {
+      sv?.params?.map(param => {
+        postData[param.procedureId] = {
+          procedureName: param.procedureName,
+          //替换params值，用来生成最后exec接口的params参数。
+          params: postData?.[param.procedureId]?.params ? [...postData[param.procedureId].params, {
+            ...param
+          }] : [{
+            ...param
+          }],
+        }
+      })
+    })
+  })
+  return postData
+}
+
 function onDragAdd(evt) {
   console.log(putList[evt.newIndex]);
 }
@@ -107,13 +153,12 @@ function onNodeExpand(data, val) {
   openNodeSet.add(data.Param_ID)
 }
 
-/**
- * 递归移除关闭节点，如果某节点关闭，则将移除改节点下的子节点
- * @param data
- * @param node
- */
-function nodeCollapse(data, node) {
-  openNodeSet.delete(data.Param_ID)
+function removeBoundProcedureStyle(params) {
+  traverseTreeData(treeData.value, (data) => {
+    if (params.find(param => param.Param_ID === data.Param_ID)) {
+      data.isBound = false
+    }
+  })
 }
 
 function loadProcedureList() {
@@ -122,7 +167,6 @@ function loadProcedureList() {
       label: item.ProcedureName,
       value: item
     }))
-
   })
 }
 
@@ -137,7 +181,7 @@ function loadTreeData(val) {
       Param_Name: val.ProcedureName,
       children: tree
     })
-    console.log('loadTreeData', props.modelValue);
+    changeBoundProcedureStyle()
     emits('update:modelValue', [
       ...props.modelValue,
       {
@@ -155,6 +199,9 @@ function loadTreeData(val) {
   })
 })()
 
+defineExpose({
+  removeBoundProcedureStyle
+})
 </script>
 
 <style lang="scss">

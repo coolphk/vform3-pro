@@ -67,10 +67,17 @@ function onNodeCollapse(data) {
 }
 
 function onCheckChange(data, checked) {
-  if (checked) {
-    emits('loadDataFinished', data)
-  } else {
-    emits('removePartialBussinessData', data)
+  console.log(11, data);
+  if (data.type === 'Scripts') {
+    if (checked) {
+      emits('loadDataFinished', data)
+    } else {
+      emits('removePartialBussinessData', data)
+    }
+  } else if (data.type === 'Node') {
+    if (!checked) {
+      data.children.map(item => emits('removePartialBussinessData', item))
+    }
   }
 }
 

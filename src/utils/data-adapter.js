@@ -147,3 +147,12 @@ export function traverseObj(obj, handle) {
     handle(key, obj[key])
   })
 }
+
+export function traverseTreeData(treeData, handle) {
+  treeData.map(item => {
+    handle(item)
+    if (item.children) {
+      traverseTreeData(item.children, handle)
+    }
+  })
+}

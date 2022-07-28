@@ -96,12 +96,12 @@
                   @add="handleBindMap(row)"
               >
                 <template #item="{element,index}">
-                  <div style="margin: 2px">
+                  <span style="margin: 2px">
                     <el-button size="small" @click="removeBindParam(row,element.Param_ID)">{{
                         element.Param_Name
                       }}
                     </el-button>
-                  </div>
+                  </span>
                 </template>
               </draggable>
             </template>
@@ -118,7 +118,8 @@
       <div class="tree-wrapper" style="border-left: none;height: 100%;">
         <div class="tree-title">请选择要绑定的数据目标</div>
         <div class="tree-body">
-          <v-data-target v-model="procedureData" :data-target="optionModel.dataTarget"></v-data-target>
+          <v-data-target ref="vDataTarget$" v-model="procedureData" :data-target="optionModel.dataTarget"
+                         :bind-map="compBindMap"></v-data-target>
         </div>
       </div>
     </div>
@@ -145,6 +146,7 @@ const props = defineProps({
 const procedureData = ref([])
 const vsTree$ = ref()
 const busTable$ = ref()
+const vDataTarget$ = ref()
 const showDataSource = ref(false)
 const inputColumnValue = ref("")
 const paramData = ref([])  //存储过程参数集合
@@ -222,7 +224,6 @@ function onCascaderChange(row, value) {
         }
       }
     }
-
     props.designer.formWidget.getWidgetRef(value[0]).widget.options.onOperationButtonClick =
         `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
             ${row.scriptId}:{
@@ -231,7 +232,6 @@ function onCascaderChange(row, value) {
             }
           })`
   } else {
-    console.log(row);
     delete compBindMap.value[row.scriptId]['scriptParams']
   }
 }
@@ -362,8 +362,13 @@ function removePartialBussinessData(script) {
  * 删除脚本参数
  */
 function removeScriptParam(scriptId) {
-  const start = paramData.value.findIndex(item => item.scriptId === scriptId)
-  start > -1 && paramData.value.splice(start, 1)
+  console.log(paramData.value);
+  for (let i = paramData.value.length - 1; i >= 0; i--) {
+    const item = paramData.value[i]
+    if (item.scriptId === scriptId) {
+      paramData.value.splice(i, 1)
+    }
+  }
 }
 
 
@@ -388,20 +393,23 @@ function removeBindParam(row, paramId) {
 }
 
 /**
- * 删除绑定关系，如果参数是对象，则代表删除全部绑定关系，但保留数据源脚本查询参数
+ * 删除绑定关系，如果参数是对象，则代表删除全部绑定关系，但保留数据源脚本查询参数(scriptParams)
  * @param scriptId
  */
 function removeBindMap(scriptId) {
+  const deletedParams = []
   if (isObj(scriptId) || scriptId === undefined) {
     traverseObj(compBindMap.value, (key, value) => {
       traverseObj(value, (sk, sv) => {
         if (sk !== 'scriptParams') {
+          //同步dataTarget被选中状态
+          sv && sv.params && deletedParams.push(...sv.params)
           delete value[sk]
         }
       })
     })
     traverseObj(compBindMap.value, (key, value) => {
-      if (isEmptyObj(compBindMap.value[key])) {
+      if (isEmptyObj(value)) {
         delete compBindMap.value[key]
       }
     })
@@ -414,7 +422,14 @@ function removeBindMap(scriptId) {
       params: []
     }))
     onCurrentChange(scriptResponse.currentPage)
+    vDataTarget$.value.removeBoundProcedureStyle(deletedParams)
   } else {
+    traverseObj(compBindMap.value[scriptId], (key, value) => {
+      if (value.params) {
+        deletedParams.push(...value.params)
+      }
+    })
+    vDataTarget$.value.removeBoundProcedureStyle(deletedParams)
     delete compBindMap.value[scriptId]
   }
 }
