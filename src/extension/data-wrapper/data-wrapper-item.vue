@@ -39,6 +39,7 @@ import refMixin from "@/components/form-render/refMixin";
 import emitter from "@/utils/emitter";
 import {isEmptyObj, traverseFieldWidgets} from "@/utils/util";
 import {execProcedure, getProcedureParams} from "@/api/data-schema";
+import {ElMessage} from "element-plus";
 
 export default {
   name: "data-wrapper-item",
@@ -61,7 +62,7 @@ export default {
     this.initRefList()
   },
   mounted() {
-    this.setFormDataWithValueSource(this.params)
+    // this.setFormDataWithValueSource(this.params)
   },
   methods: {
     /**
@@ -69,6 +70,7 @@ export default {
      * @param scriptParams
      */
     setFormDataWithValueSource(scriptParams) {
+      debugger
       const vs = this.widget?.options?.valueSource
       console.log(222, vs);
       const formData = {}
@@ -77,7 +79,7 @@ export default {
           Scripts_ID,
           currentPage: 1,
           pageSize: 10,
-          ...scriptParams
+          ...scriptParams[Scripts_ID]?.params
         }).then(res => {
           //读取数据赋值到form表单中，并给bindMap设置默认值
           traverseObj(res.Data.TableData?.[0], (key, value) => {
@@ -109,7 +111,9 @@ export default {
     },
 
     saveDataWrapper() {
-      console.log(this.params);
+      // console.log(this.params);
+      debugger
+      console.log(this.widget.id, this.widget.options.valueSource.bindMap);
 
       /**
        * 从表单中的组件取值，如果没有和绑定关系匹配的组件则获取绑定关系默认值
@@ -118,44 +122,30 @@ export default {
        * @returns {*}
        */
       function getParamVALUE(formData, sv) {
-        return formData[sv.widgetId] ? formData[sv.widgetId] : sv.paramValue;
+        return formData[sv.widgetId] ? formData[sv.widgetId] : sv.paramValue
       }
 
       const wrapperData = this.getChildWidgetsValue()
       const postData = {}
       traverseObj(this.widget.options.valueSource.bindMap, (Scripts_ID, value) => {
-        getScriptsParams(Scripts_ID).then(spRes => {
-          console.log(spRes);
-        })
-/*
-        loadBussinessSource({
-          Scripts_ID,
-          currentPage: 1,
-          pageSize: 10,
-          ...this.params
-        }).then(res => {
-          traverseObj(value, (sk, sv) => {
-            // sv.paramValue = res.Data.TableData?.[0]
-            console.log(111, res);
-            sv?.params?.map(param => {
-              postData[param.procedureId] = {
-                procedureName: param.procedureName,
-                //替换params值，用来生成最后exec接口的params参数。
-                params: postData?.[param.procedureId]?.params ? [...postData[param.procedureId].params, {
-                  ...param,
-                  Param_TestVALUE: getParamVALUE(wrapperData, sv)
-                }] : [{
-                  ...param,
-                  Param_TestVALUE: getParamVALUE(wrapperData, sv)
-                }],
-              }
-            })
+        traverseObj(value, (sk, sv) => {
+          sv?.params?.map(param => {
+            postData[param.procedureId] = {
+              procedureName: param.procedureName,
+              //替换params值，用来生成最后exec接口的params参数。
+              params: postData?.[param.procedureId]?.params ? [...postData[param.procedureId].params, {
+                ...param,
+                Param_TestVALUE: getParamVALUE(wrapperData, sv) || param.defaultValue || param.Param_TestVALUE
+              }] : [{
+                ...param,
+                Param_TestVALUE: getParamVALUE(wrapperData, sv) || param.defaultValue || param.Param_TestVALUE
+              }],
+            }
           })
         })
-*/
       })
 
-      /*traverseObj(postData, (procedureId, procedure) => {
+      traverseObj(postData, (procedureId, procedure) => {
         getProcedureParams(procedure.procedureName, "", 1).then(res => {
           const procedureParams = res.Data
           console.log('getProcedureParams', procedureParams);
@@ -174,16 +164,18 @@ export default {
           postParams = postParams.map(item => {
             return filterPostParam(item)
           })
-          console.log('postParams', postParams);
-          /!*execProcedure({
+          execProcedure({
             procedureID: procedureId,
             procedureName: procedure.procedureName,
             params: postParams
           }).then(res => {
+            if (res.Status) {
+              ElMessage.success('保存成功!')
+            }
             console.log('execProcedure', res);
-          })*!/
+          })
         })
-      })*/
+      })
     }
   }
 }

@@ -76,7 +76,6 @@ import containerItemMixin from "@/components/form-render/container-item/containe
 import {getDSByName, overwriteObj, runDataSourceRequest} from "@/utils/util"
 import {loadBussinessSource} from "@/api/bussiness-source"
 import {assembleBussinessParams} from "@/utils/data-adapter";
-
 export default {
   name: "DataTableItem",
   componentName: 'ContainerItem',  //必须固定为ContainerItem，用于接收父级组件的broadcast事件

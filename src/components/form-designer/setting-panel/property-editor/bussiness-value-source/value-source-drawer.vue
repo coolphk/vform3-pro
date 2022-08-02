@@ -229,26 +229,14 @@ watch(inputColumnValue, (newVal) => {
 function onCascaderChange(row, value) {
   //有值代表是新选中状态,否则代表取消选中状态
   if (value) {
-    /*compBindMap.value[row.scriptId] ? compBindMap.value[row.scriptId]['scriptParams'] = {
-      ...compBindMap.value[row.scriptId]['scriptParams'],
-      [row.Param_Name]: value,
-    } : props.optionModel.valueSource.bindMap = {
-      ...compBindMap.value,
-      [row.scriptId]: {
-        'scriptParams': {
-          [row.Param_Name]: value,
-        }
-      }
-    }*/
-    console.log(row, value);
     compBindMap.value[row.scriptId]['scriptParams'][row.Param_Name].linkWidget = value
-    /*props.designer.formWidget.getWidgetRef(value[0]).widget.options.onOperationButtonClick =
+    props.designer.formWidget.getWidgetRef(value[0]).widget.options.onOperationButtonClick =
         `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
             ${row.scriptId}:{
               scriptName:'${row.scriptName}',
               params:{${row.Param_Name}:row['${value[1]}']}
             }
-          })`*/
+          })`
   } else {
     delete compBindMap.value[row.scriptId]['scriptParams']
     if (isEmptyObj(compBindMap.value[row.scriptId])) {
@@ -277,19 +265,6 @@ function handleBindMap(row) {
       }
     })
   }
-  /*vsBind[row.scriptId] = {
-    ...vsBind[row.scriptId],
-    [row.label]: {
-      widgetId: row.widgetId,
-      params: row.params.map(param => ({
-        ...filterPostParam(param),
-        defaultValue: "",
-        "procedureId": param.procedureId,
-        "procedureName": param.procedureName
-      }))
-    },
-    scriptName: row.scriptName
-  }*/
 }
 
 /**
@@ -309,9 +284,10 @@ function onBindWidgetChange(row) {
  * @param script
  */
 function loadScriptsParams(script) {
+  console.log('loadScriptsParams', script);
   script && getScriptsParams(script.ID).then(res => {
-    loadTableData(script, res?.Data?.Params)
     setScriptParamsToBindMap(script, res.Data.Params)
+    loadTableData(script, res?.Data?.Params)
   })
 }
 
@@ -319,12 +295,13 @@ function setScriptParamsToBindMap({ID, NAME}, scriptParams) {
   props.optionModel.valueSource.bindMap[ID] = {
     ...props.optionModel.valueSource.bindMap[ID],
     scriptName: NAME,
-    scriptParams: props.optionModel.valueSource.bindMap[ID]['scriptParams'] ?? {}
+    scriptParams: props.optionModel.valueSource.bindMap[ID]?.['scriptParams'] ?? {}
   }
   scriptParams.map(param => {
+    param.Param_TestVALUE = compBindMap.value?.[ID]?.['scriptParams']?.[param.Param_Name]?.defaultValue ?? param.Param_TestVALUE
     compBindMap.value[ID]['scriptParams'][param.Param_Name] = {
-      defaultValue: props.optionModel.valueSource.bindMap[ID]['scriptParams'][param.Param_Name].defaultValue ?? param.Param_TestVALUE,
-      linkWidget: []
+      defaultValue: param.Param_TestVALUE,
+      linkWidget: compBindMap.value[ID]['scriptParams'][param.Param_Name].linkWidget ?? []
     }
   })
 }
@@ -378,7 +355,6 @@ function loadTableData({ID: scriptId, NAME: scriptName}, params) {
 }
 
 function onCurrentChange(currentPage) {
-  // scriptResponse.data = pagination(currentPage > bussinessData.value.length ? bussinessData.value.length : currentPage, scriptResponse.pageSize, bussinessData.value)
   scriptResponse.data = pagination(currentPage > compBussinessData.value.length ? compBussinessData.value.length : currentPage, scriptResponse.pageSize, compBussinessData.value)
   scriptResponse.total = compBussinessData.value.length
 }
@@ -394,14 +370,12 @@ function loadDataFinished(vsData) {
 }
 
 function refreshData() {
-  console.log(paramData.value);
   const params = {}
   paramData.value.map(item => {
     params[item.scriptId] = {
       scriptParams: params[item.scriptId]?.['scriptParams'] ? [...params[item.scriptId]['scriptParams'], {...item}] : [{...item}],
       scriptName: item.scriptName
     }
-    console.log('item', item);
     compBindMap.value[item.scriptId]['scriptParams'][item.Param_Name].defaultValue = item.Param_TestVALUE
   })
 
@@ -561,11 +535,11 @@ function autoBindData() {
 function onDefaultValueInput(row, param, value) {
   // console.log(getBindMapValueWithRow(row), param, value);
   getBindMapValueWithRow(row).params.find(bindMapParam => bindMapParam.Param_ID === param.Param_ID).defaultValue = value
-
-  /*getBindMapValueWithRow(row)['defaultValue'] = value;
-  if (!!!value) {
+  /*if (!!!value) {
     delete getBindMapValueWithRow(row)['defaultValue']
   }*/
+  /*getBindMapValueWithRow(row)['defaultValue'] = value;
+  */
 }
 
 /**
