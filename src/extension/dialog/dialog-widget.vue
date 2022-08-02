@@ -1,13 +1,3 @@
-<!--
-/**
- * author: vformAdmin
- * email: vdpadmin@163.com
- * website: https://www.vform666.com
- * date: 2021.08.18
- * remark: 如果要分发VForm源码，需在本文件顶部保留此文件头信息！！
- */
--->
-
 <template>
   <container-wrapper :designer="designer" :widget="widget" :parent-widget="parentWidget" :parent-list="parentList"
                      :index-of-parent-list="indexOfParentList">
@@ -46,8 +36,8 @@ import FieldComponents from '@/components/form-designer/form-widget/field-widget
 import refMixinDesign from "@/components/form-designer/refMixinDesign"
 
 export default {
-  name: "data-wrapper-widget",
-  componentName: 'DataWrapperWidget',
+  name: "dialog-widget",
+  componentName: 'DialogWidget',
   mixins: [i18n, containerMixin, refMixinDesign],
   inject: ['refList'],
   components: {

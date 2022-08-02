@@ -27,23 +27,15 @@ export default {
                         {
                           "Param_ID": "15",
                           "Param_Name": "@VBO01",
+                          "Param_TestVALUE 脚本查询的默认值:"",
                           "procedureId": 1775695957,
                           "procedureName": "HOPatient_VAE1_Update"
+                          defaultValue 默认值:
                         }
                       ]
                     },
-                    "scriptName": "获取患者信息",
-                    "AAT02": {
-                      "widgetId": "",
-                      "params": [
-                        {
-                          "Param_ID": "8",
-                          "Param_Name": "@EmpCode",
-                          "procedureId": 1775695957,
-                          "procedureName": "HOPatient_VAE1_Update"
-                        }
-                      ]
-                    }
+                    "scriptName" 脚本名称: "获取患者信息",
+                    "scriptParams 脚本参数": { "VAA01 参数名称": { "defaultValue" 参数默认值: "13698", "linkWidget" 关联组件: []"
                   }
                 },*/
       pageSize: 10

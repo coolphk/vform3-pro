@@ -30,19 +30,20 @@
 
 <script>
 import i18n from "@/utils/i18n";
-import refMixinDesign from "@/components/form-designer/refMixinDesign";
 import FieldComponents from "@/components/form-designer/form-widget/field-widget";
-import {loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams, traverseObj} from "@/utils/data-adapter";
+import {getScriptsParams, loadBussinessSource} from "@/api/bussiness-source";
+import {changeBindMapToProcedureIdAsKey, filterPostParam, traverseObj} from "@/utils/data-adapter";
 import ContainerItemWrapper from "@/components/form-render/container-item/container-item-wrapper";
 import containerItemMixin from "@/components/form-render/container-item/containerItemMixin";
 import refMixin from "@/components/form-render/refMixin";
 import emitter from "@/utils/emitter";
+import {isEmptyObj, traverseFieldWidgets} from "@/utils/util";
+import {execProcedure, getProcedureParams} from "@/api/data-schema";
 
 export default {
   name: "data-wrapper-item",
   mixins: [i18n, containerItemMixin, refMixin, emitter],
-  inject: ['refList'],
+  inject: ['refList', 'sfRefList', 'globalModel', 'getFormConfig', 'getGlobalDsv'],
   components: {
     ContainerItemWrapper,
     ...FieldComponents,
@@ -50,37 +51,40 @@ export default {
   props: {
     widget: Object,
   },
+  data() {
+    return {
+      params: {}
+    }
+  },
   computed: {},
   created() {
     this.initRefList()
   },
   mounted() {
-    // this.setFormDataWithValueSource()
+    this.setFormDataWithValueSource(this.params)
   },
   methods: {
     /**
      * 根据valueSource获取表单数据并赋值，
-     * @param scripts
+     * @param scriptParams
      */
-    setFormDataWithValueSource(scripts) {
-      debugger
+    setFormDataWithValueSource(scriptParams) {
       const vs = this.widget?.options?.valueSource
       console.log(222, vs);
-      console.log(333, scripts);
       const formData = {}
       traverseObj(vs.bindMap, (Scripts_ID, value) => {
         loadBussinessSource({
           Scripts_ID,
           currentPage: 1,
           pageSize: 10,
-          ...scripts[Scripts_ID]?.params
+          ...scriptParams
         }).then(res => {
           //读取数据赋值到form表单中，并给bindMap设置默认值
           traverseObj(res.Data.TableData?.[0], (key, value) => {
             if (vs.bindMap[Scripts_ID][key]) {
+              //todo 修改初始值
               vs.bindMap[Scripts_ID][key]['paramValue'] = value
             }
-
             if (vs.bindMap[Scripts_ID]?.[key]?.widgetId) {
               formData[vs.bindMap[Scripts_ID][key].widgetId] = value
             }
@@ -89,6 +93,97 @@ export default {
           console.log(vs.bindMap)
         })
       })
+    },
+
+    getChildWidgetsValue() {
+      const formModel = {}
+      traverseFieldWidgets(this.widget.widgetList, (widget) => {
+        formModel[widget.id] = this.formModel[widget.id]
+      })
+      console.log(this.formModel, formModel);
+      return formModel
+    },
+
+    setBussinessSourceParams(params) {
+      this.params = params
+    },
+
+    saveDataWrapper() {
+      console.log(this.params);
+
+      /**
+       * 从表单中的组件取值，如果没有和绑定关系匹配的组件则获取绑定关系默认值
+       * @param formData
+       * @param sv
+       * @returns {*}
+       */
+      function getParamVALUE(formData, sv) {
+        return formData[sv.widgetId] ? formData[sv.widgetId] : sv.paramValue;
+      }
+
+      const wrapperData = this.getChildWidgetsValue()
+      const postData = {}
+      traverseObj(this.widget.options.valueSource.bindMap, (Scripts_ID, value) => {
+        getScriptsParams(Scripts_ID).then(spRes => {
+          console.log(spRes);
+        })
+/*
+        loadBussinessSource({
+          Scripts_ID,
+          currentPage: 1,
+          pageSize: 10,
+          ...this.params
+        }).then(res => {
+          traverseObj(value, (sk, sv) => {
+            // sv.paramValue = res.Data.TableData?.[0]
+            console.log(111, res);
+            sv?.params?.map(param => {
+              postData[param.procedureId] = {
+                procedureName: param.procedureName,
+                //替换params值，用来生成最后exec接口的params参数。
+                params: postData?.[param.procedureId]?.params ? [...postData[param.procedureId].params, {
+                  ...param,
+                  Param_TestVALUE: getParamVALUE(wrapperData, sv)
+                }] : [{
+                  ...param,
+                  Param_TestVALUE: getParamVALUE(wrapperData, sv)
+                }],
+              }
+            })
+          })
+        })
+*/
+      })
+
+      /*traverseObj(postData, (procedureId, procedure) => {
+        getProcedureParams(procedure.procedureName, "", 1).then(res => {
+          const procedureParams = res.Data
+          console.log('getProcedureParams', procedureParams);
+          //获取xml结构
+          let postParams = procedureParams.filter(item => item.Param_ObjType === 'object' || item.Param_ObjType === 'array' || item.Param_isXML === '1')
+
+          //比对绑定关系与存储过程参数，将相同的进行替换
+          procedureParams.map(item => {
+            const newItem = procedure.params.find(postItem => postItem.Param_ID === item.Param_ID)
+            if (newItem) {
+              // console.log(procedure)
+              postParams.push(newItem)
+            }
+          })
+          //过滤无用字段，减少提交数据大小
+          postParams = postParams.map(item => {
+            return filterPostParam(item)
+          })
+          console.log('postParams', postParams);
+          /!*execProcedure({
+            procedureID: procedureId,
+            procedureName: procedure.procedureName,
+            params: postParams
+          }).then(res => {
+            console.log('execProcedure', res);
+          })*!/
+        })
+      })*/
     }
   }
 }

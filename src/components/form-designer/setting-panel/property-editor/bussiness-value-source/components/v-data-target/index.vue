@@ -42,8 +42,9 @@
 <script setup>
 import {reactive, ref, watch} from "vue";
 import {getProcedureList, getProcedureParams} from "@/api/data-schema";
-import {traverseObj, traverseTreeData, unFlatten} from "@/utils/data-adapter";
+import {changeBindMapToProcedureIdAsKey, traverseObj, traverseTreeData, unFlatten} from "@/utils/data-adapter";
 import useTransferFormDataToPostData from "@/components/form-render/composible/useTransferFormDataToPostData";
+import {isEmptyObj} from "@/utils/util";
 
 const props = defineProps({
   dataTarget: Object,
@@ -101,7 +102,7 @@ watch(selectedProcedures, (newVal, oldVal) => {
   }
 })
 
-watch(() => props.bindMap, () => {
+watch(() => props.bindMap, (newVal, oldValue) => {
   changeBoundProcedureStyle()
 }, {deep: true})
 
@@ -117,33 +118,18 @@ function changeBoundProcedureStyle() {
     })
   })
   traverseTreeData(treeData.value, (data) => {
-    traverseObj(postData, (key, value) => {
-      if (!value.params.find(item => item.Param_ID === data.Param_ID)) {
-        data.isBound = false
-      }
-    })
+    if (isEmptyObj(postData)) {
+      data.isBound = false
+    } else {
+      traverseObj(postData, (key, value) => {
+        if (!value.params.find(item => item.Param_ID === data.Param_ID)) {
+          data.isBound = false
+        }
+      })
+    }
   })
 }
 
-function changeBindMapToProcedureIdAsKey(bindMap) {
-  const postData = {}
-  traverseObj(bindMap, (key, value) => {
-    traverseObj(value, (sk, sv) => {
-      sv?.params?.map(param => {
-        postData[param.procedureId] = {
-          procedureName: param.procedureName,
-          //替换params值，用来生成最后exec接口的params参数。
-          params: postData?.[param.procedureId]?.params ? [...postData[param.procedureId].params, {
-            ...param
-          }] : [{
-            ...param
-          }],
-        }
-      })
-    })
-  })
-  return postData
-}
 
 function onDragAdd(evt) {
   console.log(putList[evt.newIndex]);

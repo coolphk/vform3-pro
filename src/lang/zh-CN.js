@@ -58,7 +58,7 @@ export default {
       'rich-editor': '富文本',
       cascader: '级联选择',
       slot: '插槽',
-
+      dialog: '弹出窗体',
       custom: 'Custom Component',
     },
 

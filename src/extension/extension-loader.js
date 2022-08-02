@@ -21,6 +21,7 @@ import {registerFWGenerator} from '@/utils/sfc-generator'
 import {alertTemplateGenerator} from '@/extension/samples/extension-sfc-generator'
 import editTable from "@/extension/edit-table";
 import dataWrapper from "@/extension/data-wrapper";
+import dialog from "@/extension/dialog";
 
 export const loadExtension = function (app) {
 
@@ -60,6 +61,7 @@ export const loadExtension = function (app) {
   /* -------------------------------------------------- */
   editTable.install(addBasicFieldSchema, app, PERegister)
   dataWrapper.install(addContainerWidgetSchema, app, PERegister)
+  dialog.install(addContainerWidgetSchema,app,PERegister)
   /* 容器组件加载完毕 end */
 
   /**

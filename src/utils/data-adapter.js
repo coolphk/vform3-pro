@@ -156,3 +156,23 @@ export function traverseTreeData(treeData, handle) {
     }
   })
 }
+
+export function changeBindMapToProcedureIdAsKey(bindMap) {
+  const postData = {}
+  traverseObj(bindMap, (key, value) => {
+    traverseObj(value, (sk, sv) => {
+      sv?.params?.map(param => {
+        postData[param.procedureId] = {
+          procedureName: param.procedureName,
+          //替换params值，用来生成最后exec接口的params参数。
+          params: postData?.[param.procedureId]?.params ? [...postData[param.procedureId].params, {
+            ...param
+          }] : [{
+            ...param
+          }],
+        }
+      })
+    })
+  })
+  return postData
+}

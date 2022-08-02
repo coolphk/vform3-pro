@@ -757,67 +757,7 @@ export default {
             console.log('execProcedure', res);
           })
         })
-
-        /*execProcedure({
-          procedureID: procedureId,
-          procedureName: procedure.procedureName,
-          params: procedure.params
-        }).then(res => {
-          console.log(res);
-        })*/
       })
-      /*const procedureMap = new Map() //将所有控件按存储过程名称分组
-      /!**
-       * 1、遍历所有业务组件（带dataTarget属性的组件)procedureMap={widgets:[]}
-       * 2、将相同的存储过程合并放入procedureMap中,并且将属于同一存储过程的组件放入widgets中
-       *!/
-      traverseAllWidgets(this.widgetList, async (formWidget) => {
-        if (formWidget.type === 'data-wrapper') {
-          // console.log(111, formWidget.options.valueSource.originalData);
-          const {schema: wrapperSchema} = formWidget.options.valueSource.originalData
-          const wrapperProMap = new Map() //当前数据容器对应的map
-          traverseAllWidgets(formWidget.widgetList, (widget) => {
-            useWidgetsGroupByProcedure(wrapperProMap, widget)
-          })
-          const formData = await this.getFormData()
-          wrapperProMap.forEach((value, key) => {
-            this.getFormData().then(formData => { //获取当前表单组件值
-              // console.log(formData);
-              console.log('bindMap', formWidget.options.valueSource.bindMap)
-
-              Object.keys(formData).map(key => {
-                wrapperSchema[getKeyByValue(formWidget.options.valueSource.bindMap, key)] = formData[key]
-              })
-              console.log(wrapperSchema);
-
-              getProcedureParams(key, "", 1).then(res => {
-                console.log(res);
-                res.Data.map(param => {
-                  param.Param_VALUE = wrapperSchema[param.Param_Name]
-                })
-                execProcedure({
-                  procedureID: value.id,
-                  procedureName: key,
-                  params: res.Data
-                }).then(res => {
-                  console.log(333, res);
-                }).catch(err => {
-                  console.log(444, err);
-                })
-              })
-              /!*submitData.params = useParamsInFormData(value.widgets, formData, resData)
-              submitDatas.push(submitData)
-              if (submitDatas.length === procedureMap.size) {
-                resolve(submitDatas)
-              }*!/
-            })
-          })
-        } else {
-          useWidgetsGroupByProcedure(procedureMap, formWidget)
-        }
-      })
-      console.log(procedureMap);
-     */
     },
 
     setBussinessData() {
