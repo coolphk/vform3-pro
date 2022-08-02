@@ -15,6 +15,7 @@ import {
 } from "@/components/form-designer/widget-panel/widgetsConfig.js"
 import {VARIANT_FORM_VERSION} from "@/utils/config"
 import eventBus from "@/utils/event-bus"
+import {traverseObj} from "@/utils/data-adapter";
 
 export function createDesigner(vueInstance) {
   let defaultFormConfig = deepClone(getDefaultFormConfig())
@@ -699,8 +700,20 @@ export function createDesigner(vueInstance) {
 
         return newTable
       } else if (containWidget.type === 'data-wrapper') {
+        // console.log(this.getContainerByType(containWidget.type));
         let newDataWrapper = deepClone(containWidget)
-
+        newDataWrapper.options.dataTarget = {
+          expandedKeys: [],
+          selectedProcedures: []
+        }
+        newDataWrapper.options.valueSource = {
+          checkedNodes: [],//当前选中的节点
+          scriptParams: {}, //获取数据源时，获取脚本参数接口，每个控件自己的参数实例
+          expandedKeys: [],//展开的节点id
+          originalData: {}, //原始数据，渲染时将当前dataWrapper对应的原始数据存入，会将修改的值替换originalData，然后调用exec存入存储过程.
+                            // 结构为{scriptId,schema}
+          bindMap: {},
+        }
         newDataWrapper.key = generateId()
         newDataWrapper.id = newDataWrapper.type + generateId()
         newDataWrapper.options.name = newDataWrapper.id
@@ -708,20 +721,14 @@ export function createDesigner(vueInstance) {
           widget.key = generateId()
           widget.id = widget.type + generateId()
           widget.options.name = widget.id
+          if (widget.formItemFlag || widget.type === 'button') {
+            traverseObj(widget.options, (key, value) => {
+              if (key.startsWith('on')) {
+                widget.options[key] = ""
+              }
+            })
+          }
         })
-        console.log('original', containWidget);
-        console.log('new', newDataWrapper);
-        /*newDataWrapper.id = newDataWrapper.type + generateId()
-        newDataWrapper.options.name = newDataWrapper.id
-        containWidget.cols.forEach(gridCol => {
-          let newGridCol = deepClone(this.getContainerByType('grid-col'))
-          let tmpId = generateId()
-          newGridCol.id = 'grid-col-' + tmpId
-          newGridCol.options.name = 'gridCol' + tmpId
-          newGridCol.options.span = gridCol.options.span
-          newDataWrapper.cols.push(newGridCol)
-        })*/
-
         return newDataWrapper
       } else {  //其他容器组件不支持clone操作
         return null
