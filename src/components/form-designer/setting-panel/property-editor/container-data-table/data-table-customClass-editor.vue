@@ -146,19 +146,20 @@
           </el-table-column> -->
           <el-table-column :label="i18nt('designer.setting.formatOfColumn')" width="200" prop="formatS">
             <template #default="scope">
-              <el-select v-model="scope.row.formatS" clearable>
-                <el-option-group
-                    v-for="group in op"
-                    :key="group.label"
-                    :label="group.label">
-                  <el-option
-                      v-for="item in group.options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-                  </el-option>
-                </el-option-group>
-              </el-select>
+              <el-input type="textarea" v-model="scope.row.formatS"></el-input>
+              <!--              <el-select v-model="scope.row.formatS" clearable>
+                              <el-option-group
+                                  v-for="group in op"
+                                  :key="group.label"
+                                  :label="group.label">
+                                <el-option
+                                    v-for="item in group.options"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                </el-option>
+                              </el-option-group>
+                            </el-select>-->
             </template>
           </el-table-column>
           <el-table-column :label="i18nt('designer.setting.actionColumn')" width="100" fixed="right" align="center">
@@ -228,7 +229,7 @@
                   <el-form-item :prop="'operationButtons.' + bIdx + '.type'"
                                 :label="i18nt('designer.setting.operationButtonType')">
                     <el-select v-model="btn.type" :placeholder="i18nt('designer.setting.operationButtonType')">
-											<el-option value="text">text</el-option>
+                      <el-option value="text">text</el-option>
                       <el-option value="primary">primary</el-option>
                       <el-option value="success">success</el-option>
                       <el-option value="warning">warning</el-option>
@@ -349,22 +350,22 @@ export default {
       op: [{
         label: 'Date Format',
         options: [
-          {value: 'd1', label: "yyyy-MM-dd"},
+          /*{value: 'd1', label: "yyyy-MM-dd"},
           {value: 'd2', label: "yyyy/MM/dd"},
-          {value: 'd3', label: "yyyy年MM月dd日"},
+          {value: 'd3', label: "yyyy年MM月dd日"},*/
           {value: 'd4', label: "yyyy-MM-dd HH:mm:ss"},
-          {value: 'd5', label: "yyyy-MM-dd hh:mm:ss"},
+          // {value: 'd5', label: "yyyy-MM-dd hh:mm:ss"},
         ]
       }, {
         label: 'Number Format',
         options: [
-          {value: 'n1', label: "###,###,###,##0.######"},
-          {value: 'n2', label: "###,###,###,##0.00####"},
-          {value: 'n3', label: "###,###,###,##0.000000"},
-          {value: 'n4', label: "###,###,###,##0.000"},
+          /*          {value: 'n1', label: "###,###,###,##0.######"},
+                    {value: 'n2', label: "###,###,###,##0.00####"},
+                    {value: 'n3', label: "###,###,###,##0.000000"},
+                    {value: 'n4', label: "###,###,###,##0.000"},*/
           {value: 'n5', label: "###,###,###,##0.00"},
-          {value: 'n6', label: "###,###,###,##0"},
-          {value: 'n7', label: "###,##0.00##%"},
+          /*{value: 'n6', label: "###,###,###,##0"},
+          {value: 'n7', label: "###,##0.00##%"},*/
         ]
       }],
 

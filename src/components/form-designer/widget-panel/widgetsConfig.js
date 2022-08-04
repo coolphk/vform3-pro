@@ -301,6 +301,8 @@ export const containers = [
       onSelectionChange: '',
       //操作按钮点击事件
       onOperationButtonClick: '',
+      //行点击事件
+      onTableRowClick: '',
       bussinessSource: {
         currentNodeKey: "",
         scriptParams: [],

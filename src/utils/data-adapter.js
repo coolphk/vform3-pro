@@ -157,6 +157,11 @@ export function traverseTreeData(treeData, handle) {
   })
 }
 
+/**
+ * 将绑定关系改变为以存储过程ID为主键的数据结构
+ * @param bindMap
+ * @returns {{}}
+ */
 export function changeBindMapToProcedureIdAsKey(bindMap) {
   const postData = {}
   traverseObj(bindMap, (key, value) => {

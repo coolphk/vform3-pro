@@ -8,6 +8,7 @@
               :size="widgetSize" :stripe="widget.options.stripe"
               @selection-change="handleSelectionChange"
               @sort-change="handleSortChange"
+              @row-click="hanldeTableRowClick"
               :cell-style="{padding: widget.options.rowSpacing + 'px 0'}">
 
       <el-table-column v-if="widget.options.showIndex" type="index" width="50" fixed="left"></el-table-column>
@@ -76,6 +77,7 @@ import containerItemMixin from "@/components/form-render/container-item/containe
 import {getDSByName, overwriteObj, runDataSourceRequest} from "@/utils/util"
 import {loadBussinessSource} from "@/api/bussiness-source"
 import {assembleBussinessParams} from "@/utils/data-adapter";
+
 export default {
   name: "DataTableItem",
   componentName: 'ContainerItem',  //必须固定为ContainerItem，用于接收父级组件的broadcast事件
@@ -154,6 +156,7 @@ export default {
   },
   mounted() {
     // this.handleOnMounted()
+
     if (!!this.widget.options.bussinessSource.currentNodeKey) {
       this.loadDataFromBussiness()
     } else if (!!this.widget.options.dsEnabled) {
@@ -168,28 +171,34 @@ export default {
       this.designer.setSelected(widget)
     },
 
-    renderHeader(h, {column, $index}) {//debugger
-      //console.log('column=====', column)
-      let colCount = 0;
-      if (this.widget.options.showIndex) {
-        colCount++;
-      }
-      if (this.widget.options.showCheckBox) {
-        colCount++;
-      }
+    /*    renderHeader(h, {column, $index}) {//debugger
+          //console.log('column=====', column)
+          let colCount = 0;
+          if (this.widget.options.showIndex) {
+            colCount++;
+          }
+          if (this.widget.options.showCheckBox) {
+            colCount++;
+          }
 
-      //this.$set(column, "formatS", this.widget.options.tableColumns[$index-colCount].formatS)
-      column.formatS = this.widget.options.tableColumns[$index - colCount].formatS
-      return column.label;
-    },
+          //this.$set(column, "formatS", this.widget.options.tableColumns[$index-colCount].formatS)
+          // column.formatS = this.widget.options.tableColumns[$index - colCount].formatS
+
+          return column.label;
+        },*/
 
     formatter(row, column, cellValue) {
       return cellValue;
     },
 
     formatterValue(row, column, cellValue) {
-      if (!!column.formatS) {
-        switch (column.formatS) {
+      const formatter = this.widget.options.tableColumns.find(item => item.prop === column.property)
+      if (!!formatter.formatS) {
+        const func = new Function('row', 'column', 'cellValue', formatter.formatS)
+        console.log(func)
+        return func(row, column, cellValue)
+
+        /*switch (column.formatS) {
           case 'd1':
             return formatDate1(cellValue);
           case 'd2':
@@ -214,7 +223,7 @@ export default {
             return formatNumber6(cellValue);
           case 'n7':
             return formatNumber7(cellValue);
-        }
+        }*/
       }
       return cellValue;
     },
@@ -303,7 +312,12 @@ export default {
         customFn.call(this, btnName, rowIndex, row)
       }
     },
-
+    hanldeTableRowClick(row, column, rowIndex) {
+      if (!!this.widget.options.onTableRowClick) {
+        let customFn = new Function('row', 'column', 'rowIndex', this.widget.options.onTableRowClick)
+        customFn.call(this, row, column, rowIndex)
+      }
+    },
     //--------------------- 以下为组件支持外部调用的API方法 begin ------------------//
     /* 提示：用户可自行扩充这些方法！！！ */
 

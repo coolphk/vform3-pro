@@ -165,7 +165,7 @@ const vDataTarget$ = ref()
 const showDataSource = ref(false)
 const inputColumnValue = ref("")
 const paramData = ref([])  //存储过程参数集合
-const paramBindWidgets = useBindParam(props.designer.widgetList) //存储过程参数需要绑定的组件列表
+const paramBindWidgets = useBindParam(props.designer.widgetList) //关联组件列表
 const scriptResponse = reactive({
   data: [],
   dataRange: {},
@@ -301,7 +301,7 @@ function setScriptParamsToBindMap({ID, NAME}, scriptParams) {
     param.Param_TestVALUE = compBindMap.value?.[ID]?.['scriptParams']?.[param.Param_Name]?.defaultValue ?? param.Param_TestVALUE
     compBindMap.value[ID]['scriptParams'][param.Param_Name] = {
       defaultValue: param.Param_TestVALUE,
-      linkWidget: compBindMap.value[ID]['scriptParams'][param.Param_Name].linkWidget ?? []
+      linkWidget: compBindMap.value[ID]['scriptParams']?.[param.Param_Name]?.linkWidget ?? []
     }
   })
 }

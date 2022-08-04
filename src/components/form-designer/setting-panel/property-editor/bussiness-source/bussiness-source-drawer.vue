@@ -5,6 +5,7 @@
 
     <div class="bussiness-container">
       <div class="tree_wrap">
+        <el-button @click="onClickExpaned">展开节点</el-button>
         <el-tree
             ref="tree$"
             node-key="ID"
@@ -19,6 +20,9 @@
             @node-collapse="nodeCollapse"
             @current-change="currentChange"
         >
+          <template #default="{node,data}">
+            {{ data.NAME }}--{{ data.ID }}
+          </template>
         </el-tree>
       </div>
       <div class="table_wrap">
@@ -92,9 +96,15 @@ export default {
   name: "bussinessSource-drawer",
   mixins: [i18n, propertyMixin],
   setup(props, ctx) {
+    console.log(1, props.optionModel.bussinessSource['expandedNodes']);
+    console.log(2,);
+    if (props.optionModel.bussinessSource['expandedNodes'].length === 0) {
+      props.optionModel.bussinessSource['expandedNodes'] = JSON.parse(localStorage.getItem('vsExpandedNodes'))
+    }
     const tree$ = ref()
     const busTable$ = ref()
     const showDataSource = ref(false)
+    const expanedNodes = reactive({})
     const treeData = ref([])
     const tableData = ref([])  //存储过程参数集合
     const tableColumn = ref([]) //列表列的复选框组
@@ -209,12 +219,19 @@ export default {
       }
     }
 
-    function nodeExpand(data) {
+    function nodeExpand(data, node) {
       openNodeSet.add(data.ID)
+      expanedNodes[data.ID] = {
+        name: data.NAME,
+        expanedKeys: Array.from(openNodeSet)
+      }
+      console.log(tree$.value);
+      console.log(expanedNodes);
     }
 
     function nodeCollapse(data) {
       openNodeSet.delete(data.ID)
+      delete expanedNodes[data.ID]
     }
 
     /**
@@ -298,6 +315,10 @@ export default {
       return cellStyle
     }
 
+    function onClickExpaned() {
+      props.optionModel.bussinessSource['expandedNodes'] = ['1', '2', 'c81d4236f6f1ef1b', 'df61f6db6bb0be3', 'c5aa3e6943517be7']
+    }
+
     return {
       showDataSource,
       treeData,
@@ -320,7 +341,8 @@ export default {
       onBusTableContextmenu,
       onCheckAll,
       close,
-      headerCellStyle
+      headerCellStyle,
+      onClickExpaned
     }
   },
   props: {

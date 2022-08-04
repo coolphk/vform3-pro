@@ -134,6 +134,7 @@ const EVENT_PROPERTIES = {
   'onCurrentPageChange'       :            'onCurrentPageChange-editor',
   'onSelectionChange'         :            'onSelectionChange-editor',
   'onOperationButtonClick'    :            'onOperationButtonClick-editor',
+  'onTableRowClick'           :            'onTableRowClick-editor'
 
 }
 

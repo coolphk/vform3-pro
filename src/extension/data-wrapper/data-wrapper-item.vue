@@ -111,10 +111,6 @@ export default {
     },
 
     saveDataWrapper() {
-      // console.log(this.params);
-      debugger
-      console.log(this.widget.id, this.widget.options.valueSource.bindMap);
-
       /**
        * 从表单中的组件取值，如果没有和绑定关系匹配的组件则获取绑定关系默认值
        * @param formData
