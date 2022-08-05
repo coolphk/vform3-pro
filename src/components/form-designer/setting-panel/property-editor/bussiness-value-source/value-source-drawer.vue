@@ -20,6 +20,7 @@
 
       <div class="table-wrapper">
         <el-button type="primary" @click="refreshData">刷新数据</el-button>
+        <el-button @click="clearValueSource">清楚valueSource</el-button>
         <!--        参数列表-->
         <el-table :data="paramData" border max-height="200">
           <el-table-column prop="scriptId" label="id" width="150"/>
@@ -94,7 +95,7 @@
                   item-key="Param_ID"
                   :list="row.params"
                   :group="tableDragGroup"
-                  @add="handleBindMap(row)"
+
               >
                 <template #item="{element,index}">
                   <span style="margin: 2px">
@@ -215,11 +216,49 @@ const compBussinessData = computed(() => {
   return bussinessData.value.filter((data) => !inputColumnValue.value || data.label.toLowerCase().includes(inputColumnValue.value.toLowerCase()))
 })
 
-const compBindMap = computed(() => props.optionModel.valueSource.bindMap)
+const compBindMap = computed({
+  set(value) {
+    props.optionModel.valueSource.bindMap = value
+  },
+  get() {
+    return props.optionModel.valueSource.bindMap
+  }
+})
 
 watch(inputColumnValue, (newVal) => {
   onCurrentChange(1)
 })
+
+watch(paramData, (newValue, oldValue) => {
+  console.log('watch paramData', newValue);
+  newValue.map(param => {
+    compBindMap.value[param.scriptId]['scriptParams'][param.Param_Name] = {
+      defaultValue: compBindMap.value[param.scriptId]['scriptParams'][param.Param_Name].defaultValue ?? param.Param_TestVALUE,
+      linkWidget: param.bindWidget ?? []
+    }
+  })
+}, {deep: true})
+
+watch(bussinessData, (newValue, oldValue) => {
+  console.log(newValue);
+  // clearValueSource()
+  newValue.map(row => {
+    row.params.length > 0 && (compBindMap.value[row.scriptId]['scriptFields'][row.label] = {
+      widgetId: row.widgetId,
+      params: row.params.map(item => ({
+        ...filterPostParam(item),
+        defaultValue: item.defaultValue,
+        procedureId: item.procedureId,
+        procedureName: item.procedureName
+      }))
+    })
+  })
+}, {deep: true})
+
+
+function clearValueSource() {
+  compBindMap.value = {}
+}
 
 /**
  * 脚本参数绑定组件选择事件
@@ -285,10 +324,31 @@ function onBindWidgetChange(row) {
  */
 function loadScriptsParams(script) {
   console.log('loadScriptsParams', script);
+  buildBindMap(script)
   script && getScriptsParams(script.ID).then(res => {
-    setScriptParamsToBindMap(script, res.Data.Params)
+    // setScriptParamsToBindMap(script, res.Data.Params)
+
     loadTableData(script, res?.Data?.Params)
   })
+}
+
+function buildBindMap(script) {
+  if (isEmptyObj(compBindMap.value)) {
+    compBindMap.value = {
+      [script.ID]: {
+        scriptName: script.NAME,
+        scriptParams: {},
+        scriptFields: {}
+      }
+    }
+  }
+  if (!compBindMap.value?.[script.ID]) {
+    compBindMap.value[script.ID] = {
+      scriptName: script.NAME,
+      scriptParams: [],
+      scriptFields: {}
+    }
+  }
 }
 
 function setScriptParamsToBindMap({ID, NAME}, scriptParams) {
@@ -321,13 +381,16 @@ function loadTableData({ID: scriptId, NAME: scriptName}, params) {
     const vsBindMap = compBindMap.value
     const columns = res.Data.TableHeaders
     //合并参数
-    paramData.value = paramData.value.concat(params.map(param => ({
-      scriptName: scriptName,
-      scriptId: scriptId,
-      bindWidget: vsBindMap?.[scriptId]?.['scriptParams']?.[param.Param_Name].linkWidget,
-      ...param,
-      Param_TestVALUE: vsBindMap?.[scriptId]?.['scriptParams']?.[param.Param_Name].defaultValue //数据刷新时，如果绑定关系中有参数有默认值，则使用默认值
-    })))
+    params.map(param => {
+      paramData.value.push(
+          {
+            scriptName: scriptName,
+            scriptId: scriptId,
+            bindWidget: vsBindMap?.[scriptId]?.['scriptParams']?.[param.Param_Name]?.linkWidget,
+            ...param,
+            Param_TestVALUE: vsBindMap?.[scriptId]?.['scriptParams']?.[param.Param_Name]?.defaultValue //数据刷新时，如果绑定关系中有参数有默认值，则使用默认值
+          })
+    })
 
 
     //标记数据在整合数据中的位置
@@ -412,7 +475,7 @@ function removePartialBussinessData(script) {
  * 删除脚本参数
  */
 function removeScriptParam(scriptId) {
-  console.log(paramData.value);
+  // console.log(paramData.value);
   for (let i = paramData.value.length - 1; i >= 0; i--) {
     const item = paramData.value[i]
     if (item.scriptId === scriptId) {
