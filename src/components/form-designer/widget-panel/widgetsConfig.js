@@ -127,7 +127,7 @@ export const containers = [
       customClass: '', //自定义css样式
       stripe: true, // 是否斑马线
       showIndex: false, // 是否显示行号列
-      showCheckBox: true, // 是否显示复选框列
+      showCheckBox: false, // 是否显示复选框列
       showPagination: true, // 是否分页
       smallPagination: false, //是否显示小型分页
       showSummary: false, // 是否合计

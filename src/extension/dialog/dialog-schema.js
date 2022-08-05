@@ -1,7 +1,7 @@
 export default {
   type: 'dialog',
   category: 'container',
-  icon: 'grid',
+  icon: 'dialog',
   widgetList: [],
   options: {
     name: '',

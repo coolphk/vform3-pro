@@ -4,26 +4,32 @@
              show-close @close="close">
 
     <div class="bussiness-container">
-      <div class="tree_wrap">
-        <el-button @click="onClickExpaned">展开节点</el-button>
-        <el-tree
-            ref="tree$"
-            node-key="ID"
-            check-on-click-node
-            :highlight-current="true"
-            :indent="8"
-            :props="{label:'NAME'}"
-            :data="treeData"
-            :default-expanded-keys="optionModel.bussinessSource['expandedNodes']"
-            :current-node-key="optionModel.bussinessSource['currentNodeKey']"
-            @node-expand="nodeExpand"
-            @node-collapse="nodeCollapse"
-            @current-change="currentChange"
-        >
-          <template #default="{node,data}">
-            {{ data.NAME }}--{{ data.ID }}
-          </template>
-        </el-tree>
+      <div>
+          <span v-for="(node) in treeExpandedHistory" style="margin-right: 5px">
+            <el-button @click="onClickExpaned(node)">{{ node.name }}</el-button>
+          </span>
+
+
+        <div class="tree_wrap">
+          <el-tree
+              ref="tree$"
+              node-key="ID"
+              check-on-click-node
+              :highlight-current="true"
+              :indent="8"
+              :props="{label:'NAME'}"
+              :data="treeData"
+              :default-expanded-keys="optionModel.bussinessSource['expandedNodes']"
+              :current-node-key="optionModel.bussinessSource['currentNodeKey']"
+              @node-expand="nodeExpand"
+              @node-collapse="nodeCollapse"
+              @current-change="currentChange"
+          >
+            <template #default="{node,data}">
+              {{ data.NAME }}--{{ data.ID }}
+            </template>
+          </el-tree>
+        </div>
       </div>
       <div class="table_wrap">
         <div style="margin:10px 0 10px 8px">
@@ -98,13 +104,13 @@ export default {
   setup(props, ctx) {
     console.log(1, props.optionModel.bussinessSource['expandedNodes']);
     console.log(2,);
-    if (props.optionModel.bussinessSource['expandedNodes'].length === 0) {
+    /*if (props.optionModel.bussinessSource['expandedNodes'].length === 0) {
       props.optionModel.bussinessSource['expandedNodes'] = JSON.parse(localStorage.getItem('vsExpandedNodes'))
-    }
+    }*/
     const tree$ = ref()
     const busTable$ = ref()
     const showDataSource = ref(false)
-    const expanedNodes = reactive({})
+    const expanedNodes = reactive([])
     const treeData = ref([])
     const tableData = ref([])  //存储过程参数集合
     const tableColumn = ref([]) //列表列的复选框组
@@ -134,7 +140,8 @@ export default {
         }
       ]
     })
-
+    const treeExpandedHistory = JSON.parse(localStorage.getItem('expanedNodes'))
+    console.log('treeExpandedHistory', treeExpandedHistory);
     const compSelectedColumns = computed({
       get: () => {
         return props.optionModel.tableColumns.map(item => item.prop)
@@ -173,6 +180,10 @@ export default {
 
     watch(openNodeSet, (newVal) => {
       props.optionModel.bussinessSource["expandedNodes"] = Array.from(newVal)
+    })
+
+    watch(expanedNodes, (newVal) => {
+      localStorage.setItem("expanedNodes", JSON.stringify(newVal))
     })
 
     function onCheckAll(value) {
@@ -221,17 +232,19 @@ export default {
 
     function nodeExpand(data, node) {
       openNodeSet.add(data.ID)
-      expanedNodes[data.ID] = {
+      expanedNodes.push({
+        id: data.ID,
         name: data.NAME,
         expanedKeys: Array.from(openNodeSet)
+      })
+      if (expanedNodes.length > 3) {
+        expanedNodes.shift()
       }
-      console.log(tree$.value);
-      console.log(expanedNodes);
     }
 
     function nodeCollapse(data) {
       openNodeSet.delete(data.ID)
-      delete expanedNodes[data.ID]
+      expanedNodes.splice(expanedNodes.findIndex(item => item.id === data.ID), 1)
     }
 
     /**
@@ -315,8 +328,8 @@ export default {
       return cellStyle
     }
 
-    function onClickExpaned() {
-      props.optionModel.bussinessSource['expandedNodes'] = ['1', '2', 'c81d4236f6f1ef1b', 'df61f6db6bb0be3', 'c5aa3e6943517be7']
+    function onClickExpaned(node) {
+      props.optionModel.bussinessSource['expandedNodes'] = node.expanedKeys
     }
 
     return {
@@ -332,6 +345,7 @@ export default {
       compSelectedColumns,
       compPageSize,
       checkAll,
+      treeExpandedHistory,
       isTable,
       currentChange,
       nodeExpand,

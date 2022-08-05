@@ -1,7 +1,7 @@
 export default {
   type: 'data-wrapper',
   category: 'container',
-  icon: 'table',
+  icon: 'data-wrapper',
   widgetList: [],
   options: {
     name: '',
