@@ -85,10 +85,10 @@ export default {
           traverseObj(res.Data.TableData?.[0], (key, value) => {
             if (vs.bindMap[Scripts_ID][key]) {
               //todo 修改初始值
-              vs.bindMap[Scripts_ID][key]['paramValue'] = value
+              vs.bindMap[Scripts_ID]['scriptFields'][key]['paramValue'] = value
             }
-            if (vs.bindMap[Scripts_ID]?.[key]?.widgetId) {
-              formData[vs.bindMap[Scripts_ID][key].widgetId] = value
+            if (vs.bindMap[Scripts_ID]?.['scriptFields']?.[key]?.widgetId) {
+              formData[vs.bindMap[Scripts_ID]['scriptFields'][key].widgetId] = value
             }
           })
           this.getFormRef().setFormData(formData)
@@ -124,7 +124,7 @@ export default {
       const wrapperData = this.getChildWidgetsValue()
       const postData = {}
       traverseObj(this.widget.options.valueSource.bindMap, (Scripts_ID, value) => {
-        traverseObj(value, (sk, sv) => {
+        traverseObj(value?.scriptFields, (sk, sv) => {
           sv?.params?.map(param => {
             postData[param.procedureId] = {
               procedureName: param.procedureName,

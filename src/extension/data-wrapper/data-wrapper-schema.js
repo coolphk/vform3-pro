@@ -21,19 +21,21 @@ export default {
       /*数据绑定关系，数据源与组件值的绑定关系
       数据结构"bindMap": {
                   "a3c04a830bc7fa5" 脚本id: {
-                    "AAG01" 脚本参数id: {
-                      "widgetId" 控件id: "",
-                      "params" 存储过程参数: [
-                        {
-                          "Param_ID": "15",
-                          "Param_Name": "@VBO01",
-                          "Param_TestVALUE 脚本查询的默认值:"",
-                          "procedureId": 1775695957,
-                          "procedureName": "HOPatient_VAE1_Update"
-                          defaultValue 默认值:
-                        }
-                      ]
-                    },
+                    "scriptFields:{
+                      "AAG01" 脚本参数id: {
+                        "widgetId" 控件id: "",
+                        "params" 存储过程参数: [
+                          {
+                            "Param_ID": "15",
+                            "Param_Name": "@VBO01",
+                            "Param_TestVALUE 脚本查询的默认值:"",
+                            "procedureId": 1775695957,
+                            "procedureName": "HOPatient_VAE1_Update"
+                            defaultValue 默认值:
+                          }
+                        ]
+                      },
+                    }
                     "scriptName" 脚本名称: "获取患者信息",
                     "scriptParams 脚本参数": { "VAA01 参数名称": { "defaultValue" 参数默认值: "13698", "linkWidget" 关联组件: []"
                   }

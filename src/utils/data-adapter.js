@@ -165,7 +165,7 @@ export function traverseTreeData(treeData, handle) {
 export function changeBindMapToProcedureIdAsKey(bindMap) {
   const postData = {}
   traverseObj(bindMap, (key, value) => {
-    traverseObj(value, (sk, sv) => {
+    traverseObj(value.scriptFields, (sk, sv) => {
       sv?.params?.map(param => {
         postData[param.procedureId] = {
           procedureName: param.procedureName,

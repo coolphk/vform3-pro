@@ -520,3 +520,13 @@ export function inObject(obj, value, scope) {
     return Object.keys(obj).includes(value) || !!Object.keys(obj).find(key => obj[key] === value)
   }
 }
+
+export function debounce(fn, wait){
+  let timer = null;
+  return function(){
+    if(timer !== null){
+      clearTimeout(timer);
+    }
+    timer = setTimeout(fn,wait);
+  }
+}

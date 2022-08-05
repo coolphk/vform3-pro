@@ -20,7 +20,7 @@
 
       <div class="table-wrapper">
         <el-button type="primary" @click="refreshData">刷新数据</el-button>
-        <el-button @click="clearValueSource">清楚valueSource</el-button>
+        <el-button @click="clearValueSource">清除valueSource</el-button>
         <!--        参数列表-->
         <el-table :data="paramData" border max-height="200">
           <el-table-column prop="scriptId" label="id" width="150"/>
@@ -35,7 +35,7 @@
           <el-table-column label="关联组件" width="200">
             <template #default="{row}">
               <el-cascader style="width: 160px"
-                           v-model="row.bindWidget"
+                           v-model="row.linkWidget"
                            clearable
                            :options="paramBindWidgets"
                            @change="onCascaderChange(row,$event)"
@@ -99,7 +99,7 @@
               >
                 <template #item="{element,index}">
                   <span style="margin: 2px">
-                    <el-button size="small" @click="removeBindParam(row,element.Param_ID)">{{
+                    <el-button size="small" @click="removeBindParam(row,index)">{{
                         element.Param_Name
                       }}
                     </el-button>
@@ -112,8 +112,9 @@
             <template #default="{row}">
               <div v-for="(param) in row.params" style="display: flex;justify-content: space-between">
                 {{ param.Param_Name }}：
-                <el-input style="width: 120px" v-model="param.defaultValue"
-                          @input="onDefaultValueInput(row,param,$event)"></el-input>
+                <!--                <el-input style="width: 120px" v-model="param.defaultValue"
+                                          @input="onDefaultValueInput(row,param,$event)"></el-input>-->
+                <el-input style="width: 120px" v-model="param.defaultValue"></el-input>
               </div>
             </template>
           </el-table-column>
@@ -230,28 +231,39 @@ watch(inputColumnValue, (newVal) => {
 })
 
 watch(paramData, (newValue, oldValue) => {
-  console.log('watch paramData', newValue);
+  // console.log('watch paramData', newValue);
   newValue.map(param => {
+    console.log(111, param);
     compBindMap.value[param.scriptId]['scriptParams'][param.Param_Name] = {
-      defaultValue: compBindMap.value[param.scriptId]['scriptParams'][param.Param_Name].defaultValue ?? param.Param_TestVALUE,
+      defaultValue: param.Param_TestVALUE,
       linkWidget: param.bindWidget ?? []
     }
   })
 }, {deep: true})
 
 watch(bussinessData, (newValue, oldValue) => {
-  console.log(newValue);
+
   // clearValueSource()
   newValue.map(row => {
-    row.params.length > 0 && (compBindMap.value[row.scriptId]['scriptFields'][row.label] = {
-      widgetId: row.widgetId,
-      params: row.params.map(item => ({
-        ...filterPostParam(item),
-        defaultValue: item.defaultValue,
-        procedureId: item.procedureId,
-        procedureName: item.procedureName
-      }))
-    })
+    if (!compBindMap.value[row.scriptId]) {
+      buildBindMap(row.scriptId, row.scriptName)
+    }
+    // console.log(222, compBindMap.value);
+    if (row.params.length > 0) {
+      // console.log(newValue);
+      compBindMap.value[row.scriptId]['scriptFields'][row.label] = {
+        widgetId: row.widgetId,
+        params: row.params.map(item => ({
+          ...filterPostParam(item),
+          Param_TestVALUE: row.value,
+          defaultValue: item.defaultValue,
+          procedureId: item.procedureId,
+          procedureName: item.procedureName
+        }))
+      }
+    } else if (row.params.length === 0) {
+      compBindMap.value[row.scriptId]?.['scriptFields']?.[row.label] && (delete compBindMap.value[row.scriptId]['scriptFields'][row.label])
+    }
   })
 }, {deep: true})
 
@@ -284,27 +296,6 @@ function onCascaderChange(row, value) {
   }
 }
 
-/**
- * 给绑定关系赋值
- *
- * @param row
- */
-function handleBindMap(row) {
-  const vsBind = compBindMap.value
-  vsBind[row.scriptId][row.label] = {
-    widgetId: row.widgetId,
-    params: row.params.map(param => {
-      param.defaultValue = param.defaultValue ?? ""
-      param.Param_TestVALUE = row.value
-      return {
-        ...filterPostParam(param),
-        defaultValue: param.defaultValue,
-        "procedureId": param.procedureId,
-        "procedureName": param.procedureName
-      }
-    })
-  }
-}
 
 /**
  * 绑定组件清空方法
@@ -324,47 +315,45 @@ function onBindWidgetChange(row) {
  */
 function loadScriptsParams(script) {
   console.log('loadScriptsParams', script);
-  buildBindMap(script)
+  const {ID: scriptId, NAME: scriptName} = script
+  buildBindMap(script.ID, script.NAME)
   script && getScriptsParams(script.ID).then(res => {
-    // setScriptParamsToBindMap(script, res.Data.Params)
-
+    //回显参数
+    res.Data.Params.map(param => {
+      const bindMapParam = compBindMap.value?.[scriptId]?.['scriptParams']?.[param.Param_Name]
+      param.Param_TestVALUE = bindMapParam?.defaultValue ? bindMapParam?.defaultValue : param.Param_TestVALUE
+      param.linkWidget = bindMapParam?.linkWidget.length > 0 ? bindMapParam.linkWidget : []
+      paramData.value.push({
+        scriptName: scriptName,
+        scriptId: scriptId,
+        linkWidget: param.linkWidget,
+        Param_TestVALUE: param.Param_TestVALUE,//数据刷新时，如果绑定关系中有参数有默认值，则使用默认值
+        Param_Name: param.Param_Name
+      })
+    })
     loadTableData(script, res?.Data?.Params)
   })
 }
 
-function buildBindMap(script) {
+function buildBindMap(scriptId, scriptName) {
   if (isEmptyObj(compBindMap.value)) {
     compBindMap.value = {
-      [script.ID]: {
-        scriptName: script.NAME,
+      [scriptId]: {
+        scriptName: scriptName,
         scriptParams: {},
         scriptFields: {}
       }
     }
   }
-  if (!compBindMap.value?.[script.ID]) {
-    compBindMap.value[script.ID] = {
-      scriptName: script.NAME,
-      scriptParams: [],
+  if (!compBindMap.value?.[scriptId]) {
+    compBindMap.value[scriptId] = {
+      scriptName: scriptName,
+      scriptParams: {},
       scriptFields: {}
     }
   }
 }
 
-function setScriptParamsToBindMap({ID, NAME}, scriptParams) {
-  props.optionModel.valueSource.bindMap[ID] = {
-    ...props.optionModel.valueSource.bindMap[ID],
-    scriptName: NAME,
-    scriptParams: props.optionModel.valueSource.bindMap[ID]?.['scriptParams'] ?? {}
-  }
-  scriptParams.map(param => {
-    param.Param_TestVALUE = compBindMap.value?.[ID]?.['scriptParams']?.[param.Param_Name]?.defaultValue ?? param.Param_TestVALUE
-    compBindMap.value[ID]['scriptParams'][param.Param_Name] = {
-      defaultValue: param.Param_TestVALUE,
-      linkWidget: compBindMap.value[ID]['scriptParams']?.[param.Param_Name]?.linkWidget ?? []
-    }
-  })
-}
 
 /**
  * 根据id与参数从通用接口读取数据
@@ -380,18 +369,6 @@ function loadTableData({ID: scriptId, NAME: scriptName}, params) {
     //初始化绑定关系，如果有旧的绑定关系，则读取旧的为初始值
     const vsBindMap = compBindMap.value
     const columns = res.Data.TableHeaders
-    //合并参数
-    params.map(param => {
-      paramData.value.push(
-          {
-            scriptName: scriptName,
-            scriptId: scriptId,
-            bindWidget: vsBindMap?.[scriptId]?.['scriptParams']?.[param.Param_Name]?.linkWidget,
-            ...param,
-            Param_TestVALUE: vsBindMap?.[scriptId]?.['scriptParams']?.[param.Param_Name]?.defaultValue //数据刷新时，如果绑定关系中有参数有默认值，则使用默认值
-          })
-    })
-
 
     //标记数据在整合数据中的位置
     scriptResponse.dataRange[scriptId] ? scriptResponse.dataRange[scriptId]['start'] = bussinessData.value.length : scriptResponse.dataRange[scriptId] = {start: bussinessData.value.length}
@@ -402,13 +379,13 @@ function loadTableData({ID: scriptId, NAME: scriptName}, params) {
         value: res.Data.TableData?.[0]?.[column],
         scriptName,
         scriptId,
-        widgetId: vsBindMap?.[scriptId]?.[column]?.widgetId ?? "",
-        params: vsBindMap?.[scriptId]?.[column]?.params ?? [],
+        widgetId: vsBindMap?.[scriptId]?.scriptFields?.[column]?.widgetId ?? "",
+        params: vsBindMap?.[scriptId]?.scriptFields?.[column]?.params ?? [],
       }
       //刷新数据时，重新关联绑定关系
-      if (row.params.length > 0) {
+      /*if (row.params.length > 0) {
         handleBindMap(row)
-      }
+      }*/
       return row
     }))
     scriptResponse.dataRange[scriptId]['end'] = res.Data.TableHeaders.length
@@ -466,7 +443,7 @@ function removePartialBussinessData(script) {
     })
     delete scriptResponse.dataRange[script.ID]
     removeScriptParam(script.ID)
-    removeBindMap(script.ID)
+    // removeBindMap(script.ID)
     onCurrentChange(scriptResponse.currentPage)
   }
 }
@@ -488,23 +465,10 @@ function removeScriptParam(scriptId) {
 /**
  * 点击参数按钮时，删除已经绑定的存储过程参数
  * @param row
- * @param paramId
+ * @param paramIndex
  */
-function removeBindParam(row, paramId) {
-  const bindMap = compBindMap.value
-  const params = getBindMapValueWithRow(row).params
-  const startIndex = params.findIndex(item => item.Param_ID === paramId)
-  params.splice(startIndex, 1) //删除绑定关系中对应的存储过程参数
-  if (params !== row.params) {
-    row.params.splice(startIndex, 1) //删除绑定列表中对应的存储过程参数
-  }
-  if (params.length === 0) {
-    //联动删除，如果参数全部被删除，则删除该键值，如果键值为空，则删除该脚本
-    delete bindMap[row.scriptId][row.label]
-    if (Object.keys(bindMap[row.scriptId]).length === 1 && Object.hasOwn(bindMap[row.scriptId], 'scriptName')) {
-      delete compBindMap.value[row.scriptId]
-    }
-  }
+function removeBindParam(row, paramIndex) {
+  row.params.splice(paramIndex, 1)
 }
 
 /**
@@ -512,41 +476,12 @@ function removeBindParam(row, paramId) {
  * @param scriptId
  */
 function removeBindMap(scriptId) {
-  const deletedParams = []
-  if (isObj(scriptId) || scriptId === undefined) {
-    traverseObj(compBindMap.value, (key, value) => {
-      traverseObj(value, (sk, sv) => {
-        if (sk !== 'scriptParams') {
-          //同步dataTarget被选中状态
-          sv && sv.params && deletedParams.push(...sv.params)
-          delete value[sk]
-        }
-      })
-    })
-    traverseObj(compBindMap.value, (key, value) => {
-      if (isEmptyObj(value)) {
-        delete compBindMap.value[key]
-      }
-    })
-    bussinessData.value = bussinessData.value.map(item => ({
-      label: item.label,
-      value: item.value,
-      scriptName: item.scriptName,
-      scriptId: item.scriptId,
-      widgetId: "",
-      params: []
-    }))
-    onCurrentChange(scriptResponse.currentPage)
-    vDataTarget$.value.removeBoundProcedureStyle(deletedParams)
-  } else {
-    traverseObj(compBindMap.value[scriptId], (key, value) => {
-      if (value.params) {
-        deletedParams.push(...value.params)
-      }
-    })
-    vDataTarget$.value.removeBoundProcedureStyle(deletedParams)
-    delete compBindMap.value[scriptId]
-  }
+  bussinessData.value.map(row => {
+    row.params = []
+    row.widgetId = ""
+  })
+
+
 }
 
 function getBindMapValueWithRow(row) {
@@ -557,62 +492,20 @@ function getBindMapValueWithRow(row) {
  * 根据字段名自动绑定数据,遍历存储过程参数和数据源脚本字段，找到名称相同的进行绑定
  */
 function autoBindData() {
-  removeBindMap()
   //遍历数据源脚本字段
   bussinessData.value.map(sp => {
     //遍历存储过程参数
     procedureData.value.map(procedure => {
       procedure.params.map(pp => {
         if (sp.label === pp.Param_Name || (pp.Param_Name.startsWith('@') && sp.label === pp.Param_Name.substr(1))) {
-          sp.params = [...sp.params, filterPostParam(pp)]
-          props.optionModel.valueSource.bindMap = {
-            ...compBindMap.value,
-            [sp.scriptId]: {
-              'scriptName': sp.scriptName,
-              ...compBindMap.value[sp.scriptId],
-              [sp.label]: {
-                params: compBindMap.value[sp.scriptId]?.[sp.label]?.['params'] ? [
-                      ...compBindMap.value[sp.scriptId][sp.label]['params'],
-                      {
-                        ...filterPostParam(pp),
-                        "procedureId": pp.procedureId,
-                        "procedureName": pp.procedureName
-                      }] :
-                    [{
-                      ...filterPostParam(pp),
-                      "procedureId": pp.procedureId,
-                      "procedureName": pp.procedureName
-                    }]
-              }
-            }
-          }
+          // console.log(sp, pp);
+          sp.params = [...sp.params, pp]
         }
       })
     })
   })
-}
 
-/**
- * 设置参数默认值
- */
-function onDefaultValueInput(row, param, value) {
-  // console.log(getBindMapValueWithRow(row), param, value);
-  getBindMapValueWithRow(row).params.find(bindMapParam => bindMapParam.Param_ID === param.Param_ID).defaultValue = value
-  /*if (!!!value) {
-    delete getBindMapValueWithRow(row)['defaultValue']
-  }*/
-  /*getBindMapValueWithRow(row)['defaultValue'] = value;
-  */
 }
-
-/**
- * 修改绑定参数
- * @param row
- * @param value
- */
-/*function onInputParamTestValue(row, value) {
-  compBindMap.value[row.scriptId]['scriptParams'][row.Param_Name].defaultValue = value
-}*/
 </script>
 
 <style scoped lang="scss">
