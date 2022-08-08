@@ -87,7 +87,7 @@
                  :show-close="true" custom-class="drag-dialog small-padding-dialog"
                  :close-on-click-modal="false" :close-on-press-escape="false"
                  :destroy-on-close="true" width="1180px">
-        <el-table :data="optionModel.tableColumns" style="width: 100%"
+        <el-table :data="compTableColumns" style="width: 100%"
                   :cell-style="{padding:'3px 0'}" height="500" border row-key="columnId" ref="singleTable" stripe>
           <el-table-column type="index" width="42" fixed="left"></el-table-column>
           <el-table-column label="" width="30">
@@ -145,21 +145,29 @@
             </template>
           </el-table-column> -->
           <el-table-column :label="i18nt('designer.setting.formatOfColumn')" width="200" prop="formatS">
-            <template #default="scope">
-              <el-input type="textarea" v-model="scope.row.formatS"></el-input>
-              <!--              <el-select v-model="scope.row.formatS" clearable>
-                              <el-option-group
-                                  v-for="group in op"
-                                  :key="group.label"
-                                  :label="group.label">
-                                <el-option
-                                    v-for="item in group.options"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                                </el-option>
-                              </el-option-group>
-                            </el-select>-->
+            <template #default="{row,column,$index}">
+              <el-button type="primary" @click="row.showEventDialog=true">编辑事件</el-button>
+              <el-dialog v-model="row.showEventDialog" append-to-body>
+                <el-alert type="info" :closable="false" title="function(row, column, cellValue, rowIndex) {"></el-alert>
+                <code-editor v-if="row.showEventDialog" :mode="'javascript'" :readonly="false" v-model="row.formatS"
+                             ref="ecEditor"></code-editor>
+                <el-alert type="info" :closable="false" title="}"></el-alert>
+              </el-dialog>
+
+
+              <!--                            <el-select v-model="scope.row.formatS" clearable>
+                                            <el-option-group
+                                                v-for="group in op"
+                                                :key="group.label"
+                                                :label="group.label">
+                                              <el-option
+                                                  v-for="item in group.options"
+                                                  :key="item.value"
+                                                  :label="item.label"
+                                                  :value="item.value">
+                                              </el-option>
+                                            </el-option-group>
+                                          </el-select>-->
             </template>
           </el-table-column>
           <el-table-column :label="i18nt('designer.setting.actionColumn')" width="100" fixed="right" align="center">
@@ -382,7 +390,13 @@ export default {
         return this.designer.formConfig.dataSources
       }
     },
-
+    compTableColumns() {
+      this.optionModel.tableColumns.map(column => {
+        column.showEventDialog = false
+        column.formatS = ""
+      })
+      return this.optionModel.tableColumns
+    }
   },
   created() {
     this.cssClassList = deepClone(this.designer.getCssClassList())
@@ -514,7 +528,10 @@ export default {
         disabled: false,
       })
     },
-
+    getFormatFromRow(index) {
+      console.log(this.optionModel.tableColumns[index]);
+      return this.optionModel.tableColumns[index]['formatS']
+    }
   }
 }
 </script>

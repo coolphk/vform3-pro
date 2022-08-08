@@ -191,12 +191,11 @@ export default {
       return cellValue;
     },
 
-    formatterValue(row, column, cellValue) {
+    formatterValue(row, column, cellValue, rowIndex) {
       const formatter = this.widget.options.tableColumns.find(item => item.prop === column.property)
       if (!!formatter.formatS) {
-        const func = new Function('row', 'column', 'cellValue', formatter.formatS)
-        console.log(func)
-        return func(row, column, cellValue)
+        const func = new Function('row', 'column', 'cellValue', 'rowIndex', formatter.formatS)
+        return func(row, column, cellValue, rowIndex)
 
         /*switch (column.formatS) {
           case 'd1':
