@@ -38,7 +38,7 @@
                            v-model="row.linkWidget"
                            clearable
                            :options="paramBindWidgets"
-                           @change="onCascaderChange(row,$event)"
+
               />
 
             </template>
@@ -69,9 +69,10 @@
             max-height="600"
             border
             :data="scriptResponse.data"
+
         >
-          <el-table-column prop="scriptName" sortable label="脚本名称" width="150"/>
-          <el-table-column prop="label" sortable label="列名" width="120"/>
+          <el-table-column prop="scriptName" label="脚本名称" width="150"/>
+          <el-table-column prop="label" label="列名" width="120"/>
           <el-table-column prop="value" label="实际值" width="120"/>
 
           <el-table-column label="对应组件" width="150">
@@ -87,7 +88,7 @@
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column sortable width="180" label="存储过程参数">
+          <el-table-column width="180" label="存储过程参数">
             <template #default="{row}">
               <draggable
                   class="el-card"
@@ -234,15 +235,19 @@ watch(paramData, (newValue, oldValue) => {
   // console.log('watch paramData', newValue);
   newValue.map(param => {
     console.log(111, param);
-    compBindMap.value[param.scriptId]['scriptParams'][param.Param_Name] = {
+    compBindMap.value[param.scriptId]['scriptParams'] = {
+      ...compBindMap.value[param.scriptId]['scriptParams']?.[param.Param_Name],
       defaultValue: param.Param_TestVALUE,
-      linkWidget: param.bindWidget ?? []
+      linkWidget: param?.linkWidget ?? []
     }
   })
 }, {deep: true})
 
 watch(bussinessData, (newValue, oldValue) => {
-
+  /*bussinessData.value.sort((a, b) => {
+    return b.params.length - a.params.length
+  })
+  onCurrentChange(scriptResponse.currentPage)*/
   // clearValueSource()
   newValue.map(row => {
     if (!compBindMap.value[row.scriptId]) {
@@ -269,31 +274,7 @@ watch(bussinessData, (newValue, oldValue) => {
 
 
 function clearValueSource() {
-  compBindMap.value = {}
-}
-
-/**
- * 脚本参数绑定组件选择事件
- * @param row
- * @param value
- */
-function onCascaderChange(row, value) {
-  //有值代表是新选中状态,否则代表取消选中状态
-  if (value) {
-    compBindMap.value[row.scriptId]['scriptParams'][row.Param_Name].linkWidget = value
-    props.designer.formWidget.getWidgetRef(value[0]).widget.options.onOperationButtonClick =
-        `this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
-            ${row.scriptId}:{
-              scriptName:'${row.scriptName}',
-              params:{${row.Param_Name}:row['${value[1]}']}
-            }
-          })`
-  } else {
-    delete compBindMap.value[row.scriptId]['scriptParams']
-    if (isEmptyObj(compBindMap.value[row.scriptId])) {
-      delete compBindMap.value[row.scriptId]
-    }
-  }
+  props.optionModel.valueSource.bindMap = {}
 }
 
 
@@ -429,22 +410,22 @@ function refreshData() {
 
 //脚本树勾选取消时删除相关数据，包括绑定数据、脚本参数
 function removePartialBussinessData(script) {
+
   //删除绑定关系中的存储过程参数与表格中的数据
   if (!isEmptyObj(scriptResponse.dataRange)) {
     const {start, end} = scriptResponse.dataRange[script.ID]
-    const deleteBusDatas = bussinessData.value.splice(start, end)
+    bussinessData.value.splice(start, end)
+    removeBindMap(script.ID)
+    removeScriptParam(script.ID)
+    onCurrentChange(scriptResponse.currentPage)
     traverseObj(scriptResponse.dataRange, (key, item) => {
       if (item.start >= end) {
         item.start = item.start - end + start
       }
     })
-    deleteBusDatas.map(({label: bindMapKey}) => {
-      delete compBindMap.value[bindMapKey]
-    })
+    delete compBindMap.value[script.ID]
     delete scriptResponse.dataRange[script.ID]
-    removeScriptParam(script.ID)
-    // removeBindMap(script.ID)
-    onCurrentChange(scriptResponse.currentPage)
+
   }
 }
 
@@ -480,7 +461,6 @@ function removeBindMap(scriptId) {
     row.params = []
     row.widgetId = ""
   })
-
 
 }
 
