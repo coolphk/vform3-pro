@@ -38,7 +38,7 @@
                            v-model="row.linkWidget"
                            clearable
                            :options="paramBindWidgets"
-
+                           @change="onCascaderChange"
               />
 
             </template>
@@ -127,8 +127,7 @@
             @current-change="onCurrentChange"
         />
 
-
-        <!--        {{ optionModel.valueSource.bindMap }}-->
+        {{ optionModel.valueSource.bindMap }}
       </div>
       <div class="tree-wrapper" style="border-left: none;height: 100%;">
         <div class="tree-title">请选择要绑定的数据目标</div>
@@ -150,7 +149,6 @@ import {isEmptyObj, isTable, traverseFieldWidgets} from "@/utils/util";
 import useBindParam from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/useBindParam";
 import VDataTarget from "./components/v-data-target";
 import VSourceTree from "./components/v-source-tree";
-import {isObj} from "@/utils/smart-vue-i18n/utils";
 
 const props = defineProps({
   designer: Object,
@@ -236,11 +234,11 @@ watch(inputColumnValue, (newVal) => {
 watch(paramData, (newValue, oldValue) => {
   // console.log('watch paramData', newValue);
   newValue.map(param => {
-    console.log(111, param);
     compBindMap.value[param.scriptId]['scriptParams'] = {
-      ...compBindMap.value[param.scriptId]['scriptParams']?.[param.Param_Name],
-      defaultValue: param.Param_TestVALUE,
-      linkWidget: param?.linkWidget ?? []
+      [param.Param_Name]: {
+        defaultValue: param.Param_TestVALUE,
+        linkWidget: param?.linkWidget ?? []
+      }
     }
   })
 }, {deep: true})
@@ -292,13 +290,16 @@ function onBindWidgetChange(row) {
  * @param script
  */
 function loadScriptsParams(script) {
-  console.log('loadScriptsParams', script);
+  // console.log('loadScriptsParams', script);
   const {ID: scriptId, NAME: scriptName} = script
+
   buildBindMap(script.ID, script.NAME)
+
   script && getScriptsParams(script.ID).then(res => {
     //回显参数
     res.Data.Params.map(param => {
       const bindMapParam = compBindMap.value?.[scriptId]?.['scriptParams']?.[param.Param_Name]
+      console.log('bindMapParam', bindMapParam);
       param.Param_TestVALUE = bindMapParam?.defaultValue ? bindMapParam?.defaultValue : param.Param_TestVALUE
       param.linkWidget = bindMapParam?.linkWidget.length > 0 ? bindMapParam.linkWidget : []
       paramData.value.push({
@@ -491,19 +492,42 @@ function onBusTableSort({prop, order}) {
         bussinessData.value.sort((a, b) => {
           let res = 0
           if (a[prop].length > b[prop].length) {
-            res = order === 'ascending' ? -1 : 1
-          } else if (a[prop].length < b[prop].length) {
             res = order === 'ascending' ? 1 : -1
+          } else if (a[prop].length < b[prop].length) {
+            res = order === 'ascending' ? -1 : 1
           }
           return res
         });
         break;
       case 'scriptName':
-        bussinessData.value.sort((a, b) => order === 'ascending' ? b[prop].localeCompare(a[prop]) : a[prop].localeCompare(b[prop]))
+        bussinessData.value.sort((a, b) => order === 'ascending' ? a[prop].localeCompare(b[prop]) : b[prop].localeCompare(a[prop]))
         break;
     }
     bussinessData.value.map((item, index) => console.log('bus', index, item.params))
     onCurrentChange(scriptResponse.currentPage)
+  }
+}
+
+/**
+ * 脚本参数绑定组件选择事件
+ * @param row
+ * @param value
+ */
+function onCascaderChange(row, value) {
+  console.log(111);
+  //有值代表是新选中状态,否则代表取消选中状态
+  if (value) {
+    props.designer.formWidget.getWidgetRef(value[0]).widget.options.onTableRowClick =
+        `
+        setTimeout(()=>{
+          this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
+            ${row.scriptId}:{
+              scriptName:'${row.scriptName}',
+              params:{${row.Param_Name}:row['${value[1]}']}
+            }
+          })
+        })
+        `
   }
 }
 </script>

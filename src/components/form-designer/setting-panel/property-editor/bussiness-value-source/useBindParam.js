@@ -9,6 +9,7 @@ function getAllWidgetsForBindScriptParams(widgetList) {
   traverseAllWidgets(widgetList, (widget) => {
     if (widget.formItemFlag || widget.tableFlag) {
       // bindWidgets.push(widget)
+      console.log(widget);
       paramBindWidgets.push({
         label: widget.options.label,
         value: widget.id,
