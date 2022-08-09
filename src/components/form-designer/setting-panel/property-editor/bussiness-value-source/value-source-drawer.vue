@@ -69,9 +69,9 @@
             max-height="600"
             border
             :data="scriptResponse.data"
-
+            @sort-change="onBusTableSort"
         >
-          <el-table-column prop="scriptName" label="脚本名称" width="150"/>
+          <el-table-column sortable prop="scriptName" label="脚本名称" width="150"/>
           <el-table-column prop="label" label="列名" width="120"/>
           <el-table-column prop="value" label="实际值" width="120"/>
 
@@ -88,7 +88,7 @@
               </el-select>
             </template>
           </el-table-column>
-          <el-table-column width="180" label="存储过程参数">
+          <el-table-column width="180" label="存储过程参数" prop="params" sortable="custom">
             <template #default="{row}">
               <draggable
                   class="el-card"
@@ -126,7 +126,9 @@
             :total="scriptResponse.total"
             @current-change="onCurrentChange"
         />
-        {{ optionModel.valueSource.bindMap }}
+
+
+        <!--        {{ optionModel.valueSource.bindMap }}-->
       </div>
       <div class="tree-wrapper" style="border-left: none;height: 100%;">
         <div class="tree-title">请选择要绑定的数据目标</div>
@@ -244,11 +246,6 @@ watch(paramData, (newValue, oldValue) => {
 }, {deep: true})
 
 watch(bussinessData, (newValue, oldValue) => {
-  /*bussinessData.value.sort((a, b) => {
-    return b.params.length - a.params.length
-  })
-  onCurrentChange(scriptResponse.currentPage)*/
-  // clearValueSource()
   newValue.map(row => {
     if (!compBindMap.value[row.scriptId]) {
       buildBindMap(row.scriptId, row.scriptName)
@@ -376,7 +373,8 @@ function loadTableData({ID: scriptId, NAME: scriptName}, params) {
 }
 
 function onCurrentChange(currentPage) {
-  scriptResponse.data = pagination(currentPage > compBussinessData.value.length ? compBussinessData.value.length : currentPage, scriptResponse.pageSize, compBussinessData.value)
+  scriptResponse.currentPage = currentPage
+  scriptResponse.data = pagination(currentPage, scriptResponse.pageSize, compBussinessData.value)
   scriptResponse.total = compBussinessData.value.length
 }
 
@@ -484,7 +482,29 @@ function autoBindData() {
       })
     })
   })
+}
 
+function onBusTableSort({prop, order}) {
+  if (prop) {
+    switch (prop) {
+      case 'params':
+        bussinessData.value.sort((a, b) => {
+          let res = 0
+          if (a[prop].length > b[prop].length) {
+            res = order === 'ascending' ? -1 : 1
+          } else if (a[prop].length < b[prop].length) {
+            res = order === 'ascending' ? 1 : -1
+          }
+          return res
+        });
+        break;
+      case 'scriptName':
+        bussinessData.value.sort((a, b) => order === 'ascending' ? b[prop].localeCompare(a[prop]) : a[prop].localeCompare(b[prop]))
+        break;
+    }
+    bussinessData.value.map((item, index) => console.log('bus', index, item.params))
+    onCurrentChange(scriptResponse.currentPage)
+  }
 }
 </script>
 
