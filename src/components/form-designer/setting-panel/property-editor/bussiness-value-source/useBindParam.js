@@ -4,12 +4,11 @@ import {reactive} from "vue";
 /**
  * 获取所以可以给脚本参数绑定的组件
  */
-function getAllWidgetsForBindScriptParams(widgetList) {
+function getAllWidgetsForBindScriptParams(widgetList, currentWidget) {
+  console.log('currentWidget', currentWidget);
   const paramBindWidgets = reactive([])
   traverseAllWidgets(widgetList, (widget) => {
-    if (widget.formItemFlag || widget.tableFlag) {
-      // bindWidgets.push(widget)
-      console.log(widget);
+    if ( widget.type === 'data-table') {
       paramBindWidgets.push({
         label: widget.options.label,
         value: widget.id,

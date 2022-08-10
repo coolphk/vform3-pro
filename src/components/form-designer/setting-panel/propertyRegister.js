@@ -29,6 +29,7 @@ const COMMON_PROPERTIES = {
   'validationHint'    :            'validationHint-editor',
   'bussinessSource'   :            'bussinessSource-editor',
   'valueSource'       :            'valueSource-editor',
+  'submit'            :            'submit-editor',
   'readonly'          :            'readonly-editor',
   'disabled'          :            'disabled-editor',
   'hidden'            :            'hidden-editor',
@@ -52,7 +53,6 @@ const COMMON_PROPERTIES = {
   'uploadTip'         :            'uploadTip-editor',
   'withCredentials'   :            'withCredentials-editor',
   'multipleSelect'    :            'multipleSelect-editor',
-
   'limit'             :            'limit-editor',
   'fileMaxSize'       :            'fileMaxSize-editor',
   'fileTypes'         :            'fileTypes-editor',
@@ -70,7 +70,6 @@ const COMMON_PROPERTIES = {
   'offset'             :            'offset-editor',
   'push'               :            'push-editor',
   'pull'               :            'pull-editor',
-
 }
 
 const ADVANCED_PROPERTIES = {

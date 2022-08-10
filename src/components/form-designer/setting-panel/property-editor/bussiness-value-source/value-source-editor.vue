@@ -13,6 +13,7 @@ import propertyMixin from "@/components/form-designer/setting-panel/property-edi
 import {ref} from "vue";
 import ValueSourceDrawer
   from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/value-source-drawer";
+import {isEmptyObj} from "@/utils/util";
 
 export default {
   name: "valueSource-editor",
@@ -31,7 +32,7 @@ export default {
   },
   computed: {
     buttonText() {
-      return this.optionModel.valueSource.sourceId ? '已绑定' : '编辑'
+      return isEmptyObj(this.optionModel.valueSource.bindMap) ? '编辑' : '已绑定'
     }
 
   }

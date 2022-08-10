@@ -31,13 +31,13 @@
 <script>
 import i18n from "@/utils/i18n";
 import FieldComponents from "@/components/form-designer/form-widget/field-widget";
-import {getScriptsParams, loadBussinessSource} from "@/api/bussiness-source";
-import {changeBindMapToProcedureIdAsKey, filterPostParam, traverseObj} from "@/utils/data-adapter";
+import {loadBussinessSource} from "@/api/bussiness-source";
+import {filterPostParam, traverseObj} from "@/utils/data-adapter";
 import ContainerItemWrapper from "@/components/form-render/container-item/container-item-wrapper";
 import containerItemMixin from "@/components/form-render/container-item/containerItemMixin";
 import refMixin from "@/components/form-render/refMixin";
 import emitter from "@/utils/emitter";
-import {isEmptyObj, traverseFieldWidgets} from "@/utils/util";
+import {traverseFieldWidgets} from "@/utils/util";
 import {execProcedure, getProcedureParams} from "@/api/data-schema";
 import {ElMessage} from "element-plus";
 
@@ -70,7 +70,7 @@ export default {
      * @param scriptParams
      */
     setFormDataWithValueSource(scriptParams) {
-      debugger
+      console.log('setFormDataWithValueSource', scriptParams);
       const vs = this.widget?.options?.valueSource
       console.log(222, vs);
       const formData = {}

@@ -38,7 +38,7 @@
                            v-model="row.linkWidget"
                            clearable
                            :options="paramBindWidgets"
-                           @change="onCascaderChange"
+                           @change="onCascaderChange(row,$event)"
               />
 
             </template>
@@ -168,7 +168,7 @@ const vDataTarget$ = ref()
 const showDataSource = ref(false)
 const inputColumnValue = ref("")
 const paramData = ref([])  //存储过程参数集合
-const paramBindWidgets = useBindParam(props.designer.widgetList) //关联组件列表
+const paramBindWidgets = useBindParam(props.designer.widgetList, props.selectedWidget) //关联组件列表
 const scriptResponse = reactive({
   data: [],
   dataRange: {},
@@ -398,8 +398,6 @@ function refreshData() {
     }
     compBindMap.value[item.scriptId]['scriptParams'][item.Param_Name].defaultValue = item.Param_TestVALUE
   })
-
-  paramData.value = []
   bussinessData.value = []
   traverseObj(params, (key, value) => {
     loadTableData({ID: key, NAME: value.scriptName}, value.scriptParams)
@@ -518,16 +516,14 @@ function onCascaderChange(row, value) {
   //有值代表是新选中状态,否则代表取消选中状态
   if (value) {
     props.designer.formWidget.getWidgetRef(value[0]).widget.options.onTableRowClick =
-        `
-        setTimeout(()=>{
-          this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
-            ${row.scriptId}:{
-              scriptName:'${row.scriptName}',
-              params:{${row.Param_Name}:row['${value[1]}']}
-            }
-          })
-        })
-        `
+`setTimeout(()=>{
+  this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
+    ${row.scriptId}:{
+      scriptName:'${row.scriptName}',
+      params:{${row.Param_Name}:row['${value[1]}']}
+    }
+  })
+})`
   }
 }
 </script>

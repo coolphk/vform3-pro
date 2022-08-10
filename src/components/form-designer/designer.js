@@ -8,9 +8,9 @@
 
 import {deepClone, generateId, getDefaultFormConfig, overwriteObj, traverseAllWidgets} from "@/utils/util"
 import {
-  containers,
   advancedFields,
   basicFields,
+  containers,
   customFields
 } from "@/components/form-designer/widget-panel/widgetsConfig.js"
 import {VARIANT_FORM_VERSION} from "@/utils/config"
@@ -710,8 +710,6 @@ export function createDesigner(vueInstance) {
           checkedNodes: [],//当前选中的节点
           scriptParams: {}, //获取数据源时，获取脚本参数接口，每个控件自己的参数实例
           expandedKeys: [],//展开的节点id
-          originalData: {}, //原始数据，渲染时将当前dataWrapper对应的原始数据存入，会将修改的值替换originalData，然后调用exec存入存储过程.
-                            // 结构为{scriptId,schema}
           bindMap: {},
         }
         newDataWrapper.key = generateId()
