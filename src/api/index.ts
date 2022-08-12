@@ -1,6 +1,14 @@
 import axios from "axios";
 import {ElMessage} from "element-plus";
+import {AxiosRequestOptions} from "@/types";
 // import store from "@/store";
+
+
+
+let defaultOptions: AxiosRequestOptions = {
+  showTips: false,
+  showLoading: false
+}
 
 const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
@@ -13,7 +21,7 @@ service.interceptors.request.use(config => {
 })
 service.interceptors.response.use(response => {
   if (response.data.Status) {
-    if (response.config.showTips) {
+    if (defaultOptions.showTips) {
       ElMessage({
         message: response.data.Message,
         type: 'success',
@@ -39,20 +47,16 @@ service.interceptors.response.use(response => {
   return Promise.reject(error)
 })
 
-function setServiceOptions({showTips = false, showLoading = false}) {
-  service.defaults['showTips'] = showTips
-  service.defaults['showLoading'] = showLoading
-}
 
-export function post(url, parmas, options) {
-  setServiceOptions(options || {})
-  return service.post(url, parmas)
+export function post<R>(url: string, parmas?: any, options?: AxiosRequestOptions) {
+  options && (defaultOptions = options)
+  return service.post<void, R>(url, parmas)
 }
 
 
-export function get(url, params, options) {
-  setServiceOptions(options || {})
-  return service.get(url, {params})
+export function get<R>(url: string, params?: any, options?: AxiosRequestOptions) {
+  options && (defaultOptions = options)
+  return service.get<void, R>(url, {params})
 }
 
 

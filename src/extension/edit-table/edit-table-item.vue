@@ -32,16 +32,15 @@
 <script>
 import ContainerItemWrapper from "@/components/form-render/container-item/container-item-wrapper";
 import i18n from "@/utils/i18n";
-import refMixinDesign from "@/components/form-designer/refMixinDesign";
 import {ArrowDown, ArrowUp} from "@element-plus/icons-vue";
 import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
 import emitter from "@/utils/emitter";
-import ContextMenu from "@/components/context-menu"
+import ContextMenu from "@/components/context-menu/index.vue"
 import {reactive} from "vue";
 
 export default {
   name: "edit-table-item",
-  mixins: [i18n,  fieldMixin, emitter],
+  mixins: [i18n, fieldMixin, emitter],
   inject: ['refList'],
   setup(props, {attrs}) {
     const menuOptions = reactive({

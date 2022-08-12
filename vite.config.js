@@ -3,8 +3,6 @@ import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import viteSvgIcons from 'vite-plugin-svg-icons'
 import {resolve} from 'path'
-import commonjs from '@rollup/plugin-commonjs'
-import externalGlobals from "rollup-plugin-external-globals"
 
 // https://vitejs.dev/config/
 export default defineConfig(({mode}) => {
@@ -47,7 +45,7 @@ export default defineConfig(({mode}) => {
       alias: {
         "@": resolve(__dirname, 'src'), // 路径别名
       },
-      extensions: ['.js', '.vue', '.json', '.ts'] // 使用路径别名时想要省略的后缀名，可以自己 增减
+      extensions: ['.js', '.vue', '.json', '.ts', '.tsx'] // 使用路径别名时想要省略的后缀名，可以自己 增减
     },
 
     optimizeDeps: {

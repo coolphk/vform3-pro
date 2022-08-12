@@ -1,6 +1,6 @@
 <template>
   <el-form-item :label="i18nt('designer.setting.submit')">
-    <el-select v-model="selectedSubmitButton" value-key="id" @change="onChange">
+    <el-select v-model="selectedSubmitButton" value-key="id" @change="onChange" clearable>
       <el-option v-for="(item) in compButtons" :value="item.id" :label="item.options.label"/>
     </el-select>
   </el-form-item>
@@ -35,9 +35,12 @@ export default {
   },
   methods: {
     onChange(value) {
-      const button = this.selectedWidget.widgetList.find(w => w.id === value)
-      button.options.onClick = `this.refList['${this.selectedWidget.id}'].saveDataWrapper();`
-      this.optionModel.submit = value
+      traverseAllWidgets(this.selectedWidget.widgetList, (widget) => {
+        if (widget => widget.id === value) {
+          widget.options.onClick = `this.refList['${this.selectedWidget.id}'].saveDataWrapper();`
+          this.optionModel.submit = value
+        }
+      })
     }
   }
 }

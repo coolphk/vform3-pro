@@ -1,9 +1,10 @@
 import {post} from "@/api/index";
+import {APIResponse, Procedure, ScriptParam} from "@/types";
 
 const baseUrl = '/DB_Structure'
 
 export function getProcedureList() {
-  return post(`${baseUrl}/Get_ProcedureList`)
+  return post<Procedure>(`${baseUrl}/Get_ProcedureList`)
 }
 
 /**
@@ -29,11 +30,11 @@ export function getProcedureList() {
  *     "ROWNR": null
  * }]
  */
-export function getProcedureParams(procedureName, parent_ID = "", IF_recur = 0) {
-  return post(`${baseUrl}/Get_ProcParams`, {procedureName, parent_ID, IF_recur})
+export function getProcedureParams(procedureName: string, parent_ID = "", IF_recur = 0) {
+  return post<APIResponse<[ScriptParam]>>(`${baseUrl}/Get_ProcParams`, {procedureName, parent_ID, IF_recur})
 }
 
-export function xmlToJson(params) {
+/*export function xmlToJson(params) {
   return post(`${baseUrl}/XML2JSON`, params, {showTips: true})
 }
 
@@ -44,7 +45,15 @@ export function delProcedureParams(params) {
 export function updateProcedureParams(params) {
   return post(`${baseUrl}/Uapdate_ProcParams`, params)
 }
+ */
 
-export function execProcedure(params) {
+
+export interface ExecProcedureParam {
+  procedureID: string | number
+  procedureName: string
+  params: Array<string>
+}
+
+export function execProcedure(params: {}) {
   return post(`${baseUrl}/Exec_Proc`, params)
 }

@@ -1,3 +1,75 @@
+/*
+
+const columns = [
+  {
+    key: 'Param_ID',
+    dataKey: 'Param_ID',
+    title: '参数ID',
+    width: 300,
+    type: 'expanded',
+  }, {
+    key: 'Param_Name',
+    dataKey: 'Param_Name',
+    title: '参数名称',
+    width: 150,
+  }, {
+    key: 'Param_ObjType',
+    dataKey: 'Param_ObjType',
+    title: '数据类型',
+    width: 120,
+  }, {
+    key: 'Param_isXML',
+    dataKey: 'Param_isXML',
+    title: 'XML',
+    width: 120,
+    cellRenderer: ({rowData, column}) => {
+      return (
+          <el-switch active-value="1" inactive-value="0" v-model={rowData.Param_isXML}></el-switch>
+      )
+    }
+  }, {
+    key: 'Param_VALUE',
+    dataKey: 'Param_VALUE',
+    title: '值',
+    width: 150,
+    cellRenderer: editorRender('xml', selectedProcedure)
+  }, {
+    key: 'Param_TestVALUE',
+    dataKey: 'Param_TestVALUE',
+    title: '测试值',
+    width: 150,
+    cellRenderer: ({rowData, column}) => {
+      return (
+          <el-input type="text" v-model={rowData[column.dataKey]}></el-input>
+      )
+    }
+  }, {
+    key: 'Param_Des',
+    dataKey: 'Param_Des',
+    title: '中文名',
+    width: 150,
+    cellRenderer: ({rowData, column}) => {
+      const onBlur = (e) => {
+        updateProcedureParams(mergeSubmitData(selectedProcedure.value, rowData))
+      }
+      return (
+          <el-input type="text" v-model={rowData[column.dataKey]}></el-input>
+      )
+    }
+  }, {
+    key: 'Param_BusiDes',
+    dataKey: 'Param_BusiDes',
+    title: '业务说明',
+    width: 200,
+    cellRenderer: editorRender('text')
+  }, {
+    key: 'options',
+    title: '操作',
+    width: 300,
+    cellRenderer: operationRender(selectedProcedure, tableData, expandedKeys)
+  }]
+
+
 import CodeEditor from "@/components/code-editor";
 import {delProcedureParams, getProcedureParams, updateProcedureParams, xmlToJson} from "@/api/data-schema";
 import {Delete, Plus, Select} from "@element-plus/icons-vue";
@@ -81,9 +153,9 @@ export const operationRender = (selectedProcedure, tableData, expandedKeys = [])
     if (!schema) {
       // console.log(1);
       const res = (await getProcedureParams(selectedProcedure.value.ProcedureName, rowData.Param_ID, '1'))?.data.Data
-      /*res.forEach(item => {
+      /!*res.forEach(item => {
         unflatten(res, item)
-      })*/
+      })*!/
       rowData.children = unFlatten(res, 'Param_ID')
       schema = res
     }
@@ -165,4 +237,4 @@ function deleteRow(parent, item) {
   } else {
     children.splice(children.findIndex(child => child.Param_ID === item.Param_ID), 1)
   }
-}
+}*/

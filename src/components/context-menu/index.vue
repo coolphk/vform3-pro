@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import {defineProps, reactive, ref, watch} from "vue";
+import {defineProps, ref} from "vue";
 import {onClickOutside} from "@vueuse/core";
 
 const menu$ = ref();

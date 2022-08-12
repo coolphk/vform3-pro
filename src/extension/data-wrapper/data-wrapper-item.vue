@@ -157,6 +157,7 @@ export default {
             }
           })
           //过滤无用字段，减少提交数据大小
+          debugger
           postParams = postParams.map(item => {
             return filterPostParam(item)
           })

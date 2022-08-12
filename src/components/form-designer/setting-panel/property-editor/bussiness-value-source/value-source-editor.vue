@@ -12,7 +12,7 @@ import i18n from "@/utils/i18n"
 import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin";
 import {ref} from "vue";
 import ValueSourceDrawer
-  from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/value-source-drawer";
+  from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/value-source-drawer.vue";
 import {isEmptyObj} from "@/utils/util";
 
 export default {

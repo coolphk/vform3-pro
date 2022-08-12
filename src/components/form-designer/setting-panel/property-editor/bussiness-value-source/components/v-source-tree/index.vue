@@ -26,9 +26,10 @@
 </template>
 
 <script setup>
-import {ref, watch, reactive} from "vue";
+import {reactive, ref, watch} from "vue";
 import {getScriptTree} from "@/api/bussiness-source";
 import {unFlatten} from "@/utils/data-adapter";
+import {deepClone} from "@/utils/util";
 
 const props = defineProps({
   valueSource: Object
@@ -81,7 +82,11 @@ function onCheckChange(data, checked) {
 }
 
 function onCheck(data, {checkedNodes}) {
-  props.valueSource.checkedNodes = checkedNodes
+  const copyCheckedNodes = deepClone(checkedNodes)
+  copyCheckedNodes.map(node => {
+    Object.hasOwn(node, 'children') && delete node['children']
+  })
+  props.valueSource.checkedNodes = copyCheckedNodes
 }
 </script>
 

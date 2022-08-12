@@ -147,8 +147,8 @@ import {getScriptsParams, loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams, filterPostParam, traverseObj} from "@/utils/data-adapter";
 import {isEmptyObj, isTable, traverseFieldWidgets} from "@/utils/util";
 import useBindParam from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/useBindParam";
-import VDataTarget from "./components/v-data-target";
-import VSourceTree from "./components/v-source-tree";
+import VDataTarget from "./components/v-data-target/index.vue";
+import VSourceTree from "./components/v-source-tree/index.vue";
 
 const props = defineProps({
   designer: Object,
@@ -516,7 +516,7 @@ function onCascaderChange(row, value) {
   //有值代表是新选中状态,否则代表取消选中状态
   if (value) {
     props.designer.formWidget.getWidgetRef(value[0]).widget.options.onTableRowClick =
-`setTimeout(()=>{
+        `setTimeout(()=>{
   this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
     ${row.scriptId}:{
       scriptName:'${row.scriptName}',

@@ -22,7 +22,9 @@
  *             }
  *           },
  */
-export default {
+import {VFormWidget} from "@/types";
+
+const dataWrapperWidget: VFormWidget = {
   type: 'data-wrapper',
   category: 'container',
   icon: 'data-wrapper',
@@ -38,7 +40,6 @@ export default {
     submit: '',
     valueSource: { //脚本相关
       checkedNodes: [],//当前选中的节点
-      scriptParams: {}, //获取数据源时，获取脚本参数接口，每个控件自己的参数实例
       expandedKeys: [],//展开的节点id
       bindMap: {},
       pageSize: 10
@@ -46,3 +47,6 @@ export default {
     customClass: '',
   }
 }
+
+
+export default dataWrapperWidget

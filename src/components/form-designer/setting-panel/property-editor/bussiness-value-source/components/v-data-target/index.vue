@@ -43,7 +43,7 @@
 import {reactive, ref, watch} from "vue";
 import {getProcedureList, getProcedureParams} from "@/api/data-schema";
 import {changeBindMapToProcedureIdAsKey, traverseObj, traverseTreeData, unFlatten} from "@/utils/data-adapter";
-import useTransferFormDataToPostData from "@/components/form-render/composible/useTransferFormDataToPostData";
+
 import {isEmptyObj} from "@/utils/util";
 
 const props = defineProps({
