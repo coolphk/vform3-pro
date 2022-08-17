@@ -1,5 +1,5 @@
 import {post} from "@/api/index";
-import {APIResponse, BussinessSourceParamRes, ScriptParamRes, ScriptTreeRes} from "@/types";
+import {APIResponse, BussinessSourceParamRes, LoadBussinessRes, ScriptParamRes, ScriptTreeRes} from "@/types";
 
 const baseUrl = 'DB_Structure'
 
@@ -13,5 +13,5 @@ export function getScriptsParams(Scripts_ID: string) {
 }
 
 export function loadBussinessSource(params: BussinessSourceParamRes) {
-  return post(`${baseUrl}/General_Query`, params)
+  return post<APIResponse<LoadBussinessRes>>(`${baseUrl}/General_Query`, params)
 }

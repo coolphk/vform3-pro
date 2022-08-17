@@ -29,6 +29,7 @@ const COMMON_PROPERTIES = {
   'validationHint'    :            'validationHint-editor',
   'bussinessSource'   :            'bussinessSource-editor',
   'valueSource'       :            'valueSource-editor',
+  'dataTarget'        :            'dataTarget-editor',
   'submit'            :            'submit-editor',
   'readonly'          :            'readonly-editor',
   'disabled'          :            'disabled-editor',

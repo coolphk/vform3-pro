@@ -12,7 +12,7 @@ import {
   basicFields,
   containers,
   customFields
-} from "@/components/form-designer/widget-panel/widgetsConfig.js"
+} from "@/components/form-designer/widget-panel/widgetsConfig"
 import {VARIANT_FORM_VERSION} from "@/utils/config"
 import eventBus from "@/utils/event-bus"
 import {traverseObj} from "@/utils/data-adapter";

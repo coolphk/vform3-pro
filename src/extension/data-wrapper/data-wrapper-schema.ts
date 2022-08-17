@@ -22,9 +22,61 @@
  *             }
  *           },
  */
-import {VFormWidget} from "@/types";
+import {Procedure, VFormWidget, VFormWidgetOptions} from "@/types";
 
-const dataWrapperWidget: VFormWidget = {
+interface DataWrapperOptions extends VFormWidgetOptions {
+  dataTarget: { //存储过程
+    expandedKeys: Array<string>,
+    selectedProcedures: Array<Procedure>,
+  },
+  submit: string,
+  valueSource: {
+    checkedNodes: Array<{
+      "ID": string,
+      "NAME": string,
+      "type": string,
+      "Parent_ID": string,
+      "ROWNR": string | number,
+    }>,
+    expandedKeys: Array<string | number>,//展开的节点id
+    bindMap: BindMap,
+    pageSize: 10
+  },
+}
+
+export interface DataWrapper extends VFormWidget {
+  options: DataWrapperOptions
+}
+
+interface BindMapFieldParams {
+  Param_ID: string,
+  Param_Name: string,
+  Param_TestVALUE: string,
+  procedureId: string | number,
+  procedureName: string
+  defaultValue?: "string"
+}
+
+export interface BindMap {
+  [key: string]: { //脚本id
+    scriptFields?: {
+      [key: string]: { //脚本参数id
+        widgetId?: string, //绑定控件id
+        params: Array<BindMapFieldParams> //存储过程参数
+      }
+    }
+    scriptName: string, //脚本名称
+    scriptParams: {  //脚本参数
+      [key: string]: //参数名
+        {
+          defaultValue: string, //参数默认值
+          linkWidget: Array<string> //关联控件
+        }
+    }
+  }
+}
+
+const dataWrapperWidget: DataWrapper = {
   type: 'data-wrapper',
   category: 'container',
   icon: 'data-wrapper',

@@ -19,7 +19,7 @@
               :indent="8"
               :props="{label:'NAME'}"
               :data="treeData"
-              :default-expanded-keys="optionModel.bussinessSource['expandedNodes']"
+              :default-expanded-keys="optionModel.bussinessSource['expandedKeys']"
               :current-node-key="optionModel.bussinessSource['currentNodeKey']"
               @node-expand="nodeExpand"
               @node-collapse="nodeCollapse"
@@ -42,7 +42,7 @@
           <el-table-column prop="Param_Name" label="参数名" width="150"/>
           <el-table-column prop="Param_TestVALUE" label="默认值" width="150">
             <template #default="{row}">
-              <el-input v-model="row.Param_VALUE"></el-input>
+              <el-input v-model="row.TestVALUE"></el-input>
             </template>
           </el-table-column>
           <el-table-column prop="Param_BusiDes" label="业务说明"/>
@@ -61,12 +61,12 @@
               <span style="margin-left: 8px">
                   <el-checkbox label="全选"
                                v-model="checkAll"
-                               :indeterminate="compSelectedColumns.length<tableColumn.length && compSelectedColumns.length!==0"
+                               :indeterminate="compSelectedColumns.length < tableColumns.length && compSelectedColumns.length!==0"
                                @change="onCheckAll"/>
                 </span>
             </div>
             <el-checkbox-group v-model="compSelectedColumns" style="max-height: 100px;overflow: auto">
-              <el-checkbox v-for="(item) in tableColumn" :label="item"></el-checkbox>
+              <el-checkbox v-for="(item) in tableColumns" :label="item"></el-checkbox>
             </el-checkbox-group>
           </template>
         </div>
@@ -80,7 +80,7 @@
             :header-cell-style="headerCellStyle"
             @row-contextmenu="onBusTableContextmenu"
         >
-          <el-table-column v-for="(item) in tableColumn" :prop="item" :label="item"/>
+          <el-table-column v-for="(item) in tableColumns" :prop="item" :label="item"/>
         </el-table>
       </div>
       <context-menu v-model:show="showMenu" :options="menuOptions"></context-menu>
@@ -88,36 +88,40 @@
   </el-drawer>
 </template>
 
-<script>
+<script lang="ts">
 
-import i18n from "@/utils/i18n"
-import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin";
-import {computed, reactive, ref, watch} from "vue";
+import i18n from "@/utils/i18n.js"
+// import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin";
+import {computed, defineComponent, PropType, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams} from "@/utils/data-adapter";
+import {assembleBussinessParams} from "@/utils/data-adapter.js";
 import ContextMenu from "@/components/context-menu/index.vue"
-import {isTable} from "@/utils/util";
+import {isTable} from "@/utils/util.js";
+import {ScriptParam, ScriptTreeRes} from "@/types";
+import {EditTableOptions} from "@/extension/edit-table/edit-table-schema";
+import {TableColumnCtx} from "element-plus/lib/components/table/src/table-column/defaults";
 
-export default {
+export default defineComponent({
   name: "bussinessSource-drawer",
-  mixins: [i18n, propertyMixin],
+  mixins: [i18n],
   setup(props, ctx) {
-    console.log(1, props.optionModel.bussinessSource['expandedNodes']);
-    console.log(2,);
-    /*if (props.optionModel.bussinessSource['expandedNodes'].length === 0) {
-      props.optionModel.bussinessSource['expandedNodes'] = JSON.parse(localStorage.getItem('vsExpandedNodes'))
-    }*/
+    interface TreeExpandedHistory {
+      id: string,
+      name: string,
+      expanedKeys: string[]
+    }
+
     const tree$ = ref()
     const busTable$ = ref()
     const showDataSource = ref(false)
-    const expanedNodes = reactive([])
-    const treeData = ref([])
-    const tableData = ref([])  //存储过程参数集合
-    const tableColumn = ref([]) //列表列的复选框组
-    const bussinessData = ref([])
-    const openNodeSet = reactive(new Set(props.optionModel.bussinessSource['expandedNodes']))
+    const expanedNodes = reactive<TreeExpandedHistory[]>([])
+    const treeData = ref<ScriptTreeRes[]>([])
+    const tableData = ref<ScriptParam[]>([])  //存储过程参数集合
+    const tableColumns = ref<string[]>([]) //列表列的复选框组
+    const bussinessData = ref<object[]>([])
+    const openNodeSet = reactive(new Set(props.optionModel?.bussinessSource['expandedKeys']))
     const showMenu = ref(false)
-    const currentColumn = ref({})
+    const currentColumn = ref()
     const checkAll = ref(false)
     const menuOptions = reactive({
       x: 0,
@@ -127,29 +131,27 @@ export default {
         {
           label: '设为label',
           handle() {
-            props.optionModel[`labelKey`] = currentColumn.value?.property
+            props.optionModel && (props.optionModel[`labelKey`] = currentColumn.value?.property)
             showMenu.value = false
           }
         },
         {
           label: '设为value',
           handle() {
-            props.optionModel[`valueKey`] = currentColumn.value?.property
+            props.optionModel && (props.optionModel[`valueKey`] = currentColumn.value?.property)
             showMenu.value = false
           }
         }
       ]
     })
-    const treeExpandedHistory = JSON.parse(localStorage.getItem('expanedNodes'))
-    console.log('treeExpandedHistory', treeExpandedHistory);
+    const treeExpandedHistory: TreeExpandedHistory[] = JSON.parse(localStorage.getItem('expanedNodes') ?? '[]')
     const compSelectedColumns = computed({
       get: () => {
-        return props.optionModel.tableColumns.map(item => item.prop)
+        return props.optionModel?.tableColumns.map((item: any) => item.prop)
       },
       set: (values) => {
-
         //设置table的列
-        props.optionModel.tableColumns = values.map((prop, index) => ({
+        props.optionModel && (props.optionModel.tableColumns = values?.map((prop: string, index: number) => ({
               columnId: ++index,
               prop,
               "label": prop,
@@ -157,38 +159,38 @@ export default {
               "show": true,
               "align": "center"
             })
-        )
+        ))
       }
     })
 
     const compPageSize = computed({
-      set(value) {
-        if (isTable(props.selectedWidget.type)) {
+      set(value: number) {
+        if (isTable(props.selectedWidget?.type)) {
           props.optionModel.pagination.pageSize = value
         } else {
           props.optionModel.bussinessSource.pageSize = value
         }
       },
-      get() {
-        if (isTable(props.selectedWidget.type)) {
+      get(): number {
+        if (isTable(props.selectedWidget?.type)) {
           return props.optionModel?.pagination?.pageSize || 10
         } else {
-          return props.optionModel.bussinessSource.pageSize
+          return props.optionModel.bussinessSource.pageSize as number
         }
       }
     })
 
     watch(openNodeSet, (newVal) => {
-      props.optionModel.bussinessSource["expandedNodes"] = Array.from(newVal)
+      props.optionModel.bussinessSource["expandedKeys"] = Array.from(newVal)
     })
 
     watch(expanedNodes, (newVal) => {
       localStorage.setItem("expanedNodes", JSON.stringify(newVal))
     })
 
-    function onCheckAll(value) {
+    function onCheckAll(value: boolean) {
       if (value)
-        compSelectedColumns.value = tableColumn.value
+        compSelectedColumns.value = tableColumns.value
       else {
         compSelectedColumns.value = []
       }
@@ -202,7 +204,7 @@ export default {
      * @param attr
      * @returns {(Map<any, any>|*)[]}
      */
-    function unFlatten(arr, idKey = 'ID', attr = {}) {
+    function unFlatten(arr: any[], idKey = 'ID', attr: any = {}) {
       arr.forEach(item => {
         item['children'] = getChildren(arr, item[idKey])
         Object.keys(attr).forEach(key => {
@@ -212,11 +214,11 @@ export default {
       return getChildren(arr, '0000')
     }
 
-    function getChildren(arr, parentValue, parentKey = 'Parent_ID',) {
+    function getChildren(arr: any[], parentValue: unknown, parentKey = 'Parent_ID',) {
       return arr.filter(item => item[parentKey] === parentValue)
     }
 
-    function currentChange(node) {
+    function currentChange(node: ScriptTreeRes) {
       if (node.type === 'Scripts') {
         props.optionModel.bussinessSource['currentNodeKey'] = node.ID
         props.optionModel?.tableColumns && (props.optionModel.tableColumns = [])
@@ -224,13 +226,11 @@ export default {
         //如果绑定了labelKey与valueKey则清空
         props.optionModel?.labelKey && (props.optionModel.labelKey = "")
         props.optionModel?.valueKey && (props.optionModel.valueKey = "")
-        //如果绑定了sourceId则清空
-        props.optionModel?.valueSource?.sourceId && (props.optionModel.valueSource.sourceId = "")
         loadScriptsParams(node.ID)
       }
     }
 
-    function nodeExpand(data, node) {
+    function nodeExpand(data: ScriptTreeRes) {
       openNodeSet.add(data.ID)
       expanedNodes.push({
         id: data.ID,
@@ -242,7 +242,7 @@ export default {
       }
     }
 
-    function nodeCollapse(data) {
+    function nodeCollapse(data: ScriptTreeRes) {
       openNodeSet.delete(data.ID)
       expanedNodes.splice(expanedNodes.findIndex(item => item.id === data.ID), 1)
     }
@@ -262,16 +262,17 @@ export default {
      * 根据脚本ID获取脚本参数
      * @param scriptId
      */
-    function loadScriptsParams(scriptId) {
+    function loadScriptsParams(scriptId: string) {
       // props.optionModel.tableColumns = []
       scriptId && getScriptsParams(scriptId).then(res => {
         tableData.value = res?.Data?.Params
         //将当前控件的默认值替换脚本配置页的默认值
         props.optionModel.bussinessSource['scriptParams'].map(param => {
           const defaultValue = tableData.value.find(item => item.Param_ID === param.Param_ID)
-          if (!!param.Param_VALUE && !!defaultValue) {
+          /*if (!!param.Param_VALUE && !!defaultValue) {
             defaultValue.Param_VALUE = param.Param_VALUE
-          }
+          }*/
+
         })
         props.optionModel.bussinessSource['scriptParams'] = tableData.value
         loadTableData(scriptId, tableData.value)
@@ -283,18 +284,14 @@ export default {
      * @param scriptId
      * @param params
      */
-    function loadTableData(scriptId, params) {
+    function loadTableData(scriptId: string, params: any) {
       loadBussinessSource(assembleBussinessParams({
         scriptId,
         params,
         pageSize: compPageSize.value
       })).then(res => {
         bussinessData.value = res.Data.TableData
-        tableColumn.value = res.Data.TableHeaders
-        /*console.log(tableColumn.value);
-        if (isTable(props.selectedWidget.type)) {
-          props.optionModel.tableData = res.Data.TableData
-        }*/
+        tableColumns.value = res.Data.TableHeaders
       })
     }
 
@@ -302,8 +299,9 @@ export default {
       loadTableData(props?.optionModel?.bussinessSource?.currentNodeKey, tableData.value)
     }
 
-    function onBusTableContextmenu(row, column, event) {
-      if (!isTable(props.selectedWidget.type)) {
+    function onBusTableContextmenu(row: any, column: any, event: MouseEvent) {
+
+      if (!isTable(props.selectedWidget?.type)) {
         event.preventDefault()
         showMenu.value = true
         menuOptions.x = event.x
@@ -315,8 +313,15 @@ export default {
     function close() {
     }
 
-    function headerCellStyle({column}) {
-      const cellStyle = {}
+    function headerCellStyle({column}: {
+      row: object
+      column: TableColumnCtx<object>
+      rowIndex: number
+      columnIndex: number
+    }) {
+      const cellStyle: {
+        [key: string]: string
+      } = {}
       if (column.property === props.optionModel.labelKey) {
         cellStyle['backgroundColor'] = 'darkcyan'
         cellStyle['color'] = 'white'
@@ -328,15 +333,15 @@ export default {
       return cellStyle
     }
 
-    function onClickExpaned(node) {
-      props.optionModel.bussinessSource['expandedNodes'] = node.expanedKeys
+    function onClickExpaned(node: TreeExpandedHistory) {
+      props.optionModel.bussinessSource['expandedKeys'] = node.expanedKeys
     }
 
     return {
       showDataSource,
       treeData,
       tableData,
-      tableColumn,
+      tableColumns,
       bussinessData,
       tree$,
       busTable$,
@@ -362,13 +367,20 @@ export default {
   props: {
     designer: Object,
     selectedWidget: Object,
-    optionModel: Object,
+    optionModel: {
+      type: Object as PropType<EditTableOptions>,
+      default: () => {
+        return {
+          tableColumns: []
+        }
+      }
+    },
     showDataSource: Boolean
   },
   components: {
     ContextMenu
   }
-}
+})
 
 </script>
 

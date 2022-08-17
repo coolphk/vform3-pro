@@ -8,7 +8,9 @@ declare module '*.vue' {
   export default component
 }
 
-// declare module '*.js'
+
+// declare module '@/utils/i18n.js'
+declare module '*.js'
 
 /*declare module 'axios' {
   export interface AxiosRequestConfig{

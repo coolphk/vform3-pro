@@ -1,10 +1,10 @@
 import {post} from "@/api/index";
-import {APIResponse, Procedure, ScriptParam} from "@/types";
+import {APIResponse, ExecProcedureParam, Procedure, ScriptParam} from "@/types";
 
 const baseUrl = '/DB_Structure'
 
 export function getProcedureList() {
-  return post<Procedure>(`${baseUrl}/Get_ProcedureList`)
+  return post<APIResponse<{ TableData: Procedure[] }>>(`${baseUrl}/Get_ProcedureList`)
 }
 
 /**
@@ -48,12 +48,6 @@ export function updateProcedureParams(params) {
  */
 
 
-export interface ExecProcedureParam {
-  procedureID: string | number
-  procedureName: string
-  params: Array<string>
-}
-
-export function execProcedure(params: {}) {
+export function execProcedure(params: ExecProcedureParam) {
   return post(`${baseUrl}/Exec_Proc`, params)
 }

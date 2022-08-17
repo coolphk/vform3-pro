@@ -62,68 +62,44 @@ export interface BussinessSourceParamRes {
 }
 
 
-interface BindMapFieldParams {
-  Param_ID: string,
-  Param_Name: string,
-  Param_TestVALUE: string,
-  procedureId: string | number,
-  procedureName: string
-  defaultValue?: "string"
-}
-
-export interface BindMap {
-  [key: string]: { //脚本id
-    scriptFields?: {
-      [key: string]: { //脚本参数id
-        widgetId?: string, //绑定控件id
-        params: Array<BindMapFieldParams> //存储过程参数
-      }
-    }
-    scriptName: string, //脚本名称
-    scriptParams: {  //脚本参数
-      [key: string]: //参数名
-        {
-          defaultValue: string, //参数默认值
-          linkWidget: Array<string> //关联控件
-        }
-    }
-  }
-}
-
-interface VFormWidgetOptions {
+export interface VFormWidgetOptions {
   name: string,
   label: string,
   hidden: boolean,
-  dataTarget: { //存储过程
-    expandedKeys: [],
-    selectedProcedures: Array<Procedure>,
-  },
-  submit: string,
-  valueSource: {
-    checkedNodes: Array<{
-      "ID": string,
-      "NAME": string,
-      "type": string,
-      "Parent_ID": string,
-      "ROWNR": string | number,
-    }>,
-    expandedKeys: Array<string | number>,//展开的节点id
-    bindMap: BindMap,
-    pageSize: 10
-  },
   customClass: '',
 }
 
 export interface VFormWidget {
   type: string,
-  category: string,
+  category?: 'container',
+  formItemFlag?: boolean,
   icon: string
-  widgetList: Array<VFormWidget>
+  widgetList?: Array<VFormWidget>
   options: VFormWidgetOptions
 }
 
+export interface VFormBussinessSource {
+  currentNodeKey: string, //选中的数据源ID
+  scriptParams: Array<ScriptParam>,//脚本参数
+  expandedKeys: Array<string>,//展开的节点
+  pageSize?: number
+}
+
 export interface Procedure {
-  ProcedureID: string | number
+  ProcedureID: string
   ProcedureName: string
 }
 
+export interface ExecProcedureParam {
+  procedureID: string | number
+  procedureName: string
+  params: [Partial<ScriptParam>]
+}
+
+export interface LoadBussinessRes {
+  TableData: Array<{ [key: string]: unknown }>
+  TableHeaders: Array<string>
+  currentPage: number
+  pageSize: number
+  total: number
+}
