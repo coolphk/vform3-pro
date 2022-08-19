@@ -272,8 +272,10 @@ export function getAllFieldWidgets(widgetList) {
   let result = []
   let handlerFn = (w) => {
     result.push({
+      id: w.id,
       type: w.type,
       name: w.options.name,
+      label: w.options.label,
       field: w
     })
   }
@@ -521,12 +523,12 @@ export function inObject(obj, value, scope) {
   }
 }
 
-export function debounce(fn, wait){
+export function debounce(fn, wait) {
   let timer = null;
-  return function(){
-    if(timer !== null){
+  return function () {
+    if (timer !== null) {
       clearTimeout(timer);
     }
-    timer = setTimeout(fn,wait);
+    timer = setTimeout(fn, wait);
   }
 }

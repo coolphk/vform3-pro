@@ -49,7 +49,6 @@ service.interceptors.response.use(response => {
 
 export function post<R>(url: string, parmas?: any, options?: AxiosRequestOptions) {
   options && (defaultOptions = options)
-  console.log('post baseUrl', service.defaults.baseURL);
   return service.post<void, R>(url, parmas)
 }
 

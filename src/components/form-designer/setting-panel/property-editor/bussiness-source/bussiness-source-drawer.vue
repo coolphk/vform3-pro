@@ -37,11 +37,18 @@
           <el-button type="primary" style="margin-left: 8px" @click="refreshData">刷新数据</el-button>
         </div>
 
-        <el-table :data="tableData" border max-height="200">
+        <el-table :data="scriptParamTableData" border max-height="200">
           <el-table-column prop="Param_Name" label="参数名" width="150"/>
           <el-table-column prop="Param_TestVALUE" label="默认值" width="150">
             <template #default="{row}">
-              <el-input v-model="row.TestVALUE"></el-input>
+              <el-input v-model="row.Param_TestVALUE"></el-input>
+            </template>
+          </el-table-column>
+          <el-table-column prop="linkWidgetId" label="关联组件" width="200">
+            <template #default="{row}">
+              <el-select v-model="row.linkWidgetId" style="width: 180px">
+                <el-option v-for="(item) in fieldWidgetList" :value="item.id" :label="item.label"></el-option>
+              </el-select>
             </template>
           </el-table-column>
           <el-table-column prop="Param_BusiDes" label="业务说明"/>
@@ -94,9 +101,10 @@ import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams} from "@/utils/data-adapter.js";
 import ContextMenu from "@/components/context-menu/index.vue"
-import {isTable} from "@/utils/util.js";
+import {getAllFieldWidgets, isTable} from "@/utils/util.js";
 import {ScriptParam, ScriptTreeRes} from "@/api/types";
 import {TableColumnCtx} from "element-plus/lib/components/table/src/table-column/defaults";
+
 
 interface TreeExpandedHistory {
   id: string,
@@ -125,9 +133,10 @@ const props = defineProps<{
 const tree$ = ref()
 const busTable$ = ref()
 const showDataSource = ref(false)
+const fieldWidgetList = getAllFieldWidgets(props.designer.widgetList).filter((item: any) => item.id !== props.selectedWidget.id)
 const expanedNodes = reactive<TreeExpandedHistory[]>([])
 const treeData = ref<ScriptTreeRes[]>([])
-const tableData = ref<ScriptParam[]>([])  //存储过程参数集合
+const scriptParamTableData = ref<ScriptParam[]>([])  //存储过程参数集合
 const tableColumns = ref<string[]>([]) //列表列的复选框组
 const bussinessData = ref<object[]>([])
 const openNodeSet = reactive(new Set(props.optionModel?.bussinessSource['expandedKeys']))
@@ -192,12 +201,19 @@ const compPageSize = computed({
   }
 })
 
+
 watch(openNodeSet, (newVal) => {
   props.optionModel.bussinessSource["expandedKeys"] = Array.from(newVal)
 })
 
 watch(expanedNodes, (newVal) => {
   localStorage.setItem("expanedNodes", JSON.stringify(newVal))
+})
+
+watch(scriptParamTableData, (newVal) => {
+  props.optionModel.bussinessSource['scriptParams'] = scriptParamTableData.value
+}, {
+  deep: true
 })
 
 function onCheckAll(value: boolean) {
@@ -277,17 +293,24 @@ function onDrawOpened() {
 function loadScriptsParams(scriptId: string) {
   // props.optionModel.tableColumns = []
   scriptId && getScriptsParams(scriptId).then(res => {
-    tableData.value = res?.Data?.Params
-    //将当前控件的默认值替换脚本配置页的默认值
-    props.optionModel.bussinessSource['scriptParams'].map((param: ScriptParam) => {
-      const defaultValue = tableData.value.find(item => item.Param_ID === param.Param_ID)
-      /*if (!!param.Param_VALUE && !!defaultValue) {
-        defaultValue.Param_VALUE = param.Param_VALUE
-      }*/
-
+    scriptParamTableData.value = res?.Data?.Params.map(item => {
+      const foundBusScriptParam = props.optionModel.bussinessSource['scriptParams'].find((bItem: ScriptParam) => item.Param_ID === bItem.Param_ID)
+      if (foundBusScriptParam) {
+        item.linkWidgetId = foundBusScriptParam.linkWidgetId
+        item.Param_TestVALUE = foundBusScriptParam.Param_TestVALUE
+      }
+      return item
     })
-    props.optionModel.bussinessSource['scriptParams'] = tableData.value
-    loadTableData(scriptId, tableData.value)
+    //将当前脚本参数值替换为bussinessSource配置中的默认值
+    props.optionModel.bussinessSource['scriptParams'].map((param: ScriptParam) => {
+      const tableParam = scriptParamTableData.value.find(item => item.Param_ID === param.Param_ID)
+      if (!!tableParam) {
+        tableParam.Param_TestVALUE = param.Param_TestVALUE
+        tableParam.linkWidgetId = param.linkWidgetId!
+      }
+    })
+
+    loadTableData(scriptId, scriptParamTableData.value)
   })
 }
 
@@ -308,7 +331,8 @@ function loadTableData(scriptId: string, params: any) {
 }
 
 function refreshData() {
-  loadTableData(props?.optionModel?.bussinessSource?.currentNodeKey, tableData.value)
+  debugger
+  loadTableData(props?.optionModel?.bussinessSource?.currentNodeKey, scriptParamTableData.value)
 }
 
 function onBusTableContextmenu(row: any, column: any, event: MouseEvent) {
@@ -348,52 +372,6 @@ function headerCellStyle({column}: {
 function onClickExpaned(node: TreeExpandedHistory) {
   props.optionModel.bussinessSource['expandedKeys'] = node.expanedKeys
 }
-
-/*return {
-  showDataSource,
-  treeData,
-  tableData,
-  tableColumns,
-  bussinessData,
-  tree$,
-  busTable$,
-  showMenu,
-  menuOptions,
-  compSelectedColumns,
-  compPageSize,
-  checkAll,
-  treeExpandedHistory,
-  isTable,
-  currentChange,
-  nodeExpand,
-  nodeCollapse,
-  onDrawOpened,
-  refreshData,
-  onBusTableContextmenu,
-  onCheckAll,
-  close,
-  headerCellStyle,
-  onClickExpaned
-}
-},
-props: {
-designer: Object,
-selectedWidget: Object,
-optionModel: {
-  type: Object as PropType<EditTableOptions>,
-  default: () => {
-    return {
-      tableColumns: []
-    }
-  }
-},
-showDataSource: Boolean
-},
-components: {
-ContextMenu
-}
-})*/
-
 </script>
 
 <style scoped lang="scss">

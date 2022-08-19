@@ -38,6 +38,7 @@ export interface ScriptParam {
   Param_isXML: string
   Parent_ID: string
   ROWNR: string
+  linkWidgetId?: string
 }
 
 
