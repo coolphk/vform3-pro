@@ -1,7 +1,7 @@
 <template>
   <el-drawer @opened="onDrawOpened" v-model="showDataSource" :title="`请选择业务数据源`"
              size="70%"
-             show-close @close="close">
+             show-close>
 
     <div class="bussiness-container">
       <div>
@@ -46,7 +46,7 @@
           </el-table-column>
           <el-table-column prop="linkWidgetId" label="关联组件" width="200">
             <template #default="{row}">
-              <el-select v-model="row.linkWidgetId" style="width: 180px">
+              <el-select v-model="row.linkWidgetId" style="width: 180px" @change="onScriptLinkWidgetChange">
                 <el-option v-for="(item) in fieldWidgetList" :value="item.id" :label="item.label"></el-option>
               </el-select>
             </template>
@@ -96,7 +96,6 @@
 
 <script setup lang="ts">
 
-// import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin";
 import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams} from "@/utils/data-adapter.js";
@@ -331,7 +330,6 @@ function loadTableData(scriptId: string, params: any) {
 }
 
 function refreshData() {
-  debugger
   loadTableData(props?.optionModel?.bussinessSource?.currentNodeKey, scriptParamTableData.value)
 }
 
@@ -346,8 +344,6 @@ function onBusTableContextmenu(row: any, column: any, event: MouseEvent) {
   }
 }
 
-function close() {
-}
 
 function headerCellStyle({column}: {
   row: object
@@ -372,6 +368,13 @@ function headerCellStyle({column}: {
 function onClickExpaned(node: TreeExpandedHistory) {
   props.optionModel.bussinessSource['expandedKeys'] = node.expanedKeys
 }
+
+function onScriptLinkWidgetChange(linkWidgetId: string) {
+  const oldCodeTemplate = props.designer.formWidget.getWidgetRef(linkWidgetId).field.options.onChange;
+  // props.designer.formWidget.getWidgetRef(linkWidgetId).field.options.onChange
+  const codeTemplate = `const linkWidget = this.getWidgetRef("${props.selectedWidget.id}")\nconst foundParam = linkWidget.field.options.bussinessSource.scriptParams.find(item=>item.linkWidgetId===this.field.id)\nfoundParam.Param_TestVALUE=value\nlinkWidget.initOptionItems()\nlinkWidget.setValue("")\n`
+}
+
 </script>
 
 <style scoped lang="scss">

@@ -45,26 +45,19 @@ import emitter from '@/utils/emitter'
 import './container-item/index'
 import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
 import {
-  generateId,
+  buildDefaultFormJson,
   deepClone,
-  insertCustomCssToHead,
-  insertGlobalFunctionsToHtml,
+  generateId,
   getAllContainerWidgets,
   getAllFieldWidgets,
-  traverseFieldWidgets,
-  buildDefaultFormJson,
+  insertCustomCssToHead,
+  insertGlobalFunctionsToHtml,
   traverseAllWidgets,
-  isEmptyObj,
-  uuid2,
-  traverseContainWidgets
+  traverseFieldWidgets
 } from "@/utils/util"
 import i18n, {changeLocale} from "@/utils/i18n"
 import {execProcedure, getProcedureParams} from "@/api/data-schema";
-import {ElMessage} from "element-plus";
-import {buildProcedureSchema, filterPostParam, getKeyByValue, traverseObj} from "@/utils/data-adapter";
-import {loadBussinessSource} from "@/api/bussiness-source";
-import useParamsInFormData from "./composible/useParamsInFormData";
-import useWidgetsGroupByProcedure from "./composible/useWidgetsGroupByProcedure";
+import {filterPostParam, traverseObj} from "@/utils/data-adapter";
 import useTransferFormDataToPostData from "@/components/form-render/composible/useTransferFormDataToPostData";
 
 export default {
