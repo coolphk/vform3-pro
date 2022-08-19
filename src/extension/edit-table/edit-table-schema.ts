@@ -1,4 +1,5 @@
-import {Procedure, VFormBussinessSource, VFormWidget, VFormWidgetOptions} from "@/types";
+import {Procedure} from "@/api/types";
+import {VFormBussinessSource, VFormWidget, VFormWidgetOptions} from "@/components/form-designer/widget-panel/types";
 
 interface CellStyle {
   [key: string]: any

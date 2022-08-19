@@ -6,6 +6,7 @@
     "serve": "vite",
     "build": "vite build",
     "lib": "vite build --config vite-lib.config.js",
+    "lib-test": "vite build --config vite-lib.config.js --mode production-test",
     "lib-render": "vite build --config vite-lib-render.config.js",
     "preview": "vite preview"
   },

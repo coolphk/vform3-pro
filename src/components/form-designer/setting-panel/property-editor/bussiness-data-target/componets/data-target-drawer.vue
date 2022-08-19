@@ -87,7 +87,7 @@ import {isEmptyObj, isTable} from "@/utils/util.js";
 import {getProcedureList, getProcedureParams} from "@/api/data-schema";
 import {unFlatten} from "@/utils/data-adapter.js";
 import Node from "element-plus/es/components/tree/src/model/node";
-import {Procedure, ScriptParam} from "@/types";
+import {Procedure, ScriptParam} from "@/api/types";
 import {EditTableOptions} from "@/extension/edit-table/edit-table-schema";
 
 //树组件数据

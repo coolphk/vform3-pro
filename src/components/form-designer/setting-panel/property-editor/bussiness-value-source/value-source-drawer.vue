@@ -1,5 +1,5 @@
 <template>
-  <el-dialog v-model="showDataSource" title="请配置数据绑定关系"
+  <el-dialog v-model="compShowDataSource" title="请配置数据绑定关系"
              show-close
              :append-to-body="true"
              :close-on-press-escape="false"
@@ -51,7 +51,9 @@
               <div style="display: flex">
                 列名搜索:
                 <el-input style="width: 120px" v-model="inputColumnValue"/>
-                <el-button style="margin-left: 10px" type="primary" @click="autoBindData">自定绑定(根据字段名匹配)</el-button>
+                <el-button style="margin-left: 10px" :loading="loading.autoBind" type="primary" @click="autoBindData">
+                  自定绑定(根据字段名匹配)
+                </el-button>
                 <el-popconfirm title="确定要清除所有绑定关系吗" @confirm="removeBindMap">
                   <template #reference>
                     <el-button type="warning">清除绑定关系</el-button>
@@ -100,7 +102,7 @@
               >
                 <template #item="{element,index}">
                   <span style="margin: 2px">
-                    <el-button size="small" @click="removeBindParam(row,index)">{{
+                    <el-button size="small" @click="removeBindProcedureParam(row,index)">{{
                         element.Param_Name
                       }}
                     </el-button>
@@ -126,13 +128,14 @@
             :total="scriptResponse.total"
             @current-change="onCurrentChange"
         />
-
+        {{ bussinessData }}
+        <hr/>
         {{ optionModel.valueSource.bindMap }}
       </div>
       <div class="tree-wrapper" style="border-left: none;height: 100%;">
         <div class="tree-title">请选择要绑定的数据目标</div>
         <div class="tree-body">
-          <v-data-target ref="vDataTarget$" v-model="procedureData" :data-target="optionModel.dataTarget"
+          <v-data-target ref="vDataTarget$" v-model="procedureData" :data-target="optionModel.valueSource.dataTarget"
                          :bind-map="compBindMap"></v-data-target>
         </div>
       </div>
@@ -140,65 +143,73 @@
   </el-dialog>
 </template>
 
-<script setup>
+<script setup lang="ts">
 
-import {computed, reactive, ref, watch} from "vue";
+import {computed, defineProps, reactive, ref, watch} from "vue";
 import {getScriptsParams, loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams, filterPostParam, traverseObj} from "@/utils/data-adapter";
-import {isEmptyObj, isTable, traverseFieldWidgets} from "@/utils/util";
-import useBindParam from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/useBindParam";
+import {assembleBussinessParams, filterPostParam, traverseObj} from "@/utils/data-adapter.js";
+import {isEmptyObj, traverseFieldWidgets} from "@/utils/util.js";
+import useBindParam
+  from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/useBindParam.js";
 import VDataTarget from "./components/v-data-target/index.vue";
 import VSourceTree from "./components/v-source-tree/index.vue";
+import {BindMap, DataWrapperOptions} from "@/extension/data-wrapper/data-wrapper-schema";
+import {
+  BussinessData,
+  DataRange,
+  ScriptParamData,
+  ScriptResponse
+} from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/types";
+import {ExecProcedureParam, ScriptParam, ScriptTreeRes} from "@/api/types";
 
-const props = defineProps({
-  designer: Object,
-  selectedWidget: Object,
-  optionModel: Object,
-  showDataSource: Boolean
-})
-/*[{
-      procedureId: val.ProcedureID,
-      procedureName: val.ProcedureName,
-      params: res.Data
-    }]*/
-const procedureData = ref([])
+
+const props = defineProps<{
+  designer: any,
+  selectedWidget: any,
+  optionModel: DataWrapperOptions,
+  modelValue: boolean
+}>()
+
+const emits = defineEmits(['update:modelValue'])
+
+const procedureData = ref<ExecProcedureParam[]>([])
 const vsTree$ = ref()
 const busTable$ = ref()
 const vDataTarget$ = ref()
-const showDataSource = ref(false)
 const inputColumnValue = ref("")
-const paramData = ref([])  //存储过程参数集合
-const paramBindWidgets = useBindParam(props.designer.widgetList, props.selectedWidget) //关联组件列表
-const scriptResponse = reactive({
+const paramData = ref<ScriptParamData[]>([])  //存储过程参数集合
+const paramBindWidgets = useBindParam(props.designer?.widgetList, props.selectedWidget) //关联组件列表
+const scriptResponse = reactive<ScriptResponse>({
   data: [],
   dataRange: {},
   total: 0,
   currentPage: 1,
   pageSize: 10
 }) //根据脚本参数查询的实际的数据，并进行分页
-const bussinessData = ref([]) //绑定表格数据
-
+const bussinessData = ref<BussinessData[]>([]) //绑定表格数据
+const loading = reactive({
+  autoBind: false
+})
 const tableDragGroup = { //绑定表格中拖拽容器
   name: 'itxst',
   put: true,
   pull: false
 }
-
-//每页显示条数
-const compPageSize = computed({
+const compShowDataSource = computed<boolean>({
   set(value) {
-    if (isTable(props.selectedWidget.type)) {
-      props.optionModel.pagination.pageSize = value
-    } else {
-      props.optionModel.valueSource.pageSize = value
-    }
+    emits('update:modelValue', value)
   },
   get() {
-    if (isTable(props.selectedWidget.type)) {
-      return props.optionModel?.pagination?.pageSize || 10
-    } else {
-      return props.optionModel.valueSource.pageSize
-    }
+    return props.modelValue
+  }
+})
+//每页显示条数
+const compPageSize = computed<number>({
+  set(value) {
+    props.optionModel.valueSource.pageSize = value
+  },
+  get() {
+    return props.optionModel.valueSource.pageSize
   }
 })
 
@@ -207,8 +218,8 @@ const compPageSize = computed({
  * @type {ComputedRef<*[]>}
  */
 const compChildrenWidgets = computed(() => {
-  const childrenWidgets = []
-  traverseFieldWidgets(props.selectedWidget.widgetList, (field) => {
+  const childrenWidgets: any[] = []
+  traverseFieldWidgets(props.selectedWidget.widgetList, (field: any) => {
     childrenWidgets.push(field)
   })
   return childrenWidgets
@@ -218,7 +229,7 @@ const compBussinessData = computed(() => {
   return bussinessData.value.filter((data) => !inputColumnValue.value || data.label.toLowerCase().includes(inputColumnValue.value.toLowerCase()))
 })
 
-const compBindMap = computed({
+const compBindMap = computed<BindMap>({
   set(value) {
     props.optionModel.valueSource.bindMap = value
   },
@@ -251,7 +262,7 @@ watch(bussinessData, (newValue, oldValue) => {
     // console.log(222, compBindMap.value);
     if (row.params.length > 0) {
       // console.log(newValue);
-      compBindMap.value[row.scriptId]['scriptFields'][row.label] = {
+      compBindMap.value[row.scriptId].scriptFields[row.label] = {
         widgetId: row.widgetId,
         params: row.params.map(item => ({
           ...filterPostParam(item),
@@ -277,11 +288,11 @@ function clearValueSource() {
  * 绑定组件清空方法
  * @param row
  */
-function onClearBindWidget(row) {
+function onClearBindWidget(row: BussinessData) {
   getBindMapValueWithRow(row) && (getBindMapValueWithRow(row).widgetId = "")
 }
 
-function onBindWidgetChange(row) {
+function onBindWidgetChange(row: BussinessData) {
   getBindMapValueWithRow(row) && (getBindMapValueWithRow(row).widgetId = row.widgetId)
 }
 
@@ -289,7 +300,7 @@ function onBindWidgetChange(row) {
  * 根据脚本ID获取脚本参数
  * @param script
  */
-function loadScriptsParams(script) {
+function loadScriptsParams(script: ScriptTreeRes) {
   // console.log('loadScriptsParams', script);
   const {ID: scriptId, NAME: scriptName} = script
 
@@ -297,15 +308,14 @@ function loadScriptsParams(script) {
 
   script && getScriptsParams(script.ID).then(res => {
     //回显参数
-    res.Data.Params.map(param => {
+    res.Data.Params.map((param) => {
       const bindMapParam = compBindMap.value?.[scriptId]?.['scriptParams']?.[param.Param_Name]
       console.log('bindMapParam', bindMapParam);
       param.Param_TestVALUE = bindMapParam?.defaultValue ? bindMapParam?.defaultValue : param.Param_TestVALUE
-      param.linkWidget = bindMapParam?.linkWidget.length > 0 ? bindMapParam.linkWidget : []
       paramData.value.push({
         scriptName: scriptName,
         scriptId: scriptId,
-        linkWidget: param.linkWidget,
+        linkWidget: bindMapParam?.linkWidget.length > 0 ? bindMapParam.linkWidget : [],
         Param_TestVALUE: param.Param_TestVALUE,//数据刷新时，如果绑定关系中有参数有默认值，则使用默认值
         Param_Name: param.Param_Name
       })
@@ -314,7 +324,7 @@ function loadScriptsParams(script) {
   })
 }
 
-function buildBindMap(scriptId, scriptName) {
+function buildBindMap(scriptId: string, scriptName: string) {
   if (isEmptyObj(compBindMap.value)) {
     compBindMap.value = {
       [scriptId]: {
@@ -339,7 +349,7 @@ function buildBindMap(scriptId, scriptName) {
  * @param script
  * @param params
  */
-function loadTableData({ID: scriptId, NAME: scriptName}, params) {
+function loadTableData({ID: scriptId, NAME: scriptName}: ScriptTreeRes, params: ScriptParam[]) {
   loadBussinessSource(assembleBussinessParams({
     scriptId,
     params,
@@ -350,7 +360,10 @@ function loadTableData({ID: scriptId, NAME: scriptName}, params) {
     const columns = res.Data.TableHeaders
 
     //标记数据在整合数据中的位置
-    scriptResponse.dataRange[scriptId] ? scriptResponse.dataRange[scriptId]['start'] = bussinessData.value.length : scriptResponse.dataRange[scriptId] = {start: bussinessData.value.length}
+    scriptResponse.dataRange[scriptId] ? scriptResponse.dataRange[scriptId]['start'] = bussinessData.value.length : scriptResponse.dataRange[scriptId] = {
+      start: bussinessData.value.length,
+      end: bussinessData.value.length
+    }
     bussinessData.value = bussinessData.value.concat(columns.map(column => {
       //给绑定MAP建立初始值key,如果已经存在bindmap中，则直接获取bindmap中值
       const row = {
@@ -358,8 +371,8 @@ function loadTableData({ID: scriptId, NAME: scriptName}, params) {
         value: res.Data.TableData?.[0]?.[column],
         scriptName,
         scriptId,
-        widgetId: vsBindMap?.[scriptId]?.scriptFields?.[column]?.widgetId ?? "",
-        params: vsBindMap?.[scriptId]?.scriptFields?.[column]?.params ?? [],
+        widgetId: "",
+        params: [],
       }
       //刷新数据时，重新关联绑定关系
       /*if (row.params.length > 0) {
@@ -373,24 +386,33 @@ function loadTableData({ID: scriptId, NAME: scriptName}, params) {
   })
 }
 
-function onCurrentChange(currentPage) {
+function onCurrentChange(currentPage: number) {
   scriptResponse.currentPage = currentPage
   scriptResponse.data = pagination(currentPage, scriptResponse.pageSize, compBussinessData.value)
   scriptResponse.total = compBussinessData.value.length
 }
 
-function pagination(pageNo, pageSize, array) {
+function pagination(pageNo: number, pageSize: number, array: BussinessData[]) {
   const offset = (pageNo - 1) * pageSize;
   return (offset + pageSize >= array.length) ? array.slice(offset, array.length) : array.slice(offset, offset + pageSize);
 }
 
 
-function loadDataFinished(vsData) {
+function loadDataFinished(vsData: ScriptTreeRes) {
+  console.log('vsData', vsData);
   loadScriptsParams(vsData)
 }
 
 function refreshData() {
-  const params = {}
+  interface Params {
+    [key: string]: {
+      scriptParams: ScriptParamData[]
+      scriptName: string
+    }
+  }
+
+  const params: Params = {}
+  // const params = {}
   paramData.value.map(item => {
     params[item.scriptId] = {
       scriptParams: params[item.scriptId]?.['scriptParams'] ? [...params[item.scriptId]['scriptParams'], {...item}] : [{...item}],
@@ -399,14 +421,15 @@ function refreshData() {
     compBindMap.value[item.scriptId]['scriptParams'][item.Param_Name].defaultValue = item.Param_TestVALUE
   })
   bussinessData.value = []
-  traverseObj(params, (key, value) => {
-    loadTableData({ID: key, NAME: value.scriptName}, value.scriptParams)
+  console.log(222, params);
+  traverseObj(params, (key: string, value: any) => {
+    loadTableData({ID: key, NAME: value.scriptName} as ScriptTreeRes, value.scriptParams)
   })
 }
 
 
 //脚本树勾选取消时删除相关数据，包括绑定数据、脚本参数
-function removePartialBussinessData(script) {
+function removePartialBussinessData(script: ScriptTreeRes) {
 
   //删除绑定关系中的存储过程参数与表格中的数据
   if (!isEmptyObj(scriptResponse.dataRange)) {
@@ -415,7 +438,7 @@ function removePartialBussinessData(script) {
     removeBindMap(script.ID)
     removeScriptParam(script.ID)
     onCurrentChange(scriptResponse.currentPage)
-    traverseObj(scriptResponse.dataRange, (key, item) => {
+    traverseObj(scriptResponse.dataRange, (key: string, item: DataRange) => {
       if (item.start >= end) {
         item.start = item.start - end + start
       }
@@ -429,7 +452,7 @@ function removePartialBussinessData(script) {
 /**
  * 删除脚本参数
  */
-function removeScriptParam(scriptId) {
+function removeScriptParam(scriptId: string) {
   // console.log(paramData.value);
   for (let i = paramData.value.length - 1; i >= 0; i--) {
     const item = paramData.value[i]
@@ -445,7 +468,7 @@ function removeScriptParam(scriptId) {
  * @param row
  * @param paramIndex
  */
-function removeBindParam(row, paramIndex) {
+function removeBindProcedureParam(row: BussinessData, paramIndex: number) {
   row.params.splice(paramIndex, 1)
 }
 
@@ -453,7 +476,7 @@ function removeBindParam(row, paramIndex) {
  * 删除绑定关系，如果参数是对象，则代表删除全部绑定关系，但保留数据源脚本查询参数(scriptParams)
  * @param scriptId
  */
-function removeBindMap(scriptId) {
+function removeBindMap(scriptId: string) {
   bussinessData.value.map(row => {
     row.params = []
     row.widgetId = ""
@@ -461,29 +484,34 @@ function removeBindMap(scriptId) {
 
 }
 
-function getBindMapValueWithRow(row) {
-  return compBindMap.value?.[row.scriptId]?.[row.label]
+function getBindMapValueWithRow(row: BussinessData) {
+  return compBindMap.value?.[row.scriptId]?.['scriptFields'][row.label]
 }
 
 /**
  * 根据字段名自动绑定数据,遍历存储过程参数和数据源脚本字段，找到名称相同的进行绑定
  */
 function autoBindData() {
+  loading.autoBind = true
   //遍历数据源脚本字段
   bussinessData.value.map(sp => {
     //遍历存储过程参数
     procedureData.value.map(procedure => {
       procedure.params.map(pp => {
-        if (sp.label === pp.Param_Name || (pp.Param_Name.startsWith('@') && sp.label === pp.Param_Name.substr(1))) {
-          // console.log(sp, pp);
-          sp.params = [...sp.params, pp]
+        if (sp.label === pp.Param_Name || (pp.Param_Name!.startsWith('@') && sp.label === pp.Param_Name!.substring(1))) {
+          sp.params = [...sp.params, {
+            ...pp,
+            procedureId: procedure.ProcedureID,
+            procedureName: procedure.ProcedureName,
+          }]
         }
       })
     })
   })
+  loading.autoBind = false
 }
 
-function onBusTableSort({prop, order}) {
+function onBusTableSort({prop, order}: { prop: string, order: string }) {
   if (prop) {
     switch (prop) {
       case 'params':
@@ -511,7 +539,7 @@ function onBusTableSort({prop, order}) {
  * @param row
  * @param value
  */
-function onCascaderChange(row, value) {
+function onCascaderChange(row: ScriptParamData, value: string[]) {
   console.log(111);
   //有值代表是新选中状态,否则代表取消选中状态
   if (value) {

@@ -5,19 +5,21 @@ import VFormRender from '@/components/form-render/index.vue'
 
 import Draggable from '@/../lib/vuedraggable/dist/vuedraggable.umd.js'
 import {registerIcon} from '@/utils/el-icons'
-import SvgIcon from '@/components/svg-icon'  //svg组件
+import SvgIcon from '@/components/svg-icon' //svg组件
 import 'virtual:svg-icons-register'
 import '@/iconfont/iconfont.css'
 
 import ContainerWidgets from '@/components/form-designer/form-widget/container-widget/index'
 import ContainerItems from '@/components/form-render/container-item/index'
 
-import { addDirective } from '@/utils/directive'
-import { installI18n } from '@/utils/i18n'
-import { loadExtension } from '@/extension/extension-loader'
+import {addDirective} from '@/utils/directive'
+import {installI18n} from '@/utils/i18n'
+import {loadExtension} from '@/extension/extension-loader'
+import {changeServiceBaseURL} from "@/api";
 
 
-VFormDesigner.install = function (app) {
+VFormDesigner.install = function (app, options) {
+  console.log('install VFormDesigner', options)
   addDirective(app)
   installI18n(app)
   loadExtension(app)
@@ -32,6 +34,7 @@ VFormDesigner.install = function (app) {
 }
 
 VFormRender.install = function (app) {
+  console.log('install VFormRender');
   installI18n(app)
   loadExtension(app)
 
@@ -47,7 +50,9 @@ const components = [
   VFormRender
 ]
 
-const install = (app) => {
+const install = (app, options) => {
+  console.log('install VForm');
+  changeServiceBaseURL(options.baseURL)
   addDirective(app)
   installI18n(app)
   loadExtension(app)
@@ -55,7 +60,7 @@ const install = (app) => {
   app.use(ContainerWidgets)
   app.use(ContainerItems)
 
-  registerIcon(app)
+  // registerIcon(app)
   app.component('draggable', Draggable)
   app.component('svg-icon', SvgIcon)
 

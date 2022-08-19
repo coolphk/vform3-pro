@@ -1,5 +1,5 @@
 <template>
-  <el-drawer @opened="onDrawOpened" v-model="showDataSource" :title="`请选择${i18nt('designer.setting.bussinessSource')}`"
+  <el-drawer @opened="onDrawOpened" v-model="showDataSource" :title="`请选择业务数据源`"
              size="70%"
              show-close @close="close">
 
@@ -8,7 +8,6 @@
           <span v-for="(node) in treeExpandedHistory" style="margin-right: 5px">
             <el-button @click="onClickExpaned(node)">{{ node.name }}</el-button>
           </span>
-
 
         <div class="tree_wrap">
           <el-tree
@@ -88,299 +87,312 @@
   </el-drawer>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 
-import i18n from "@/utils/i18n.js"
 // import propertyMixin from "@/components/form-designer/setting-panel/property-editor/propertyMixin";
-import {computed, defineComponent, PropType, reactive, ref, watch} from "vue";
+import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams} from "@/utils/data-adapter.js";
 import ContextMenu from "@/components/context-menu/index.vue"
 import {isTable} from "@/utils/util.js";
-import {ScriptParam, ScriptTreeRes} from "@/types";
-import {EditTableOptions} from "@/extension/edit-table/edit-table-schema";
+import {ScriptParam, ScriptTreeRes} from "@/api/types";
 import {TableColumnCtx} from "element-plus/lib/components/table/src/table-column/defaults";
 
-export default defineComponent({
-  name: "bussinessSource-drawer",
-  mixins: [i18n],
-  setup(props, ctx) {
-    interface TreeExpandedHistory {
-      id: string,
-      name: string,
-      expanedKeys: string[]
-    }
+interface TreeExpandedHistory {
+  id: string,
+  name: string,
+  expanedKeys: string[]
+}
 
-    const tree$ = ref()
-    const busTable$ = ref()
-    const showDataSource = ref(false)
-    const expanedNodes = reactive<TreeExpandedHistory[]>([])
-    const treeData = ref<ScriptTreeRes[]>([])
-    const tableData = ref<ScriptParam[]>([])  //存储过程参数集合
-    const tableColumns = ref<string[]>([]) //列表列的复选框组
-    const bussinessData = ref<object[]>([])
-    const openNodeSet = reactive(new Set(props.optionModel?.bussinessSource['expandedKeys']))
-    const showMenu = ref(false)
-    const currentColumn = ref()
-    const checkAll = ref(false)
-    const menuOptions = reactive({
-      x: 0,
-      y: 0,
-      title: '操作列表',
-      handles: [
-        {
-          label: '设为label',
-          handle() {
-            props.optionModel && (props.optionModel[`labelKey`] = currentColumn.value?.property)
-            showMenu.value = false
-          }
-        },
-        {
-          label: '设为value',
-          handle() {
-            props.optionModel && (props.optionModel[`valueKey`] = currentColumn.value?.property)
-            showMenu.value = false
-          }
-        }
-      ]
-    })
-    const treeExpandedHistory: TreeExpandedHistory[] = JSON.parse(localStorage.getItem('expanedNodes') ?? '[]')
-    const compSelectedColumns = computed({
-      get: () => {
-        return props.optionModel?.tableColumns.map((item: any) => item.prop)
-      },
-      set: (values) => {
-        //设置table的列
-        props.optionModel && (props.optionModel.tableColumns = values?.map((prop: string, index: number) => ({
-              columnId: ++index,
-              prop,
-              "label": prop,
-              "width": "100",
-              "show": true,
-              "align": "center"
-            })
-        ))
+/*props: {
+  designer: Object,
+      selectedWidget: Object,
+      optionModel: {
+    type: Object as PropType<EditTableOptions>,
+  default: () => {
+      return {
+        tableColumns: []
       }
-    })
-
-    const compPageSize = computed({
-      set(value: number) {
-        if (isTable(props.selectedWidget?.type)) {
-          props.optionModel.pagination.pageSize = value
-        } else {
-          props.optionModel.bussinessSource.pageSize = value
-        }
-      },
-      get(): number {
-        if (isTable(props.selectedWidget?.type)) {
-          return props.optionModel?.pagination?.pageSize || 10
-        } else {
-          return props.optionModel.bussinessSource.pageSize as number
-        }
-      }
-    })
-
-    watch(openNodeSet, (newVal) => {
-      props.optionModel.bussinessSource["expandedKeys"] = Array.from(newVal)
-    })
-
-    watch(expanedNodes, (newVal) => {
-      localStorage.setItem("expanedNodes", JSON.stringify(newVal))
-    })
-
-    function onCheckAll(value: boolean) {
-      if (value)
-        compSelectedColumns.value = tableColumns.value
-      else {
-        compSelectedColumns.value = []
-      }
-    }
-
-
-    /***
-     * 将数组转换为children树形结构
-     * @param arr
-     * @param idKey
-     * @param attr
-     * @returns {(Map<any, any>|*)[]}
-     */
-    function unFlatten(arr: any[], idKey = 'ID', attr: any = {}) {
-      arr.forEach(item => {
-        item['children'] = getChildren(arr, item[idKey])
-        Object.keys(attr).forEach(key => {
-          item[key] = attr[key]
-        })
-      })
-      return getChildren(arr, '0000')
-    }
-
-    function getChildren(arr: any[], parentValue: unknown, parentKey = 'Parent_ID',) {
-      return arr.filter(item => item[parentKey] === parentValue)
-    }
-
-    function currentChange(node: ScriptTreeRes) {
-      if (node.type === 'Scripts') {
-        props.optionModel.bussinessSource['currentNodeKey'] = node.ID
-        props.optionModel?.tableColumns && (props.optionModel.tableColumns = [])
-        props.optionModel?.tableData && (props.optionModel.tableData = [])
-        //如果绑定了labelKey与valueKey则清空
-        props.optionModel?.labelKey && (props.optionModel.labelKey = "")
-        props.optionModel?.valueKey && (props.optionModel.valueKey = "")
-        loadScriptsParams(node.ID)
-      }
-    }
-
-    function nodeExpand(data: ScriptTreeRes) {
-      openNodeSet.add(data.ID)
-      expanedNodes.push({
-        id: data.ID,
-        name: data.NAME,
-        expanedKeys: Array.from(openNodeSet)
-      })
-      if (expanedNodes.length > 3) {
-        expanedNodes.shift()
-      }
-    }
-
-    function nodeCollapse(data: ScriptTreeRes) {
-      openNodeSet.delete(data.ID)
-      expanedNodes.splice(expanedNodes.findIndex(item => item.id === data.ID), 1)
-    }
-
-    /**
-     * 抽屉展开时刷新左侧树,获取脚本数据源
-     */
-    function onDrawOpened() {
-      getScriptTree().then(res => {
-        treeData.value = unFlatten(res.Data, 'ID')
-        const scriptId = props?.optionModel?.bussinessSource?.currentNodeKey
-        loadScriptsParams(scriptId)
-      })
-    }
-
-    /**
-     * 根据脚本ID获取脚本参数
-     * @param scriptId
-     */
-    function loadScriptsParams(scriptId: string) {
-      // props.optionModel.tableColumns = []
-      scriptId && getScriptsParams(scriptId).then(res => {
-        tableData.value = res?.Data?.Params
-        //将当前控件的默认值替换脚本配置页的默认值
-        props.optionModel.bussinessSource['scriptParams'].map(param => {
-          const defaultValue = tableData.value.find(item => item.Param_ID === param.Param_ID)
-          /*if (!!param.Param_VALUE && !!defaultValue) {
-            defaultValue.Param_VALUE = param.Param_VALUE
-          }*/
-
-        })
-        props.optionModel.bussinessSource['scriptParams'] = tableData.value
-        loadTableData(scriptId, tableData.value)
-      })
-    }
-
-    /**
-     * 根据id与参数从通用接口读取数据
-     * @param scriptId
-     * @param params
-     */
-    function loadTableData(scriptId: string, params: any) {
-      loadBussinessSource(assembleBussinessParams({
-        scriptId,
-        params,
-        pageSize: compPageSize.value
-      })).then(res => {
-        bussinessData.value = res.Data.TableData
-        tableColumns.value = res.Data.TableHeaders
-      })
-    }
-
-    function refreshData() {
-      loadTableData(props?.optionModel?.bussinessSource?.currentNodeKey, tableData.value)
-    }
-
-    function onBusTableContextmenu(row: any, column: any, event: MouseEvent) {
-
-      if (!isTable(props.selectedWidget?.type)) {
-        event.preventDefault()
-        showMenu.value = true
-        menuOptions.x = event.x
-        menuOptions.y = event.y
-        currentColumn.value = column
-      }
-    }
-
-    function close() {
-    }
-
-    function headerCellStyle({column}: {
-      row: object
-      column: TableColumnCtx<object>
-      rowIndex: number
-      columnIndex: number
-    }) {
-      const cellStyle: {
-        [key: string]: string
-      } = {}
-      if (column.property === props.optionModel.labelKey) {
-        cellStyle['backgroundColor'] = 'darkcyan'
-        cellStyle['color'] = 'white'
-      }
-      if (column.property === props.optionModel.valueKey) {
-        cellStyle['backgroundColor'] = 'brown'
-        cellStyle['color'] = 'white'
-      }
-      return cellStyle
-    }
-
-    function onClickExpaned(node: TreeExpandedHistory) {
-      props.optionModel.bussinessSource['expandedKeys'] = node.expanedKeys
-    }
-
-    return {
-      showDataSource,
-      treeData,
-      tableData,
-      tableColumns,
-      bussinessData,
-      tree$,
-      busTable$,
-      showMenu,
-      menuOptions,
-      compSelectedColumns,
-      compPageSize,
-      checkAll,
-      treeExpandedHistory,
-      isTable,
-      currentChange,
-      nodeExpand,
-      nodeCollapse,
-      onDrawOpened,
-      refreshData,
-      onBusTableContextmenu,
-      onCheckAll,
-      close,
-      headerCellStyle,
-      onClickExpaned
     }
   },
-  props: {
-    designer: Object,
-    selectedWidget: Object,
-    optionModel: {
-      type: Object as PropType<EditTableOptions>,
-      default: () => {
-        return {
-          tableColumns: []
-        }
+  showDataSource: Boolean
+},*/
+const props = defineProps<{
+  designer: any,
+  selectedWidget: any,
+  optionModel: any
+}>()
+const tree$ = ref()
+const busTable$ = ref()
+const showDataSource = ref(false)
+const expanedNodes = reactive<TreeExpandedHistory[]>([])
+const treeData = ref<ScriptTreeRes[]>([])
+const tableData = ref<ScriptParam[]>([])  //存储过程参数集合
+const tableColumns = ref<string[]>([]) //列表列的复选框组
+const bussinessData = ref<object[]>([])
+const openNodeSet = reactive(new Set(props.optionModel?.bussinessSource['expandedKeys']))
+const showMenu = ref(false)
+const currentColumn = ref()
+const checkAll = ref(false)
+const treeExpandedHistory: TreeExpandedHistory[] = JSON.parse(localStorage.getItem('expanedNodes') ?? '[]')
+const menuOptions = reactive({
+  x: 0,
+  y: 0,
+  title: '操作列表',
+  handles: [
+    {
+      label: '设为label',
+      handle() {
+        props.optionModel && (props.optionModel[`labelKey`] = currentColumn.value?.property)
+        showMenu.value = false
       }
     },
-    showDataSource: Boolean
+    {
+      label: '设为value',
+      handle() {
+        props.optionModel && (props.optionModel[`valueKey`] = currentColumn.value?.property)
+        showMenu.value = false
+      }
+    }
+  ]
+})
+
+const compSelectedColumns = computed({
+  get: () => {
+    return props.optionModel?.tableColumns.map((item: any) => item.prop)
   },
-  components: {
-    ContextMenu
+  set: (values) => {
+    //设置table的列
+    props.optionModel && (props.optionModel.tableColumns = values?.map((prop: string, index: number) => ({
+          columnId: ++index,
+          prop,
+          "label": prop,
+          "width": "100",
+          "show": true,
+          "align": "center"
+        })
+    ))
   }
 })
+
+const compPageSize = computed({
+  set(value: number) {
+    if (isTable(props.selectedWidget?.type)) {
+      props.optionModel.pagination.pageSize = value
+    } else {
+      props.optionModel.bussinessSource.pageSize = value
+    }
+  },
+  get(): number {
+    if (isTable(props.selectedWidget?.type)) {
+      return props.optionModel?.pagination?.pageSize || 10
+    } else {
+      return props.optionModel.bussinessSource.pageSize as number
+    }
+  }
+})
+
+watch(openNodeSet, (newVal) => {
+  props.optionModel.bussinessSource["expandedKeys"] = Array.from(newVal)
+})
+
+watch(expanedNodes, (newVal) => {
+  localStorage.setItem("expanedNodes", JSON.stringify(newVal))
+})
+
+function onCheckAll(value: boolean) {
+  if (value)
+    compSelectedColumns.value = tableColumns.value
+  else {
+    compSelectedColumns.value = []
+  }
+}
+
+
+/***
+ * 将数组转换为children树形结构
+ * @param arr
+ * @param idKey
+ * @param attr
+ * @returns {(Map<any, any>|*)[]}
+ */
+function unFlatten(arr: any[], idKey = 'ID', attr: any = {}) {
+  arr.forEach(item => {
+    item['children'] = getChildren(arr, item[idKey])
+    Object.keys(attr).forEach(key => {
+      item[key] = attr[key]
+    })
+  })
+  return getChildren(arr, '0000')
+}
+
+function getChildren(arr: any[], parentValue: unknown, parentKey = 'Parent_ID',) {
+  return arr.filter(item => item[parentKey] === parentValue)
+}
+
+function currentChange(node: ScriptTreeRes) {
+  if (node.type === 'Scripts') {
+    props.optionModel.bussinessSource['currentNodeKey'] = node.ID
+    props.optionModel?.tableColumns && (props.optionModel.tableColumns = [])
+    props.optionModel?.tableData && (props.optionModel.tableData = [])
+    //如果绑定了labelKey与valueKey则清空
+    props.optionModel?.labelKey && (props.optionModel.labelKey = "")
+    props.optionModel?.valueKey && (props.optionModel.valueKey = "")
+    loadScriptsParams(node.ID)
+  }
+}
+
+function nodeExpand(data: ScriptTreeRes) {
+  openNodeSet.add(data.ID)
+  expanedNodes.push({
+    id: data.ID,
+    name: data.NAME,
+    expanedKeys: Array.from(openNodeSet) as string[]
+  })
+  if (expanedNodes.length > 3) {
+    expanedNodes.shift()
+  }
+}
+
+function nodeCollapse(data: ScriptTreeRes) {
+  openNodeSet.delete(data.ID)
+  expanedNodes.splice(expanedNodes.findIndex(item => item.id === data.ID), 1)
+}
+
+/**
+ * 抽屉展开时刷新左侧树,获取脚本数据源
+ */
+function onDrawOpened() {
+  getScriptTree().then(res => {
+    treeData.value = unFlatten(res.Data, 'ID')
+    const scriptId = props?.optionModel?.bussinessSource?.currentNodeKey
+    loadScriptsParams(scriptId)
+  })
+}
+
+/**
+ * 根据脚本ID获取脚本参数
+ * @param scriptId
+ */
+function loadScriptsParams(scriptId: string) {
+  // props.optionModel.tableColumns = []
+  scriptId && getScriptsParams(scriptId).then(res => {
+    tableData.value = res?.Data?.Params
+    //将当前控件的默认值替换脚本配置页的默认值
+    props.optionModel.bussinessSource['scriptParams'].map((param: ScriptParam) => {
+      const defaultValue = tableData.value.find(item => item.Param_ID === param.Param_ID)
+      /*if (!!param.Param_VALUE && !!defaultValue) {
+        defaultValue.Param_VALUE = param.Param_VALUE
+      }*/
+
+    })
+    props.optionModel.bussinessSource['scriptParams'] = tableData.value
+    loadTableData(scriptId, tableData.value)
+  })
+}
+
+/**
+ * 根据id与参数从通用接口读取数据
+ * @param scriptId
+ * @param params
+ */
+function loadTableData(scriptId: string, params: any) {
+  loadBussinessSource(assembleBussinessParams({
+    scriptId,
+    params,
+    pageSize: compPageSize.value
+  })).then(res => {
+    bussinessData.value = res.Data.TableData
+    tableColumns.value = res.Data.TableHeaders
+  })
+}
+
+function refreshData() {
+  loadTableData(props?.optionModel?.bussinessSource?.currentNodeKey, tableData.value)
+}
+
+function onBusTableContextmenu(row: any, column: any, event: MouseEvent) {
+
+  if (!isTable(props.selectedWidget?.type)) {
+    event.preventDefault()
+    showMenu.value = true
+    menuOptions.x = event.x
+    menuOptions.y = event.y
+    currentColumn.value = column
+  }
+}
+
+function close() {
+}
+
+function headerCellStyle({column}: {
+  row: object
+  column: TableColumnCtx<object>
+  rowIndex: number
+  columnIndex: number
+}) {
+  const cellStyle: {
+    [key: string]: string
+  } = {}
+  if (column.property === props.optionModel.labelKey) {
+    cellStyle['backgroundColor'] = 'darkcyan'
+    cellStyle['color'] = 'white'
+  }
+  if (column.property === props.optionModel.valueKey) {
+    cellStyle['backgroundColor'] = 'brown'
+    cellStyle['color'] = 'white'
+  }
+  return cellStyle
+}
+
+function onClickExpaned(node: TreeExpandedHistory) {
+  props.optionModel.bussinessSource['expandedKeys'] = node.expanedKeys
+}
+
+/*return {
+  showDataSource,
+  treeData,
+  tableData,
+  tableColumns,
+  bussinessData,
+  tree$,
+  busTable$,
+  showMenu,
+  menuOptions,
+  compSelectedColumns,
+  compPageSize,
+  checkAll,
+  treeExpandedHistory,
+  isTable,
+  currentChange,
+  nodeExpand,
+  nodeCollapse,
+  onDrawOpened,
+  refreshData,
+  onBusTableContextmenu,
+  onCheckAll,
+  close,
+  headerCellStyle,
+  onClickExpaned
+}
+},
+props: {
+designer: Object,
+selectedWidget: Object,
+optionModel: {
+  type: Object as PropType<EditTableOptions>,
+  default: () => {
+    return {
+      tableColumns: []
+    }
+  }
+},
+showDataSource: Boolean
+},
+components: {
+ContextMenu
+}
+})*/
 
 </script>
 

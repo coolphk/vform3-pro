@@ -22,25 +22,21 @@
  *             }
  *           },
  */
-import {Procedure, VFormWidget, VFormWidgetOptions} from "@/types";
+import {Procedure, ScriptTreeRes} from "@/api/types";
+import {VFormWidget, VFormWidgetOptions} from "@/components/form-designer/widget-panel/types";
 
-interface DataWrapperOptions extends VFormWidgetOptions {
-  dataTarget: { //存储过程
-    expandedKeys: Array<string>,
-    selectedProcedures: Array<Procedure>,
-  },
+export interface DataWrapperOptions extends VFormWidgetOptions {
   submit: string,
   valueSource: {
-    checkedNodes: Array<{
-      "ID": string,
-      "NAME": string,
-      "type": string,
-      "Parent_ID": string,
-      "ROWNR": string | number,
-    }>,
+    dataTarget: { //存储过程
+      expandedKeys: Array<string>,
+      selectedProcedures: Array<Procedure>,
+    },
+
+    checkedNodes: Array<ScriptTreeRes>,
     expandedKeys: Array<string | number>,//展开的节点id
     bindMap: BindMap,
-    pageSize: 10
+    pageSize: number,
   },
 }
 
@@ -48,18 +44,18 @@ export interface DataWrapper extends VFormWidget {
   options: DataWrapperOptions
 }
 
-interface BindMapFieldParams {
+export interface BindMapFieldParams {
   Param_ID: string,
   Param_Name: string,
   Param_TestVALUE: string,
   procedureId: string | number,
   procedureName: string
-  defaultValue?: "string"
+  defaultValue: "string"
 }
 
 export interface BindMap {
   [key: string]: { //脚本id
-    scriptFields?: {
+    scriptFields: {
       [key: string]: { //脚本参数id
         widgetId?: string, //绑定控件id
         params: Array<BindMapFieldParams> //存储过程参数
@@ -85,12 +81,12 @@ const dataWrapperWidget: DataWrapper = {
     name: '',
     label: 'data-wrapper',
     hidden: false,
-    dataTarget: { //存储过程
-      expandedKeys: [],
-      selectedProcedures: []
-    },
     submit: '',
     valueSource: { //脚本相关
+      dataTarget: {
+        expandedKeys: [],
+        selectedProcedures: []
+      },
       checkedNodes: [],//当前选中的节点
       expandedKeys: [],//展开的节点id
       bindMap: {},

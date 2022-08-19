@@ -1,5 +1,5 @@
 import {post} from "@/api/index";
-import {APIResponse, ExecProcedureParam, Procedure, ScriptParam} from "@/types";
+import {APIResponse, ExecProcedureParam, Procedure, ScriptParam} from "@/api/types";
 
 const baseUrl = '/DB_Structure'
 

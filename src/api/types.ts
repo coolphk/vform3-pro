@@ -62,38 +62,13 @@ export interface BussinessSourceParamRes {
 }
 
 
-export interface VFormWidgetOptions {
-  name: string,
-  label: string,
-  hidden: boolean,
-  customClass: '',
-}
-
-export interface VFormWidget {
-  type: string,
-  category?: 'container',
-  formItemFlag?: boolean,
-  icon: string
-  widgetList?: Array<VFormWidget>
-  options: VFormWidgetOptions
-}
-
-export interface VFormBussinessSource {
-  currentNodeKey: string, //选中的数据源ID
-  scriptParams: Array<ScriptParam>,//脚本参数
-  expandedKeys: Array<string>,//展开的节点
-  pageSize?: number
-}
-
 export interface Procedure {
   ProcedureID: string
   ProcedureName: string
 }
 
-export interface ExecProcedureParam {
-  procedureID: string | number
-  procedureName: string
-  params: [Partial<ScriptParam>]
+export interface ExecProcedureParam extends Procedure {
+  params: ScriptParam[]
 }
 
 export interface LoadBussinessRes {

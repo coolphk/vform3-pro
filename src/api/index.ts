@@ -1,8 +1,7 @@
 import axios from "axios";
 import {ElMessage} from "element-plus";
-import {AxiosRequestOptions} from "@/types";
+import {AxiosRequestOptions} from "@/api/types";
 // import store from "@/store";
-
 
 
 let defaultOptions: AxiosRequestOptions = {
@@ -13,7 +12,7 @@ let defaultOptions: AxiosRequestOptions = {
 const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
   // baseURL: import.meta.env.VITE_APP_BASE_API, // 超时
-  baseURL: 'http://42.101.11.150:15104/api', // 超时
+  baseURL: (import.meta.env.VITE_APP_BASE_HOST) as string + import.meta.env.VITE_APP_BASE_API, // 超时
   timeout: 10000
 })
 service.interceptors.request.use(config => {
@@ -50,6 +49,7 @@ service.interceptors.response.use(response => {
 
 export function post<R>(url: string, parmas?: any, options?: AxiosRequestOptions) {
   options && (defaultOptions = options)
+  console.log('post baseUrl', service.defaults.baseURL);
   return service.post<void, R>(url, parmas)
 }
 
@@ -59,5 +59,8 @@ export function get<R>(url: string, params?: any, options?: AxiosRequestOptions)
   return service.get<void, R>(url, {params})
 }
 
+export function changeServiceBaseURL(baseURL: string) {
+  service.defaults.baseURL = baseURL
+}
 
 export default service

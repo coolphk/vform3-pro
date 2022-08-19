@@ -7,8 +7,9 @@ import {resolve} from 'path'
 // https://vitejs.dev/config/
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, process.cwd())
-  const {VITE_APP_BASE_API} = env
+  const {VITE_APP_BASE_API, VITE_APP_DIST} = env
   return {
+
     server: {
       host: true,
       port: 3030,
@@ -63,6 +64,7 @@ export default defineConfig(({mode}) => {
 
     build: {
       //minify: false,
+      outDir: VITE_APP_DIST,
       commonjsOptions: {
         exclude: [
           'lib/vuedraggable/dist/vuedraggable.umd.js,',  //引号前的逗号不能删，不知何故？？

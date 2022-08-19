@@ -16,6 +16,7 @@
 
     <div style="flex:1; margin-top: 8px;" class="el-card">
       <el-tree
+          v-loading="treeLoading"
           node-key="Param_ID"
           style="height: 100%;overflow: auto;"
           :indent="8"
@@ -51,14 +52,14 @@ const props = defineProps({
   modelValue: Object,
   bindMap: Object
 })
-
+const treeLoading = ref(false)
 const emits = defineEmits(['update:modelValue'])
 
 const putList = reactive([])
 const showLoading = ref(false)
 const showProcedureListLoading = ref(true)
 //展开的节点
-const openNodeSet = reactive(new Set(props.dataTarget['expandedKeys']))
+const openNodeSet = reactive(new Set(props?.dataTarget['expandedKeys']))
 const select$ = ref()
 //树组件引用
 const tree$ = ref("")
@@ -157,6 +158,7 @@ function loadProcedureList() {
 }
 
 function loadTreeData(val) {
+  treeLoading.value = true
   getProcedureParams(val.ProcedureName, "", 1).then((res) => {
     const tree = unFlatten(res.Data.sort((a, b) => a.Param_Des.localeCompare(b.Param_Des)), 'Param_ID', {
       procedureId: val.ProcedureID,
@@ -175,6 +177,7 @@ function loadTreeData(val) {
         procedureName: val.ProcedureName,
         params: res.Data
       }])
+    treeLoading.value = false
   })
 }
 

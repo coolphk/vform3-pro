@@ -13,7 +13,7 @@
 import i18n from "@/utils/i18n"
 import {ref} from "vue";
 import {isEmptyObj} from "@/utils/util";
-import DataTargetDrawer from "./componets/data-target-drawer";
+import DataTargetDrawer from "./componets/data-target-drawer.vue";
 
 
 export default {

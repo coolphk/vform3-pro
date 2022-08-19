@@ -52,7 +52,6 @@ getScriptTree().then(res => {
       emits('loadDataFinished', node)
     }
   })
-
 })
 
 watch(openNodeSet, (newVal) => {
