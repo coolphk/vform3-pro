@@ -48,9 +48,9 @@ export interface BindMapFieldParams {
   Param_ID: string,
   Param_Name: string,
   Param_TestVALUE: string,
-  procedureId: string | number,
+  procedureId: string,
   procedureName: string
-  defaultValue: "string"
+  defaultValue: string
 }
 
 export interface BindMap {

@@ -26,7 +26,7 @@ ROWNR: string*/
   | 'Param_Des'
   | 'Param_BusiDes'>*/
 
-export type BussinessDataParam = ScriptParam
+export type BussinessDataParam = Partial<ScriptParam>
   & { procedureId: string, procedureName: string, defaultValue?: string }
 
 /*={

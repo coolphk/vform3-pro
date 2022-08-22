@@ -326,6 +326,7 @@ function loadScriptsParams(script: ScriptTreeRes) {
 
 function buildBindMap(scriptId: string, scriptName: string) {
   if (isEmptyObj(compBindMap.value)) {
+    console.log('buildBindMap');
     compBindMap.value = {
       [scriptId]: {
         scriptName: scriptName,
@@ -356,7 +357,7 @@ function loadTableData({ID: scriptId, NAME: scriptName}: ScriptTreeRes, params: 
     pageSize: compPageSize.value
   })).then(res => {
     //初始化绑定关系，如果有旧的绑定关系，则读取旧的为初始值
-    const vsBindMap = compBindMap.value
+    const vsBindMap: BindMap = compBindMap.value
     const columns = res.Data.TableHeaders
 
     //标记数据在整合数据中的位置
@@ -371,8 +372,8 @@ function loadTableData({ID: scriptId, NAME: scriptName}: ScriptTreeRes, params: 
         value: res.Data.TableData?.[0]?.[column],
         scriptName,
         scriptId,
-        widgetId: "",
-        params: [],
+        widgetId: vsBindMap?.[scriptId]?.scriptFields?.[column]?.widgetId ?? "",
+        params: vsBindMap?.[scriptId]?.scriptFields?.[column]?.params ?? [],
       }
       //刷新数据时，重新关联绑定关系
       /*if (row.params.length > 0) {
