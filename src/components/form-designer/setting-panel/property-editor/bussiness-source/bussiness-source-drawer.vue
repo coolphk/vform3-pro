@@ -45,8 +45,12 @@
             </template>
           </el-table-column>
           <el-table-column prop="linkWidgetId" label="关联组件" width="200">
-            <template #default="{row}">
-              <el-select v-model="row.linkWidgetId" style="width: 180px" @change="onScriptLinkWidgetChange">
+            <template #default="{row,$index}">
+              <el-select style="width: 180px"
+                         clearable
+                         :model-value="row.linkWidgetId"
+                         @change="onScriptLinkWidgetChange(row,$index,$event)"
+              >
                 <el-option v-for="(item) in fieldWidgetList" :value="item.id" :label="item.label"></el-option>
               </el-select>
             </template>
@@ -369,12 +373,22 @@ function onClickExpaned(node: TreeExpandedHistory) {
   props.optionModel.bussinessSource['expandedKeys'] = node.expanedKeys
 }
 
-function onScriptLinkWidgetChange(linkWidgetId: string) {
-  const oldCodeTemplate = props.designer.formWidget.getWidgetRef(linkWidgetId).field.options.onChange;
-  // props.designer.formWidget.getWidgetRef(linkWidgetId).field.options.onChange
-  const codeTemplate = `const linkWidget = this.getWidgetRef("${props.selectedWidget.id}")\nconst foundParam = linkWidget.field.options.bussinessSource.scriptParams.find(item=>item.linkWidgetId===this.field.id)\nfoundParam.Param_TestVALUE=value\nlinkWidget.initOptionItems()\nlinkWidget.setValue("")\n`
+// function onScriptLinkWidgetChange(linkWidgetId: string) {
+function onScriptLinkWidgetChange(row: ScriptParam, index: number, linkWidgetId: string) {
+  if (linkWidgetId) {
+    row.linkWidgetId = linkWidgetId
+    const codeTemplate = `const linkWidget = this.getWidgetRef("${props.selectedWidget.id}");\nconst foundParam = linkWidget.field.options.bussinessSource.scriptParams.find(item => item.linkWidgetId === this.field.id);\nfoundParam.Param_TestVALUE = value;\nlinkWidget.initOptionItems();\nlinkWidget.setValue("");`
+    props.designer.formWidget.getWidgetRef(linkWidgetId).field.options.onChange = replaceCode(props.designer.formWidget.getWidgetRef(linkWidgetId).field.options.onChange, codeTemplate)
+  } else {
+    props.designer.formWidget.getWidgetRef(row.linkWidgetId).field.options.onChange = replaceCode(props.designer.formWidget.getWidgetRef(row.linkWidgetId).field.options.onChange, '')
+    row.linkWidgetId = ''
+  }
 }
 
+
+function replaceCode(orignalStr: string, targetCode: string) {
+  return orignalStr.replace(/const\s*linkWidget\s*(.*\n){4}.*setValue\(""\n\);/, targetCode)
+}
 </script>
 
 <style scoped lang="scss">

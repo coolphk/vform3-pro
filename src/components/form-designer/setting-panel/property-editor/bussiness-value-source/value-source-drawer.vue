@@ -422,7 +422,6 @@ function refreshData() {
     compBindMap.value[item.scriptId]['scriptParams'][item.Param_Name].defaultValue = item.Param_TestVALUE
   })
   bussinessData.value = []
-  console.log(222, params);
   traverseObj(params, (key: string, value: any) => {
     loadTableData({ID: key, NAME: value.scriptName} as ScriptTreeRes, value.scriptParams)
   })
