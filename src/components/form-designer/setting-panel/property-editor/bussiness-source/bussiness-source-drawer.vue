@@ -372,10 +372,9 @@ function onScriptLinkWidgetChange(row: ScriptParam, index: number, linkWidgetId:
   //如果有linkWidgetId代表是change操作,否则为clear操作,change操作需要删除原关联组件的代码，并且判断当前选中关联组件以前是否选中过，
   //如果选中过则进行替换，否则进行添加操作
   if (linkWidgetId) {
-    debugger
     linkWidget = getLinkWidget(linkWidgetId) //获取关联组件
     //要生成的代码
-    codeTemplate = `const linkWidget = this.getWidgetRef("${props.selectedWidget.id}");\nconst foundParam = linkWidget.field.options.bussinessSource.scriptParams.find(item => item.linkWidgetId === this.field.id);\nfoundParam.Param_TestVALUE = value;\nlinkWidget.initOptionItems();\nlinkWidget.setValue("");\n`
+    codeTemplate = `const linkWidget = this.getWidgetRef("${props.selectedWidget.id}");\nconst foundParam = linkWidget.field.options.bussinessSource.scriptParams.find(item => item.linkWidgetId === this.field.id);\nfoundParam.Param_TestVALUE = value[this.field.options.valueKey];\nlinkWidget.initOptionItems();\nlinkWidget.setValue("");\n`
     linkWidgetEventCode = linkWidget.options[getWidgetEventByType(linkWidget.type)] //关联组件原代码
     //如果关联组件源代码可以匹配到，则使用替换，否则使用增加
     if (linkWidgetEventCode.match(regexp) !== null) {
