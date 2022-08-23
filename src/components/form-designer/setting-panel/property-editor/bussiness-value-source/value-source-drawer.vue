@@ -494,16 +494,12 @@ function getBindMapValueWithRow(row: BussinessData) {
 function autoBindData() {
   loading.autoBind = true
   //遍历数据源脚本字段
-  bussinessData.value.map(sp => {
+  bussinessData.value.map(row => {
     //遍历存储过程参数
     procedureData.value.map(procedure => {
       procedure.params.map(pp => {
-        if (sp.label === pp.Param_Name || (pp.Param_Name!.startsWith('@') && sp.label === pp.Param_Name!.substring(1))) {
-          sp.params = [...sp.params, {
-            ...pp,
-            procedureId: procedure.ProcedureID,
-            procedureName: procedure.ProcedureName,
-          }]
+        if (row.label === pp.Param_Name || (pp.Param_Name!.startsWith('@') && row.label === pp.Param_Name!.substring(1))) {
+          row.params.push(pp)
         }
       })
     })

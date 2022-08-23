@@ -18,7 +18,7 @@ function transferFormDataToPostData(formData, widgetList) {
       const bindMap = widget.options.valueSource.bindMap
       console.log('transferFormDataToPostData', bindMap);
       traverseObj(bindMap, (key, value) => {
-        traverseObj(value, (sk, sv) => {
+        traverseObj(value.scriptFields, (sk, sv) => {
           sv?.params?.map(param => {
             postData[param.procedureId] = {
               procedureName: param.procedureName,
