@@ -383,8 +383,9 @@ export function translateOptionItems(rawData, widgetType, labelKey, valueKey) {
       const value = ri[valueKey]
       if (isNotNull(label) && isNotNull(value)) {
         result.push({
+          ...ri,
           label,
-          value
+          value,
         })
       }
     })

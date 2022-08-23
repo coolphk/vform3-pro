@@ -396,7 +396,7 @@ export default {
     },
 
     handleChangeEvent(value) {
-      this.syncUpdateFormModel(value)
+      this.syncUpdateFormModel(value[this.field.options.valueKey])
       this.emitFieldDataChange(value, this.oldFieldValue)
 
       //number组件一般不会触发focus事件，故此处需要手工赋值oldFieldValue！！

@@ -4,6 +4,7 @@
                      :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex"
                      :sub-form-row-id="subFormRowId">
     <el-select ref="fieldEditor" v-model="fieldModel" v-show="!isReadMode" class="full-width-input"
+               :value-key="field.options.valueKey"
                :disabled="field.options.disabled"
                :size="widgetSize"
                :clearable="field.options.clearable"
@@ -17,7 +18,7 @@
                @focus="handleFocusCustomEvent" @blur="handleBlurCustomEvent"
                @change="handleChangeEvent">
       <el-option v-for="(item,index) in field.options.optionItems" :key="index" :label="item.label"
-                 :value="item.value" :disabled="item.disabled">
+                 :value="item" :disabled="item.disabled">
       </el-option>
     </el-select>
     <template v-if="isReadMode">

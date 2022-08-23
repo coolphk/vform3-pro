@@ -2,40 +2,6 @@ import {isEmptyObj, uuid2} from "@/utils/util";
 
 let id = 0
 
-function objectToArray(obj, level, path) {
-  level++
-  if (isObj(obj)) {
-    const keys = Reflect.ownKeys(obj);
-    const self = []
-    if (keys.length > 0) {
-      keys.map((key, index) => {
-        const data = {
-          id: id++,
-          label: key,
-          require: true,
-          level,
-          path: path === '' ? key : `${path}.${key}`,
-        }
-        if (isObj(obj[key]) || isArray(obj[key])) {
-          data['children'] = objectToArray(obj[key], level, data.path, obj)
-        } else {
-          data['value'] = obj[key]
-        }
-        self.push(data)
-      })
-    }
-    return self
-  } else if (isArray(obj)) {
-    const item = obj[0]
-    const data = {
-      label: 'item',
-      children: objectToArray(item, level, path)
-    }
-    return [data]
-  }
-}
-
-
 function isObj(obj) {
   return Object.prototype.toString.call(obj) === '[object Object]'
 }
@@ -43,16 +9,6 @@ function isObj(obj) {
 function isArray(obj) {
   return Object.prototype.toString.call(obj) === '[object Array]'
 }
-
-/*export function unflatten(arr, node) {
-  if (node.HaveChild === "1") {
-    node['children'] = getChildren(arr, node.Param_ID)
-  }
-}*/
-
-/*export function getChildren(arr, parentId) {
-  return arr.filter(item => item.Parent_ID === parentId)
-}*/
 
 /***
  * 将数组转换为children树形结构
@@ -180,4 +136,22 @@ export function changeBindMapToProcedureIdAsKey(bindMap) {
     })
   })
   return postData
+}
+
+export const getWidgetEventByType = (type) => {
+  const onChange = 'onChange'
+  const eventMap = {
+    'data-table': 'onTableRowClick',
+    'input': onChange,
+    'textarea': onChange,
+    'number': onChange,
+    'radio': onChange,
+    'checkbox': onChange,
+    'select': onChange,
+    'time': onChange,
+    'date': onChange,
+    'switch': onChange,
+    'button': 'onClick'
+  }
+  return eventMap[type]
 }

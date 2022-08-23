@@ -58,7 +58,7 @@
           <el-table-column prop="Param_BusiDes" label="业务说明"/>
         </el-table>
         <div class="widget-wrapper">
-          <template v-if="optionModel.labelKey">
+          <template v-if="selectedWidget.type==='select'">
             <span class="label">控件Label：</span><span style="color:darkcyan">{{
               optionModel.labelKey
             }}</span>
@@ -66,7 +66,7 @@
               optionModel.valueKey
             }}</span>
           </template>
-          <template v-if="isTable(selectedWidget.type)">
+          <template v-else-if="isTable(selectedWidget.type)">
             <div class="label">选择要显示的列
               <span style="margin-left: 8px">
                   <el-checkbox label="全选"
@@ -79,6 +79,9 @@
               <el-checkbox v-for="(item) in tableColumns" :label="item"></el-checkbox>
             </el-checkbox-group>
           </template>
+          <!--          <template v-else-if="">
+
+                    </template>-->
         </div>
         <el-table
             v-if="bussinessData.length>0"
@@ -93,7 +96,8 @@
           <el-table-column v-for="(item) in tableColumns" :prop="item" :label="item"/>
         </el-table>
       </div>
-      <context-menu v-model:show="showMenu" :options="menuOptions"></context-menu>
+      <context-menu v-model:show="showMenu" :options="menuOptions"/>
+
     </div>
   </el-drawer>
 </template>
@@ -102,10 +106,10 @@
 
 import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams} from "@/utils/data-adapter.js";
+import {assembleBussinessParams, getWidgetEventByType} from "@/utils/data-adapter.js";
 import ContextMenu from "@/components/context-menu/index.vue"
 import {getAllFieldWidgets, isTable} from "@/utils/util.js";
-import {ScriptParam, ScriptTreeRes} from "@/api/types";
+import {LoadBussinessRes, ScriptParam, ScriptTreeRes} from "@/api/types";
 import {TableColumnCtx} from "element-plus/lib/components/table/src/table-column/defaults";
 
 
@@ -115,19 +119,16 @@ interface TreeExpandedHistory {
   expanedKeys: string[]
 }
 
-/*props: {
-  designer: Object,
-      selectedWidget: Object,
-      optionModel: {
-    type: Object as PropType<EditTableOptions>,
-  default: () => {
-      return {
-        tableColumns: []
-      }
-    }
-  },
-  showDataSource: Boolean
-},*/
+interface MenuOptions {
+  x: number,
+  y: number,
+  title: string,
+  handles: {
+    label: string,
+    handle: Function
+  }[]
+}
+
 const props = defineProps<{
   designer: any,
   selectedWidget: any,
@@ -141,33 +142,13 @@ const expanedNodes = reactive<TreeExpandedHistory[]>([])
 const treeData = ref<ScriptTreeRes[]>([])
 const scriptParamTableData = ref<ScriptParam[]>([])  //存储过程参数集合
 const tableColumns = ref<string[]>([]) //列表列的复选框组
-const bussinessData = ref<object[]>([])
+const bussinessData = ref<Array<{ [key: string]: unknown }>>([])
 const openNodeSet = reactive(new Set(props.optionModel?.bussinessSource['expandedKeys']))
 const showMenu = ref(false)
 const currentColumn = ref()
 const checkAll = ref(false)
 const treeExpandedHistory: TreeExpandedHistory[] = JSON.parse(localStorage.getItem('expanedNodes') ?? '[]')
-const menuOptions = reactive({
-  x: 0,
-  y: 0,
-  title: '操作列表',
-  handles: [
-    {
-      label: '设为label',
-      handle() {
-        props.optionModel && (props.optionModel[`labelKey`] = currentColumn.value?.property)
-        showMenu.value = false
-      }
-    },
-    {
-      label: '设为value',
-      handle() {
-        props.optionModel && (props.optionModel[`valueKey`] = currentColumn.value?.property)
-        showMenu.value = false
-      }
-    }
-  ]
-})
+const menuOptions = reactive(getMenuOptionsByWidget())
 
 const compSelectedColumns = computed({
   get: () => {
@@ -337,8 +318,7 @@ function refreshData() {
   loadTableData(props?.optionModel?.bussinessSource?.currentNodeKey, scriptParamTableData.value)
 }
 
-function onBusTableContextmenu(row: any, column: any, event: MouseEvent) {
-
+function onBusTableContextmenu(row: LoadBussinessRes, column: TableColumnCtx<LoadBussinessRes>, event: MouseEvent) {
   if (!isTable(props.selectedWidget?.type)) {
     event.preventDefault()
     showMenu.value = true
@@ -375,20 +355,107 @@ function onClickExpaned(node: TreeExpandedHistory) {
 
 // function onScriptLinkWidgetChange(linkWidgetId: string) {
 function onScriptLinkWidgetChange(row: ScriptParam, index: number, linkWidgetId: string) {
-  if (linkWidgetId) {
-    row.linkWidgetId = linkWidgetId
-    const codeTemplate = `const linkWidget = this.getWidgetRef("${props.selectedWidget.id}");\nconst foundParam = linkWidget.field.options.bussinessSource.scriptParams.find(item => item.linkWidgetId === this.field.id);\nfoundParam.Param_TestVALUE = value;\nlinkWidget.initOptionItems();\nlinkWidget.setValue("");`
-    props.designer.formWidget.getWidgetRef(linkWidgetId).field.options.onChange = replaceCode(props.designer.formWidget.getWidgetRef(linkWidgetId).field.options.onChange, codeTemplate)
-  } else {
-    props.designer.formWidget.getWidgetRef(row.linkWidgetId).field.options.onChange = replaceCode(props.designer.formWidget.getWidgetRef(row.linkWidgetId).field.options.onChange, '')
-    row.linkWidgetId = ''
+  function getLinkWidget(linkWidgetId: string) {
+    return props.designer.formWidget.getWidgetRef(linkWidgetId).field
   }
+
+  function deleteLinkWidgetCode(linkWidgetId: string) {
+    const linkWidget = getLinkWidget(row.linkWidgetId!)
+    const linkWidgetEventCode = linkWidget.options[getWidgetEventByType(linkWidget.type)]
+    if (linkWidgetEventCode.match(regexp) !== null) {
+      linkWidget.options[getWidgetEventByType(linkWidget.type)] = linkWidgetEventCode.replace(regexp, '')
+    }
+  }
+
+  const regexp = new RegExp(`const\\s*linkWidget\\s*.*\\("${props.selectedWidget.id}"\\);\\n(.*\\n){3}.*setValue\\(""\\);\\n?`)
+  let linkWidget, codeTemplate, linkWidgetEventCode;
+  //如果有linkWidgetId代表是change操作,否则为clear操作,change操作需要删除原关联组件的代码，并且判断当前选中关联组件以前是否选中过，
+  //如果选中过则进行替换，否则进行添加操作
+  if (linkWidgetId) {
+    linkWidget = getLinkWidget(linkWidgetId) //获取关联组件
+    //要生成的代码
+    codeTemplate = `const linkWidget = this.getWidgetRef("${props.selectedWidget.id}");\nconst foundParam = linkWidget.field.options.bussinessSource.scriptParams.find(item => item.linkWidgetId === this.field.id);\nfoundParam.Param_TestVALUE = value;\nlinkWidget.initOptionItems();\nlinkWidget.setValue("");\n`
+    linkWidgetEventCode = linkWidget.options[getWidgetEventByType(linkWidget.type)] //关联组件原代码
+    //如果关联组件源代码可以匹配到，则使用替换，否则使用增加
+    if (linkWidgetEventCode.match(regexp) !== null) {
+      linkWidget.options[getWidgetEventByType(linkWidget.type)] = linkWidgetEventCode.replace(regexp, codeTemplate)
+    } else {
+      linkWidget.options[getWidgetEventByType(linkWidget.type)] = linkWidgetEventCode + codeTemplate
+    }
+    //如果有row.linkWidgetId代表以前关联过别的组件，需要把原关联组件的代码删除掉
+    if (row.linkWidgetId) {
+      deleteLinkWidgetCode(row.linkWidgetId)
+    }
+  } else {
+    deleteLinkWidgetCode(row.linkWidgetId!)
+  }
+  row.linkWidgetId = linkWidgetId
 }
 
+function getMenuOptionsByWidget() {
 
-function replaceCode(orignalStr: string, targetCode: string) {
-  return orignalStr.replace(/const\s*linkWidget\s*(.*\n){4}.*setValue\(""\n\);/, targetCode)
+
+  let menuOptions: MenuOptions
+  switch (props.selectedWidget.type) {
+    case 'select':
+      menuOptions = {
+        x: 0,
+        y: 0,
+        title: '操作列表',
+        handles: [
+          {
+            label: '设为label',
+            handle() {
+              props.optionModel && (props.optionModel[`labelKey`] = currentColumn.value?.property)
+              showMenu.value = false
+            }
+          },
+          {
+            label: '设为value',
+            handle() {
+              props.optionModel && (props.optionModel[`valueKey`] = currentColumn.value?.property)
+              showMenu.value = false
+            }
+          }
+        ]
+      }
+      break;
+    case 'input':
+      menuOptions = {
+        x: 0,
+        y: 0,
+        title: '操作列表',
+        handles: [
+          {
+            label: '设为value',
+            handle() {
+              props.optionModel && (props.optionModel[`valueKey`] = currentColumn.value?.property)
+              showMenu.value = false
+            }
+          }
+        ]
+      }
+      break;
+    default:
+      menuOptions = {
+        x: 0,
+        y: 0,
+        title: '操作列表',
+        handles: [
+          {
+            label: '设为value',
+            handle() {
+            }
+          }
+        ]
+      }
+  }
+  return menuOptions
 }
+
+/*
+
+*/
 </script>
 
 <style scoped lang="scss">
