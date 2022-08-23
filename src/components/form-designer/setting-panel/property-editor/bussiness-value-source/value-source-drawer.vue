@@ -128,9 +128,12 @@
             :total="scriptResponse.total"
             @current-change="onCurrentChange"
         />
-        {{ bussinessData }}
-        <hr/>
-        {{ optionModel.valueSource.bindMap }}
+
+        <div v-if="mode === 'development'">
+          {{ bussinessData }}
+          <hr/>
+          {{ optionModel.valueSource.bindMap }}
+        </div>
       </div>
       <div class="tree-wrapper" style="border-left: none;height: 100%;">
         <div class="tree-title">请选择要绑定的数据目标</div>
@@ -171,7 +174,7 @@ const props = defineProps<{
 }>()
 
 const emits = defineEmits(['update:modelValue'])
-
+const mode = import.meta.env.MODE
 const procedureData = ref<ExecProcedureParam[]>([])
 const vsTree$ = ref()
 const busTable$ = ref()
@@ -430,12 +433,12 @@ function refreshData() {
 
 //脚本树勾选取消时删除相关数据，包括绑定数据、脚本参数
 function removePartialBussinessData(script: ScriptTreeRes) {
-
+  console.log(script);
   //删除绑定关系中的存储过程参数与表格中的数据
   if (!isEmptyObj(scriptResponse.dataRange)) {
     const {start, end} = scriptResponse.dataRange[script.ID]
     bussinessData.value.splice(start, end)
-    removeBindMap(script.ID)
+    // removeBindMap(script.ID)
     removeScriptParam(script.ID)
     onCurrentChange(scriptResponse.currentPage)
     traverseObj(scriptResponse.dataRange, (key: string, item: DataRange) => {
@@ -445,7 +448,6 @@ function removePartialBussinessData(script: ScriptTreeRes) {
     })
     delete compBindMap.value[script.ID]
     delete scriptResponse.dataRange[script.ID]
-
   }
 }
 
@@ -536,7 +538,6 @@ function onBusTableSort({prop, order}: { prop: string, order: string }) {
  * @param value
  */
 function onCascaderChange(row: ScriptParamData, value: string[]) {
-  console.log(111);
   //有值代表是新选中状态,否则代表取消选中状态
   if (value) {
     props.designer.formWidget.getWidgetRef(value[0]).widget.options.onTableRowClick =
