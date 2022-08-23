@@ -65,15 +65,12 @@ export default {
     //
   },
   created() {
-    this.initRefList()
+
   },
   mounted() {
     //
   },
   methods: {
-    getRefList() {
-      return this.refList
-    }
   }
 }
 </script>
