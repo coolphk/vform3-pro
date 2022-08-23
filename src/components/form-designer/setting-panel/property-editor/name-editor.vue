@@ -8,6 +8,7 @@
     </template>
     <template v-if="!!selectedWidget.category || noFieldList">
       <el-input type="text" v-model="optionModel.name" :readonly="widgetNameReadonly" @change="updateWidgetNameAndRef"></el-input>
+
     </template>
     <template v-else>
       <el-select v-model="optionModel.name" allow-create filterable :disabled="widgetNameReadonly" @change="updateWidgetNameAndRef"
@@ -19,10 +20,10 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
-  import {isEmptyStr} from "@/utils/util"
+import i18n from "@/utils/i18n"
+import {isEmptyStr} from "@/utils/util"
 
-  export default {
+export default {
     name: "name-editor",
     mixins: [i18n],
     props: {

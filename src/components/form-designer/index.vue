@@ -74,8 +74,12 @@ import SettingPanel from './setting-panel/index'
 import VFormWidget from './form-widget/index'
 import {createDesigner} from "@/components/form-designer/designer"
 import {
-  addWindowResizeHandler, deepClone, getQueryParam, getAllContainerWidgets,
-  getAllFieldWidgets, traverseAllWidgets
+  addWindowResizeHandler,
+  deepClone,
+  getAllContainerWidgets,
+  getAllFieldWidgets,
+  getQueryParam,
+  traverseAllWidgets
 } from "@/utils/util"
 import {MOCK_CASE_URL, VARIANT_FORM_VERSION} from "@/utils/config"
 import i18n, {changeLocale} from "@/utils/i18n"
@@ -115,8 +119,7 @@ export default {
           externalLink: true,  //是否显示GitHub、文档等外部链接
           formTemplates: true,  //是否显示表单模板
           eventCollapse: true,  //是否显示组件事件属性折叠面板
-          widgetNameReadonly: false,  //禁止修改组件名称
-
+          widgetNameReadonly: true,  //禁止修改组件名称
           clearDesignerButton: true,  //是否显示清空设计器按钮
           previewFormButton: true,  //是否显示预览表单按钮
           importJsonButton: true,  //是否显示导入JSON按钮

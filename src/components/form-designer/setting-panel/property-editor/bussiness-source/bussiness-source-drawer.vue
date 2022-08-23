@@ -353,14 +353,14 @@ function onClickExpaned(node: TreeExpandedHistory) {
   props.optionModel.bussinessSource['expandedKeys'] = node.expanedKeys
 }
 
-// function onScriptLinkWidgetChange(linkWidgetId: string) {
+
 function onScriptLinkWidgetChange(row: ScriptParam, index: number, linkWidgetId: string) {
-  function getLinkWidget(linkWidgetId: string) {
-    return props.designer.formWidget.getWidgetRef(linkWidgetId).field
+  function getLinkWidget(id: string) {
+    return props.designer.formWidget.getWidgetRef(id).field
   }
 
-  function deleteLinkWidgetCode(linkWidgetId: string) {
-    const linkWidget = getLinkWidget(row.linkWidgetId!)
+  function deleteLinkWidgetCode(id: string) {
+    const linkWidget = getLinkWidget(id)
     const linkWidgetEventCode = linkWidget.options[getWidgetEventByType(linkWidget.type)]
     if (linkWidgetEventCode.match(regexp) !== null) {
       linkWidget.options[getWidgetEventByType(linkWidget.type)] = linkWidgetEventCode.replace(regexp, '')
@@ -372,6 +372,7 @@ function onScriptLinkWidgetChange(row: ScriptParam, index: number, linkWidgetId:
   //如果有linkWidgetId代表是change操作,否则为clear操作,change操作需要删除原关联组件的代码，并且判断当前选中关联组件以前是否选中过，
   //如果选中过则进行替换，否则进行添加操作
   if (linkWidgetId) {
+    debugger
     linkWidget = getLinkWidget(linkWidgetId) //获取关联组件
     //要生成的代码
     codeTemplate = `const linkWidget = this.getWidgetRef("${props.selectedWidget.id}");\nconst foundParam = linkWidget.field.options.bussinessSource.scriptParams.find(item => item.linkWidgetId === this.field.id);\nfoundParam.Param_TestVALUE = value;\nlinkWidget.initOptionItems();\nlinkWidget.setValue("");\n`
