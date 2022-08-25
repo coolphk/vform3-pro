@@ -1,7 +1,7 @@
 <template>
   <el-form-item :label="i18nt('designer.setting.submit')">
     <el-select v-model="selectedSubmitButton" value-key="id" @change="onChange" clearable>
-      <el-option v-for="(item) in compButtons" :value="item.id" :label="item.options.label"/>
+      <el-option v-for="(item) in compButtons" :value="item" :label="`${item.options.label}-${item.id}`"/>
     </el-select>
   </el-form-item>
 </template>
@@ -20,9 +20,7 @@ export default {
     optionModel: Object,
   },
   data() {
-    return {
-      selectedSubmitButton: this.optionModel.submit
-    }
+    return {}
   },
   computed: {
     compButtons() {
@@ -31,6 +29,14 @@ export default {
         widget.type === 'button' && buttons.push(widget)
       })
       return buttons
+    },
+    selectedSubmitButton: {
+      get() {
+        return this.optionModel.submit
+      },
+      set(value) {
+        this.optionModel.submit = value
+      }
     }
   },
   methods: {
