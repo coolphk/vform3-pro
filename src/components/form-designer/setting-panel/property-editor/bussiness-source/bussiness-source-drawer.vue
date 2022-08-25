@@ -209,27 +209,6 @@ function onCheckAll(value: boolean) {
 }
 
 
-/***
- * 将数组转换为children树形结构
- * @param arr
- * @param idKey
- * @param attr
- * @returns {(Map<any, any>|*)[]}
- */
-/*function unFlatten(arr: any[], idKey = 'ID', attr: any = {}) {
-  arr.forEach(item => {
-    item['children'] = getChildren(arr, item[idKey])
-    Object.keys(attr).forEach(key => {
-      item[key] = attr[key]
-    })
-  })
-  return getChildren(arr, '0000')
-}
-
-function getChildren(arr: any[], parentValue: unknown, parentKey = 'Parent_ID',) {
-  return arr.filter(item => item[parentKey] === parentValue)
-}*/
-
 function currentChange(node: ScriptTreeRes) {
   if (node.type === 'Scripts') {
     props.optionModel.bussinessSource['currentNodeKey'] = node.ID
@@ -363,7 +342,7 @@ function onScriptLinkWidgetChange(row: ScriptParam, index: number, linkWidgetId:
     return props.designer.formWidget.getWidgetRef(id).field
   }
 
-  function deleteLinkWidgetCode(id: string) {
+  function deleteLinkWidgetCode(id: string, regexp: RegExp) {
     const linkWidget = getLinkWidget(id)
     const linkWidgetEventCode = linkWidget.options[getWidgetEventByType(linkWidget.type)]
     if (linkWidgetEventCode.match(regexp) !== null) {
@@ -388,10 +367,10 @@ function onScriptLinkWidgetChange(row: ScriptParam, index: number, linkWidgetId:
     }
     //如果有row.linkWidgetId代表以前关联过别的组件，需要把原关联组件的代码删除掉
     if (row.linkWidgetId) {
-      deleteLinkWidgetCode(row.linkWidgetId)
+      deleteLinkWidgetCode(row.linkWidgetId, regexp)
     }
   } else {
-    deleteLinkWidgetCode(row.linkWidgetId!)
+    deleteLinkWidgetCode(row.linkWidgetId!, regexp)
   }
   row.linkWidgetId = linkWidgetId
 }
