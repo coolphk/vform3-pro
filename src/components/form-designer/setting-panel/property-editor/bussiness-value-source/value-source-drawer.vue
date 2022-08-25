@@ -138,8 +138,8 @@
       <div class="tree-wrapper" style="border-left: none;height: 100%;">
         <div class="tree-title">请选择要绑定的数据目标</div>
         <div class="tree-body">
-          <v-data-target ref="vDataTarget$" v-model="procedureData" :data-target="optionModel.valueSource.dataTarget"
-                         :bind-map="compBindMap"></v-data-target>
+          <v-data-target ref="vDataTarget$" v-model="procedureData"
+                         :data-target="optionModel.valueSource.dataTarget"></v-data-target>
         </div>
       </div>
     </div>
@@ -267,13 +267,16 @@ watch(bussinessData, (newValue, oldValue) => {
       // console.log(newValue);
       compBindMap.value[row.scriptId].scriptFields[row.label] = {
         widgetId: row.widgetId,
-        params: row.params.map(item => ({
-          ...filterPostParam(item),
-          Param_TestVALUE: row.value,
-          defaultValue: item.defaultValue,
-          procedureId: item.procedureId,
-          procedureName: item.procedureName
-        }))
+        params: row.params.map(item => {
+          vDataTarget$.value.changeBoundProcedureStyle(item, true)
+          return {
+            ...filterPostParam(item),
+            Param_TestVALUE: row.value,
+            defaultValue: item.defaultValue,
+            procedureId: item.procedureId,
+            procedureName: item.procedureName
+          }
+        })
       }
     } else if (row.params.length === 0) {
       compBindMap.value[row.scriptId]?.['scriptFields']?.[row.label] && (delete compBindMap.value[row.scriptId]['scriptFields'][row.label])
@@ -471,7 +474,9 @@ function removeScriptParam(scriptId: string) {
  * @param paramIndex
  */
 function removeBindProcedureParam(row: BussinessData, paramIndex: number) {
+  vDataTarget$.value.changeBoundProcedureStyle(row.params[paramIndex], false)
   row.params.splice(paramIndex, 1)
+
 }
 
 /**
@@ -483,7 +488,7 @@ function removeBindMap(scriptId: string) {
     row.params = []
     row.widgetId = ""
   })
-
+  vDataTarget$.value.removeAllBoundStyle()
 }
 
 function getBindMapValueWithRow(row: BussinessData) {

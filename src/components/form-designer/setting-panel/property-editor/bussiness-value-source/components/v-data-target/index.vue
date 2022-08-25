@@ -43,14 +43,11 @@
 <script setup>
 import {reactive, ref, watch} from "vue";
 import {getProcedureList, getProcedureParams} from "@/api/data-schema";
-import {changeBindMapToProcedureIdAsKey, traverseObj, traverseTreeData, unFlatten} from "@/utils/data-adapter";
-
-import {isEmptyObj} from "@/utils/util";
+import {traverseTreeData, unFlatten} from "@/utils/data-adapter";
 
 const props = defineProps({
   dataTarget: Object,
-  modelValue: Object,
-  bindMap: Object
+  modelValue: Object
 })
 const treeLoading = ref(false)
 const emits = defineEmits(['update:modelValue'])
@@ -74,6 +71,7 @@ const treeDragGroup = {
 }
 
 const treeData = ref([]) //存储过程具体内容树
+const originalTreeData = ref([])
 //存储过程下拉列表
 const procedureList = ref([])
 const selectedProcedures = ref(props.dataTarget.selectedProcedures)
@@ -96,6 +94,7 @@ watch(selectedProcedures, (newVal, oldVal) => {
       oldVal.map(ov => {
         if (newVal.findIndex((nv) => nv.ProcedureID === ov.ProcedureID) === -1) {
           treeData.value.splice(treeData.value.findIndex(param => param.Param_ID === ov.ProcedureID), 1)
+          originalTreeData.value.splice(originalTreeData.value.findIndex(param => param.Param_ID === ov.ProcedureID), 1)
         }
       })
     }
@@ -103,30 +102,11 @@ watch(selectedProcedures, (newVal, oldVal) => {
   }
 })
 
-watch(() => props.bindMap, (newVal, oldValue) => {
-  changeBoundProcedureStyle()
-}, {deep: true})
 
-function changeBoundProcedureStyle() {
-  const postData = changeBindMapToProcedureIdAsKey(props.bindMap)
-  traverseObj(postData, (key, value) => {
-    value.params.map(param => {
-      traverseTreeData(treeData.value, (data) => {
-        if (param.Param_ID === data.Param_ID) {
-          data.isBound = true
-        }
-      })
-    })
-  })
-  traverseTreeData(treeData.value, (data) => {
-    if (isEmptyObj(postData)) {
-      data.isBound = false
-    } else {
-      traverseObj(postData, (key, value) => {
-        if (!value.params.find(item => item.Param_ID === data.Param_ID)) {
-          data.isBound = false
-        }
-      })
+function changeBoundProcedureStyle(param, flag) {
+  traverseTreeData(treeData.value, (treeItem) => {
+    if (treeItem.Param_Name == param.Param_Name && treeItem.procedureName === param.procedureName) {
+      treeItem.isBound = flag
     }
   })
 }
@@ -138,14 +118,6 @@ function onDragAdd(evt) {
 
 function onNodeExpand(data, val) {
   openNodeSet.add(data.Param_ID)
-}
-
-function removeBoundProcedureStyle(params) {
-  traverseTreeData(treeData.value, (data) => {
-    if (params.find(param => param.Param_ID === data.Param_ID)) {
-      data.isBound = false
-    }
-  })
 }
 
 function loadProcedureList() {
@@ -160,7 +132,8 @@ function loadProcedureList() {
 function loadTreeData(val) {
   treeLoading.value = true
   getProcedureParams(val.ProcedureName, "", 1).then((res) => {
-    const tree = unFlatten(res.Data.sort((a, b) => a.Param_Des.localeCompare(b.Param_Des)), 'Param_ID', {
+    originalTreeData.value.push(res.Data)
+    const tree = unFlatten(res.Data, 'Param_ID', {
       procedureId: val.ProcedureID,
       procedureName: val.ProcedureName
     })
@@ -169,7 +142,6 @@ function loadTreeData(val) {
       Param_Name: val.ProcedureName,
       children: tree
     })
-    changeBoundProcedureStyle()
     emits('update:modelValue', [
       ...props.modelValue,
       {
@@ -188,9 +160,18 @@ function loadTreeData(val) {
   })
 })()
 
+function removeAllBoundStyle() {
+  traverseTreeData(treeData.value, item => {
+    item.isBound = false
+  })
+}
+
+
 defineExpose({
-  removeBoundProcedureStyle
+  changeBoundProcedureStyle,
+  removeAllBoundStyle
 })
+
 </script>
 
 <style lang="scss">

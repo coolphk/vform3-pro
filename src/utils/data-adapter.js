@@ -106,8 +106,10 @@ export function traverseObj(obj, handle) {
 }
 
 export function traverseTreeData(treeData, handle) {
-  treeData.map(item => {
-    handle(item)
+  treeData?.some(item => {
+    const flag = handle(item)
+    if (flag)
+      return true
     if (item.children) {
       traverseTreeData(item.children, handle)
     }
