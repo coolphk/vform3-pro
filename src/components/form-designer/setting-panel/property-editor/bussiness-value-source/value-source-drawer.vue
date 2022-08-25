@@ -102,10 +102,17 @@
               >
                 <template #item="{element,index}">
                   <span style="margin: 2px">
-                    <el-button size="small" @click="removeBindProcedureParam(row,index)">{{
+                    <el-tooltip
+                        :content="element.procedureName"
+                        placement="top-start"
+                    >
+                    <el-button
+                        size="small"
+                        @click="removeBindProcedureParam(row,index)">{{
                         element.Param_Name
                       }}
                     </el-button>
+                    </el-tooltip>
                   </span>
                 </template>
               </draggable>
@@ -114,9 +121,12 @@
           <el-table-column label="参数默认值" width="240">
             <template #default="{row}">
               <div v-for="(param) in row.params" style="display: flex;justify-content: space-between">
-                {{ param.Param_Name }}：
-                <!--                <el-input style="width: 120px" v-model="param.defaultValue"
-                                          @input="onDefaultValueInput(row,param,$event)"></el-input>-->
+                <el-tooltip
+                    :content="param.procedureName"
+                    placement="top-start"
+                >
+                  {{ param.Param_Name }}：
+                </el-tooltip>
                 <el-input style="width: 120px" v-model="param.defaultValue"></el-input>
               </div>
             </template>
