@@ -4,7 +4,8 @@ export default {
       card: '卡片',
       alert: '提示',
       'edit-table': '编辑表格',
-      'data-wrapper': '数据容器'
+      'data-wrapper': '数据容器',
+      'tree-view': '树形视图'
     },
 
     setting: {
@@ -21,7 +22,12 @@ export default {
       center: '文字居中',
       showIcon: '显示图标',
       effect: '显示效果',
-
+      showBorder: '显示边框',
+      rootParentValue: '根节点父级ID',
+      labelKey: '标签字段',
+      valueKey: '值字段',
+      expandOnClickNode: '点击标签展开节点',
+      parentKey: '父级ID字段'
     },
 
   }

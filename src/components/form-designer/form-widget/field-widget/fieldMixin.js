@@ -376,7 +376,7 @@ export default {
 
       /* 必须用dispatch向指定父组件派发消息！！ */
       this.dispatch('VFormRender', 'fieldChange',
-        [this.field.options.name, newValue, oldValue, this.subFormName, this.subFormRowIndex])
+        [this.field.options.name, newValue[this.field.options.valueKey], oldValue[[this.field.options.valueKey]], this.subFormName, this.subFormRowIndex])
     },
 
     syncUpdateFormModel(value) {

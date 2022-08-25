@@ -9,19 +9,16 @@ import {
 import * as PERegister from '@/components/form-designer/setting-panel/propertyRegister'
 import * as PEFactory from '@/components/form-designer/setting-panel/property-editor-factory.jsx'
 
-import {cardSchema} from "@/extension/samples/extension-schema"
+import {alertSchema, cardSchema} from "@/extension/samples/extension-schema"
 import CardWidget from '@/extension/samples/card/card-widget'
 import CardItem from '@/extension/samples/card/card-item'
-import {registerCWGenerator} from '@/utils/sfc-generator'
-import {cardTemplateGenerator} from '@/extension/samples/extension-sfc-generator'
-
-import {alertSchema} from "@/extension/samples/extension-schema"
+import {registerCWGenerator, registerFWGenerator} from '@/utils/sfc-generator'
+import {alertTemplateGenerator, cardTemplateGenerator} from '@/extension/samples/extension-sfc-generator'
 import AlertWidget from '@/extension/samples/alert/alert-widget'
-import {registerFWGenerator} from '@/utils/sfc-generator'
-import {alertTemplateGenerator} from '@/extension/samples/extension-sfc-generator'
 import editTable from "@/extension/edit-table";
 import dataWrapper from "@/extension/data-wrapper";
 import dialog from "@/extension/dialog";
+import treeView from "@/extension/tree-view";
 
 export const loadExtension = function (app) {
 
@@ -48,6 +45,7 @@ export const loadExtension = function (app) {
   PERegister.registerCPEditor(app, 'card-cardWidth', 'card-cardWidth-editor',
     PEFactory.createInputTextEditor('cardWidth', 'extension.setting.cardWidth'))
 
+
   let shadowOptions = [
     {label: 'never', value: 'never'},
     {label: 'hover', value: 'hover'},
@@ -62,6 +60,9 @@ export const loadExtension = function (app) {
   editTable.install(addBasicFieldSchema, app, PERegister)
   dataWrapper.install(addContainerWidgetSchema, app, PERegister)
   dialog.install(addContainerWidgetSchema,app,PERegister)
+  treeView.install(addBasicFieldSchema,app,PERegister)
+
+
   /* 容器组件加载完毕 end */
 
   /**

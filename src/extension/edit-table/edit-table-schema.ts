@@ -1,12 +1,11 @@
 import {Procedure} from "@/api/types";
-import {VFormBussinessSource, VFormWidget, VFormWidgetOptions} from "@/components/form-designer/widget-panel/types";
+import {VFormWidget, VFormWidgetOptions} from "@/components/form-designer/widget-panel/types";
 
 interface CellStyle {
   [key: string]: any
 }
 
 export interface EditTableOptions extends VFormWidgetOptions {
-  bussinessSource: VFormBussinessSource
   cellStyle: CellStyle
   tableColumns: Array<EditTableColumn>
   tableData: Array<any>

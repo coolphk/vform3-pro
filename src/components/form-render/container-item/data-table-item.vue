@@ -66,11 +66,6 @@
 import ContainerItemWrapper from '@/components/form-render/container-item/container-item-wrapper'
 import emitter from '@/utils/emitter'
 import i18n from "@/utils/i18n"
-import {
-  formatDate1, formatDate2, formatDate3, formatDate4, formatDate5,
-  formatNumber1, formatNumber2, formatNumber3, formatNumber4,
-  formatNumber5, formatNumber6, formatNumber7
-} from "@/utils/format"
 import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
 import refMixin from "@/components/form-render/refMixin"
 import containerItemMixin from "@/components/form-render/container-item/containerItemMixin"
@@ -313,7 +308,7 @@ export default {
     },
     hanldeTableRowClick(row, column, rowIndex) {
       if (!!this.widget.options.onTableRowClick) {
-        let customFn = new Function('row', 'column', 'rowIndex', this.widget.options.onTableRowClick)
+        let customFn = new Function('data', 'column', 'rowIndex', this.widget.options.onTableRowClick)
         customFn.call(this, row, column, rowIndex)
       }
     },

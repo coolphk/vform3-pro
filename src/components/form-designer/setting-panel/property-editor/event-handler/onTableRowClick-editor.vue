@@ -6,10 +6,10 @@
 </template>
 
 <script>
-  import i18n from "@/utils/i18n"
-  import eventMixin from "@/components/form-designer/setting-panel/property-editor/event-handler/eventMixin"
+import i18n from "@/utils/i18n"
+import eventMixin from "@/components/form-designer/setting-panel/property-editor/event-handler/eventMixin"
 
-  export default {
+export default {
     name: "onTableRowClick-editor",
     mixins: [i18n, eventMixin],
     props: {
@@ -19,7 +19,7 @@
     },
     data() {
       return {
-        eventParams: ['row', 'column', 'rowIndex'],
+        eventParams: ['data', 'column', 'rowIndex'],
       }
     }
   }

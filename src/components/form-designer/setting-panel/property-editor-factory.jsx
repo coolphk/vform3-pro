@@ -9,7 +9,7 @@ export const createInputTextEditor = function (propName, propLabelKey) {
     render(h) {
       return (
         <el-form-item label={translate(propLabelKey)}>
-          <el-input type="text" v-model={this.optionModel[propName]} />
+          <el-input type="text" v-model={this.optionModel[propName]}/>
         </el-form-item>
       )
     }
@@ -32,10 +32,10 @@ export const createInputNumberEditor = function (propName, propLabelKey) {
     },
     render(h) {
       return (
-          <el-form-item label={translate(propLabelKey)}>
-            <el-input-number type="text" v-model={this.optionModel[propName]}
-                             onChange={this.updateValue} style="width: 100%" />
-          </el-form-item>
+        <el-form-item label={translate(propLabelKey)}>
+          <el-input-number type="text" v-model={this.optionModel[propName]}
+                           onChange={this.updateValue} style="width: 100%"/>
+        </el-form-item>
       )
     }
   }
@@ -49,7 +49,7 @@ export const createBooleanEditor = function (propName, propLabelKey) {
     render(h) {
       return (
         <el-form-item label={translate(propLabelKey)}>
-          <el-switch v-model={this.optionModel[propName]} />
+          <el-switch v-model={this.optionModel[propName]}/>
         </el-form-item>
       )
     }
@@ -106,15 +106,15 @@ export const createRadioButtonGroupEditor = function (propName, propLabelKey, co
     },
     render(h) {
       return (
-          <el-form-item label={translate(propLabelKey)}>
-            <el-radio-group v-model={this.optionModel[propName]}>
-              {
-                configs.optionItems.map(item => {
-                  return <el-radio-button label={item.value}>{item.label}</el-radio-button>
-                })
-              }
-            </el-radio-group>
-          </el-form-item>
+        <el-form-item label={translate(propLabelKey)}>
+          <el-radio-group v-model={this.optionModel[propName]}>
+            {
+              configs.optionItems.map(item => {
+                return <el-radio-button label={item.value}>{item.label}</el-radio-button>
+              })
+            }
+          </el-radio-group>
+        </el-form-item>
       )
     }
   }
@@ -131,7 +131,7 @@ export const createSelectEditor = function (propName, propLabelKey, configs) {
           <el-select v-model={this.optionModel[propName]}>
             {
               configs.optionItems.map(item => {
-                return <el-option label={item.label} value={item.value} />
+                return <el-option label={item.label} value={item.value}/>
               })
             }
           </el-select>
@@ -155,7 +155,7 @@ export const createEventHandlerEditor = function (eventPropName, eventParams) {
     render(h) {
       return (
         <el-form-item label={eventPropName} label-width="150px">
-            <el-button type="info" icon="el-icon-edit" plain round onClick={this.editEventHandler}>
+          <el-button type="info" icon="el-icon-edit" plain round onClick={this.editEventHandler}>
             {translate('designer.setting.addEventHandler')}</el-button>
         </el-form-item>
       )
@@ -166,7 +166,7 @@ export const createEventHandlerEditor = function (eventPropName, eventParams) {
 export const createEmptyEditor = function () {
   return {
     render() {
-      return <div style="display: none" />
+      return <div style="display: none"/>
     }
   }
 }

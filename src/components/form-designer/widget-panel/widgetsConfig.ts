@@ -144,12 +144,12 @@ export const containers = [
           fixed: 'left',
           sortable: true
         },
-        {columnId: 2, prop: 'date', label: '日期1', width: '160', show: true, align: 'left', formatS: 'd1'},
-        {columnId: 3, prop: 'date2', label: '日期2', width: '160', show: true, align: 'left', formatS: 'd4'},
-        {columnId: 4, prop: 'date3', label: '日期3', width: '160', show: true, align: 'left', formatS: 'd5'},
-        {columnId: 5, prop: 'f1', label: '基金', width: '150', show: true, align: 'right', sortable: true, formatS: 'n1'},
-        {columnId: 6, prop: 'f2', label: '股票', width: '150', show: true, align: 'right', sortable: true, formatS: 'n2'},
-        {columnId: 7, prop: 'f3', label: '存款', width: '150', show: true, align: 'right', sortable: true, formatS: 'n3'},
+        {columnId: 2, prop: 'date', label: '日期1', width: '160', show: true, align: 'left', formatS: ''},
+        {columnId: 3, prop: 'date2', label: '日期2', width: '160', show: true, align: 'left', formatS: ''},
+        {columnId: 4, prop: 'date3', label: '日期3', width: '160', show: true, align: 'left', formatS: ''},
+        {columnId: 5, prop: 'f1', label: '基金', width: '150', show: true, align: 'right', sortable: true, formatS: ''},
+        {columnId: 6, prop: 'f2', label: '股票', width: '150', show: true, align: 'right', sortable: true, formatS: ''},
+        {columnId: 7, prop: 'f3', label: '存款', width: '150', show: true, align: 'right', sortable: true, formatS: ''},
         {
           columnId: 8,
           prop: 'f4',
@@ -158,7 +158,7 @@ export const containers = [
           show: true,
           align: 'right',
           sortable: true,
-          formatS: 'n4'
+          formatS: ''
         },
         {
           columnId: 9,
@@ -168,7 +168,7 @@ export const containers = [
           show: true,
           align: 'right',
           sortable: true,
-          formatS: 'n5'
+          formatS: ''
         },
         {
           columnId: 10,
@@ -178,7 +178,7 @@ export const containers = [
           show: true,
           align: 'right',
           sortable: true,
-          formatS: 'n6'
+          formatS: ''
         },
         {
           columnId: 11,
@@ -188,7 +188,7 @@ export const containers = [
           show: true,
           align: 'right',
           sortable: true,
-          formatS: 'n7'
+          formatS: ''
         },
         {columnId: 12, prop: 'add', label: '地址', width: '250', show: true},
         {columnId: 13, prop: 'ss', label: '秘密', width: '100', show: false},
@@ -553,7 +553,7 @@ export const basicFields = [
       bussinessSource: {
         currentNodeKey: "", //选中的数据源ID
         scriptParams: [],//脚本参数
-        expandedNodes: [],//展开的节点
+        expandedKeys:[],
         pageSize: 10
       },
       name: '',

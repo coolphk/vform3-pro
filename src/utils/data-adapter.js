@@ -16,20 +16,21 @@ function isArray(obj) {
  * @param idKey
  * @param attr 需要新加入的属性对象
  * @param rootParentId 根节点的parentId
+ * @param parentKey parentId字段
  * @returns {(Map<any, any>|*)[]}
  */
-export function unFlatten(arr, idKey = 'ID', attr = {}, rootParentId = '0000') {
+export function unFlatten(arr, idKey = 'ID', attr = {}, rootParentId = '0000', parentKey = 'Parent_ID') {
   arr.forEach(item => {
-    item['children'] = getChildren(arr, item[idKey])
+    item['children'] = getChildren(arr, item[idKey], parentKey)
     Object.keys(attr).forEach(key => {
       item[key] = attr[key]
     })
   })
-  return getChildren(arr, rootParentId)
+  return getChildren(arr, rootParentId, parentKey)
 }
 
-export function getChildren(arr, parentValue, parentKey = 'Parent_ID',) {
-  return arr.filter(item => item[parentKey] === parentValue)
+export function getChildren(arr, parentValue, parentKey) {
+  return arr.filter(item => item[parentKey] == parentValue)
 }
 
 

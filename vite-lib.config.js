@@ -61,6 +61,7 @@ export default defineConfig(({mode}) => {
       lib: {
         entry: resolve(__dirname, 'install.js'),
         name: 'VFormDesigner',
+        formats: ['umd'],
         fileName: (format) => `designer.${format}.js`
       },
       rollupOptions: {

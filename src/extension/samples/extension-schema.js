@@ -12,6 +12,7 @@ export const cardSchema = {
     cardWidth: '100%',
     shadow: 'never',
     customClass: '',
+    showBorder: false
   }
 }
 

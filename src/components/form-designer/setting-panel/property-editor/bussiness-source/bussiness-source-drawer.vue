@@ -106,7 +106,7 @@
 
 import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams, getWidgetEventByType} from "@/utils/data-adapter.js";
+import {assembleBussinessParams, getWidgetEventByType, unFlatten} from "@/utils/data-adapter.js";
 import ContextMenu from "@/components/context-menu/index.vue"
 import {getAllFieldWidgets, isTable} from "@/utils/util.js";
 import {LoadBussinessRes, ScriptParam, ScriptTreeRes} from "@/api/types";
@@ -216,7 +216,7 @@ function onCheckAll(value: boolean) {
  * @param attr
  * @returns {(Map<any, any>|*)[]}
  */
-function unFlatten(arr: any[], idKey = 'ID', attr: any = {}) {
+/*function unFlatten(arr: any[], idKey = 'ID', attr: any = {}) {
   arr.forEach(item => {
     item['children'] = getChildren(arr, item[idKey])
     Object.keys(attr).forEach(key => {
@@ -228,7 +228,7 @@ function unFlatten(arr: any[], idKey = 'ID', attr: any = {}) {
 
 function getChildren(arr: any[], parentValue: unknown, parentKey = 'Parent_ID',) {
   return arr.filter(item => item[parentKey] === parentValue)
-}
+}*/
 
 function currentChange(node: ScriptTreeRes) {
   if (node.type === 'Scripts') {
@@ -346,6 +346,10 @@ function headerCellStyle({column}: {
     cellStyle['backgroundColor'] = 'brown'
     cellStyle['color'] = 'white'
   }
+  if (column.property === props.optionModel.parentKey) {
+    cellStyle['backgroundColor'] = 'green'
+    cellStyle['color'] = 'white'
+  }
   return cellStyle
 }
 
@@ -393,15 +397,17 @@ function onScriptLinkWidgetChange(row: ScriptParam, index: number, linkWidgetId:
 }
 
 function getMenuOptionsByWidget() {
+  let menuOptions: MenuOptions = {
+    x: 0,
+    y: 0,
+    title: '操作列表',
+    handles: []
+  }
 
-
-  let menuOptions: MenuOptions
   switch (props.selectedWidget.type) {
     case 'select':
       menuOptions = {
-        x: 0,
-        y: 0,
-        title: '操作列表',
+        ...menuOptions,
         handles: [
           {
             label: '设为label',
@@ -422,9 +428,7 @@ function getMenuOptionsByWidget() {
       break;
     case 'input':
       menuOptions = {
-        x: 0,
-        y: 0,
-        title: '操作列表',
+        ...menuOptions,
         handles: [
           {
             label: '设为value',
@@ -436,14 +440,40 @@ function getMenuOptionsByWidget() {
         ]
       }
       break;
-    default:
+    case 'tree-view' :
       menuOptions = {
-        x: 0,
-        y: 0,
-        title: '操作列表',
+        ...menuOptions,
         handles: [
           {
+            label: '设为label',
+            handle() {
+              props.optionModel && (props.optionModel[`labelKey`] = currentColumn.value?.property)
+              showMenu.value = false
+            }
+          },
+          {
             label: '设为value',
+            handle() {
+              props.optionModel && (props.optionModel[`valueKey`] = currentColumn.value?.property)
+              showMenu.value = false
+            }
+          },
+          {
+            label: '设为父级ID',
+            handle() {
+              props.optionModel && (props.optionModel[`parentKey`] = currentColumn.value?.property)
+              showMenu.value = false
+            }
+          }
+        ]
+      }
+      break;
+    default:
+      menuOptions = {
+        ...menuOptions,
+        handles: [
+          {
+            label: '',
             handle() {
             }
           }

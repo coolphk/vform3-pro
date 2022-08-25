@@ -5,9 +5,11 @@ export interface VFormWidgetOptions {
   label: string,
   hidden: boolean,
   customClass: '',
+  bussinessSource?: VFormBussinessSource
 }
 
 export interface VFormWidget {
+  id?: string,
   type: string,
   category?: 'container',
   formItemFlag?: boolean,

@@ -279,6 +279,7 @@ export function getAllFieldWidgets(widgetList) {
       field: w
     })
   }
+
   traverseFieldWidgets(widgetList, handlerFn)
 
   return result
