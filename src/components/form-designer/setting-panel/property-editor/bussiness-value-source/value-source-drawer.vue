@@ -138,7 +138,7 @@
             :total="scriptResponse.total"
             @current-change="onCurrentChange"
         />
-
+<!--        <iframe src="https://zuobiao.keyaark.cn/pages/dicom-detail/dicom-view-qrcode?hospitalId=1652260589&studyNumber=58243"  />-->
         <div v-if="mode === 'development'">
           {{ bussinessData }}
           <hr/>
@@ -326,7 +326,6 @@ function loadScriptsParams(script: ScriptTreeRes) {
     //回显参数
     res.Data.Params.map((param) => {
       const bindMapParam = compBindMap.value?.[scriptId]?.['scriptParams']?.[param.Param_Name]
-      console.log('bindMapParam', bindMapParam);
       param.Param_TestVALUE = bindMapParam?.defaultValue ? bindMapParam?.defaultValue : param.Param_TestVALUE
       paramData.value.push({
         scriptName: scriptName,

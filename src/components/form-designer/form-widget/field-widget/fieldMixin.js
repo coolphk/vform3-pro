@@ -1,7 +1,7 @@
 import {deepClone, getDSByName, overwriteObj, runDataSourceRequest, translateOptionItems} from "@/utils/util"
 import FormValidators from '@/utils/validators'
 import {loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams} from "@/utils/data-adapter";
+import {assembleBussinessParams, isObj} from "@/utils/data-adapter";
 
 export default {
   inject: ['refList', 'getFormConfig', 'globalOptionData', 'globalModel', 'getOptionData', 'getGlobalDsv', 'getReadMode',/*'getDataWrapperBindMap'*/],
@@ -396,7 +396,11 @@ export default {
     },
 
     handleChangeEvent(value) {
-      this.syncUpdateFormModel(value[this.field.options.valueKey])
+      if (isObj(value)) {
+        this.syncUpdateFormModel(value[this.field.options.valueKey])
+      } else {
+        this.syncUpdateFormModel(value)
+      }
       this.emitFieldDataChange(value, this.oldFieldValue)
 
       //number组件一般不会触发focus事件，故此处需要手工赋值oldFieldValue！！

@@ -167,7 +167,6 @@ export function traverseContainWidgets(widgetList, handler) {
     if (w.category === 'container') {
       handler(w)
     }
-
     if (w.type === 'grid') {
       w.cols.map(col => {
         traverseContainWidgets(col.widgetList, handler)
@@ -184,7 +183,7 @@ export function traverseContainWidgets(widgetList, handler) {
       })
     } else if (w.type === 'sub-form') {
       traverseContainWidgets(w.widgetList, handler)
-    } else if (w.category === 'container') {  //自定义容器
+    } else if (w.category === 'container' && w.widgetList.length > 0) {  //自定义容器
       traverseContainWidgets(w.widgetList, handler)
     }
   })

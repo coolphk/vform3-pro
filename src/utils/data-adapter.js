@@ -2,11 +2,11 @@ import {isEmptyObj, uuid2} from "@/utils/util";
 
 let id = 0
 
-function isObj(obj) {
+export function isObj(obj) {
   return Object.prototype.toString.call(obj) === '[object Object]'
 }
 
-function isArray(obj) {
+export function isArray(obj) {
   return Object.prototype.toString.call(obj) === '[object Array]'
 }
 
