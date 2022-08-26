@@ -1,4 +1,4 @@
-import {traverseFieldWidgets} from "@/utils/util";
+import {traverseAllWidgets} from "@/utils/util";
 import {reactive} from "vue";
 
 /**
@@ -6,7 +6,7 @@ import {reactive} from "vue";
  */
 function getAllWidgetsForBindScriptParams(widgetList, currentWidget) {
   const paramBindWidgets = reactive([])
-  traverseFieldWidgets(widgetList, (widget) => {
+  traverseAllWidgets(widgetList, (widget) => {
     if (widget.type === 'data-table') {
       paramBindWidgets.push({
         label: widget.options.label,

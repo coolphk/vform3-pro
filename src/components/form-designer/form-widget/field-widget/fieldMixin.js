@@ -144,7 +144,6 @@ export default {
           this.setValue(newFormData[this.field.options.name])
         }
       })
-
       this.on$('field-value-changed', (values) => {
         if (!!this.subFormItemFlag) {
           let subFormData = this.formModel[this.subFormName]
@@ -220,7 +219,6 @@ export default {
           })).then(res => {
             this.loadOptions(res.Data.TableData)
           })
-          // loadBussinessSource()
         } else if (!!this.field.options.dsEnabled) {
           this.field.options.optionItems.splice(0, this.field.options.optionItems.length) // 清空原有选项
           let curDSName = this.field.options.dsName
@@ -375,8 +373,13 @@ export default {
       this.emit$('field-value-changed', [newValue, oldValue])
 
       /* 必须用dispatch向指定父组件派发消息！！ */
-      this.dispatch('VFormRender', 'fieldChange',
-        [this.field.options.name, newValue[this.field.options.valueKey], oldValue[[this.field.options.valueKey]], this.subFormName, this.subFormRowIndex])
+      if (isObj(newValue)) {
+        this.dispatch('VFormRender', 'fieldChange',
+          [this.field.options.name, newValue[this.field.options.valueKey], oldValue[this.field.options.valueKey], this.subFormName, this.subFormRowIndex])
+      } else {
+        this.dispatch('VFormRender', 'fieldChange',
+          [this.field.options.name, newValue, oldValue, this.subFormName, this.subFormRowIndex])
+      }
     },
 
     syncUpdateFormModel(value) {
@@ -508,11 +511,23 @@ export default {
       } else */
       if (!!this.field.formItemFlag) {
         let oldValue = deepClone(this.fieldModel)
-        this.fieldModel = newValue
+        if (this.field.options?.bussinessSource?.currentNodeKey) {
+          const bussinessSource = this.field.options.bussinessSource
+          const valueKey = this.field.options.valueKey
+          loadBussinessSource(assembleBussinessParams({
+            scriptId: bussinessSource.currentNodeKey,
+            params: bussinessSource.scriptParams,
+            pageSize: bussinessSource.pageSize
+          })).then(res => {
+            this.fieldModel = res.Data.TableData.find((item => item[valueKey] == newValue))
+          })
+        } else {
+          this.fieldModel = newValue
+        }
         this.initFileList()
-
+        // console.log(this.field)
         this.syncUpdateFormModel(newValue)
-        this.emitFieldDataChange(newValue, oldValue)
+        // this.emitFieldDataChange(newValue, oldValue)
       }
     },
 

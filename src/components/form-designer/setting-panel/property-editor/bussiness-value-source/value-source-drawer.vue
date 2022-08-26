@@ -138,7 +138,7 @@
             :total="scriptResponse.total"
             @current-change="onCurrentChange"
         />
-<!--        <iframe src="https://zuobiao.keyaark.cn/pages/dicom-detail/dicom-view-qrcode?hospitalId=1652260589&studyNumber=58243"  />-->
+        <!--        <iframe src="https://zuobiao.keyaark.cn/pages/dicom-detail/dicom-view-qrcode?hospitalId=1652260589&studyNumber=58243"  />-->
         <div v-if="mode === 'development'">
           {{ bussinessData }}
           <hr/>
@@ -559,7 +559,7 @@ function onCascaderChange(row: ScriptParamData, value: string[]) {
   this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
     ${row.scriptId}:{
       scriptName:'${row.scriptName}',
-      params:{${row.Param_Name}:row['${value[1]}']}
+      params:{${row.Param_Name}:data['${value[1]}']}
     }
   })
 })`

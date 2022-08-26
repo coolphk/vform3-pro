@@ -46,7 +46,7 @@
         <el-button v-if="showToolButton('exportJsonButton')" link @click="exportJson">
           {{ i18nt('designer.toolbar.exportJson') }}
         </el-button>
-        <el-button v-if="showToolButton('exportCodeButton')" link @click="exportCode">
+<!--        <el-button v-if="showToolButton('exportCodeButton')" link @click="exportCode">
           {{ i18nt('designer.toolbar.exportCode') }}
         </el-button>
         <el-button v-if="showToolButton('generateSFCButton')" link @click="generateSFC">
@@ -56,7 +56,7 @@
         <el-button v-if="showToolButton('dataSourceButton')" link @click="showDataSource">
           <svg-icon icon-class="vue-sfc"/>
           {{ i18nt('designer.toolbar.dataSchema') }}
-        </el-button>
+        </el-button>-->
         <template v-for="(idx, slotName) in $slots">
           <slot :name="slotName"></slot>
         </template>
@@ -239,11 +239,13 @@ import VFormRender from '@/components/form-render/index'
 import CodeEditor from '@/components/code-editor/index'
 import Clipboard from 'clipboard'
 import {
-  deepClone,
+  addWindowResizeHandler,
   copyToClipboard,
+  deepClone,
   generateId,
   getQueryParam,
-  traverseAllWidgets, addWindowResizeHandler, traverseFieldWidgets, isEmptyObj, uuid2, traverseContainWidgets
+  traverseAllWidgets,
+  traverseFieldWidgets
 } from "@/utils/util"
 import i18n from '@/utils/i18n'
 import {generateCode} from "@/utils/code-generator"
@@ -251,11 +253,6 @@ import {genSFC} from "@/utils/sfc-generator"
 import loadBeautifier from "@/utils/beautifierLoader"
 import {saveAs} from 'file-saver'
 import DatasourceDialog from "@/components/form-designer/toolbar-panel/datasource-dialog/index.vue";
-import {buildProcedureSchema, traverseObj} from "@/utils/data-adapter";
-import {execProcedure, getProcedureParams} from "@/api/data-schema";
-import {ElMessage} from "element-plus";
-import {toRaw} from "vue";
-import {loadBussinessSource} from "@/api/bussiness-source";
 
 export default {
   name: "ToolbarPanel",

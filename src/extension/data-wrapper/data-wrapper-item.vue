@@ -72,7 +72,6 @@ export default {
     setFormDataWithValueSource(scriptParams) {
       console.log('setFormDataWithValueSource', scriptParams);
       const vs = this.widget?.options?.valueSource
-      console.log(222, vs);
       const formData = {}
       traverseObj(vs.bindMap, (Scripts_ID, value) => {
         loadBussinessSource({
@@ -83,7 +82,7 @@ export default {
         }).then(res => {
           //读取数据赋值到form表单中，并给bindMap设置默认值
           traverseObj(res.Data.TableData?.[0], (key, value) => {
-            if (vs.bindMap[Scripts_ID][key]) {
+            if (vs.bindMap[Scripts_ID]['scriptFields'][key]) {
               //todo 修改初始值
               vs.bindMap[Scripts_ID]['scriptFields'][key]['paramValue'] = value
             }
