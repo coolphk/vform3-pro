@@ -59,6 +59,7 @@ export default defineComponent({
       if (this.compOptionModal.bussinessSource?.currentNodeKey) {
         loadBussinessSource(assembleBussinessParams({
           scriptId: this.widget!.options.bussinessSource!.currentNodeKey,
+          pageSize: this.widget!.options.bussinessSource!.pageSize,
           currentPage: this.currentPage,
           params: this.widget!.options.bussinessSource!.scriptParams
         })).then((res => {

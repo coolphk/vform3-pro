@@ -6,6 +6,12 @@
     <el-form-item :label="i18nt('designer.setting.tableHeight')">
       <el-input v-model="optionModel.tableHeight"></el-input>
     </el-form-item>
+    <el-form-item :label="i18nt('designer.setting.refreshWidget')">
+      <el-select v-model="optionModel.refreshWidget">
+        <el-option v-for="(item) in compRefreshWidgets" :key="item.value" :value="item.value"
+                   :label="item.label"></el-option>
+      </el-select>
+    </el-form-item>
     <el-form-item :label="i18nt('designer.setting.customClass')">
       <el-select v-model="optionModel.customClass" multiple filterable allow-create
                  default-first-option>
@@ -302,7 +308,7 @@
 
 <script>
 import i18n from "@/utils/i18n"
-import {deepClone, generateId} from "@/utils/util"
+import {deepClone, generateId, traverseAllWidgets} from "@/utils/util"
 import Sortable from "sortablejs"
 import CodeEditor from '@/components/code-editor/index'
 
@@ -396,6 +402,19 @@ export default {
         column.formatS = ""
       })
       return this.optionModel.tableColumns
+    },
+    compRefreshWidgets() {
+      const refreshWidgets = []
+      traverseAllWidgets(this.designer.widgetList, (widget) => {
+        console.log(111, widget);
+        if (widget.type === 'button') {
+          refreshWidgets.push({
+            label: `${widget.options.label}-${widget.id}`,
+            value: widget.id
+          })
+        }
+      })
+      return refreshWidgets
     }
   },
   created() {

@@ -133,6 +133,7 @@ export const containers = [
       showSummary: false, // 是否合计
       border: true, // 是否带有纵向边框（拖拽）
       tableSize: 'default', // 表格大小，large大、default中、small小
+
       tableColumns: [ //表格列信息
         {
           columnId: 1,
@@ -303,6 +304,7 @@ export const containers = [
       onOperationButtonClick: '',
       //行点击事件
       onTableRowClick: '',
+      refreshWidget: '', //关联刷新的组件ID
       bussinessSource: {
         currentNodeKey: "",
         scriptParams: [],
@@ -553,7 +555,7 @@ export const basicFields = [
       bussinessSource: {
         currentNodeKey: "", //选中的数据源ID
         scriptParams: [],//脚本参数
-        expandedKeys:[],
+        expandedKeys: [],
         pageSize: 10
       },
       name: '',

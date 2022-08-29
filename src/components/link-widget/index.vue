@@ -20,6 +20,7 @@ import {ScriptParam} from "@/api/types";
 import {getAllFieldWidgets} from "@/utils/util.js";
 import {getWidgetEventByType} from "@/utils/data-adapter.js";
 
+
 type Prop = {
   row: ScriptParam,//当前选中的列
   selectedWidget: any, //当前选中的组件
@@ -66,17 +67,19 @@ function onScriptLinkWidgetChange(linkWidgetId: string[]) {
 function addOrUpdateLinkWidgetCode(linkWidgetId: string) {
   //获取当前选中的关联组件
   const linkWidget = getLinkWidgetHandleWidget(linkWidgetId)
-  //根据当前组件与当前关联组件获取匹配正则与代码模板
-  const res = getCodeTemplateWithLWTypeAndCWType(linkWidget.type, props.selectedWidget.type)
-  //当前关联组件的事件代码
-  const linkWidgetCode = linkWidget.options[getWidgetEventByType(linkWidget.type)]
+  if (linkWidget) {
+    //根据当前组件与当前关联组件获取匹配正则与代码模板
+    const res = getCodeTemplateWithLWTypeAndCWType(linkWidget.type, props.selectedWidget.type)
+    //当前关联组件的事件代码
+    const linkWidgetCode = linkWidget.options[getWidgetEventByType(linkWidget.type)]
 
-  //当前关联组件代码是否包含
-  const matched = linkWidgetCode.match(res.regTemplate)
-  if (matched) {
-    linkWidget.options[getWidgetEventByType(linkWidget.type)] = linkWidgetCode.replace(res.regTemplate, res.codeTemplate)
-  } else {
-    linkWidget.options[getWidgetEventByType(linkWidget.type)] += res.codeTemplate
+    //当前关联组件代码是否包含
+    const matched = linkWidgetCode.match(res.regTemplate)
+    if (matched) {
+      linkWidget.options[getWidgetEventByType(linkWidget.type)] = linkWidgetCode.replace(res.regTemplate, res.codeTemplate)
+    } else {
+      linkWidget.options[getWidgetEventByType(linkWidget.type)] += res.codeTemplate
+    }
   }
 }
 
@@ -86,12 +89,14 @@ function addOrUpdateLinkWidgetCode(linkWidgetId: string) {
 function deleteOldLWCode() {
   if (props.row.linkWidgetId?.[0]) {
     //获取旧组件的事件代码
-    const originalLW = getLinkWidgetHandleWidget(props.row.linkWidgetId[0])
-    const oldCode = originalLW.options[getWidgetEventByType(originalLW.type)]
-    const oldRes = getCodeTemplateWithLWTypeAndCWType(originalLW.type, props.selectedWidget.type)
-    const oldMatched = oldCode.match(oldRes.regTemplate)
-    if (oldMatched) {
-      originalLW.options[getWidgetEventByType(originalLW.type)] = oldCode.replace(oldRes.regTemplate, "")
+    const originalLW = getLinkWidgetHandleWidget(props.row.linkWidgetId?.[0])
+    if (originalLW) {
+      const oldCode = originalLW.options[getWidgetEventByType(originalLW.type)]
+      const oldRes = getCodeTemplateWithLWTypeAndCWType(originalLW.type, props.selectedWidget.type)
+      const oldMatched = oldCode.match(oldRes.regTemplate)
+      if (oldMatched) {
+        originalLW.options[getWidgetEventByType(originalLW.type)] = oldCode.replace(oldRes.regTemplate, "")
+      }
     }
   }
 }
@@ -156,7 +161,7 @@ function getLinkWidget(id: string) {
  */
 function getSelectedWidgetTriggerFunction(type: string) {
   let strFunction = ""
-  switch (props.selectedWidget.type) {
+  switch (type) {
     case 'select':
       strFunction = 'initOptionItems'
       break
@@ -176,25 +181,24 @@ function getSelectedWidgetTriggerFunction(type: string) {
 function getLinkWidgetHandleWidget(linkWidgetId: string) {
   let handleWidget
   switch (props.selectedWidget.type) {
-    case 'data-table':
-    case 'tree-view':
-      handleWidget = getLinkWidget(props.selectedWidget.refreshWidget)
-      break
+    /*case 'data-table':
+      // case 'tree-view':
+      if (props.selectedWidget.options.refreshWidget === '') {
+        ElMessage.error({
+          message: '请先选择关联刷新组件'
+        })
+        nextTick(() => props.row.linkWidgetId = [])
+        // setTimeout(() => props.row.linkWidgetId = [])
+        return
+      }
+      handleWidget = getLinkWidget(props.selectedWidget.options.refreshWidget)
+      break*/
     default:
       handleWidget = getLinkWidget(linkWidgetId)
   }
   return handleWidget;
 }
 
-/**
- * 获取关联组件的调用方法
- */
-function getLinkWidgetHandleFunction(linkWidgetType: string) {
-  return getWidgetEventByType(linkWidgetType)
-}
-
-
-// const compLinkWidgets =
 </script>
 
 <style scoped>

@@ -370,7 +370,7 @@ export default {
       addOperationButton: '增加按钮',
       deleteOperationButtonHint: '确定删除该按钮？',
       operationButtonDuplicatedNameError: '按钮名称不可重复',
-
+      refreshWidget: '关联刷新控件',
       //data-source
       dsEnabled: '使用数据源',
       dsName: '指定数据源',

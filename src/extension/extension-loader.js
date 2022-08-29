@@ -19,6 +19,7 @@ import editTable from "@/extension/edit-table";
 import dataWrapper from "@/extension/data-wrapper";
 import dialog from "@/extension/dialog";
 import treeView from "@/extension/tree-view";
+import addWidgetEditor from "@/components/form-designer/setting-panel/addDynamicWidgetEditor";
 
 export const loadExtension = function (app) {
 
@@ -59,8 +60,8 @@ export const loadExtension = function (app) {
   /* -------------------------------------------------- */
   editTable.install(addBasicFieldSchema, app, PERegister)
   dataWrapper.install(addContainerWidgetSchema, app, PERegister)
-  dialog.install(addContainerWidgetSchema,app,PERegister)
-  treeView.install(addBasicFieldSchema,app,PERegister)
+  dialog.install(addContainerWidgetSchema, app, PERegister)
+  treeView.install(addBasicFieldSchema, app, PERegister)
 
 
   /* 容器组件加载完毕 end */
@@ -123,4 +124,7 @@ export const loadExtension = function (app) {
   registerFWGenerator('alert', alertTemplateGenerator)  //注册字段组件的代码生成器
   /* -------------------------------------------------- */
   /* 字段组件加载完毕 end */
+
+  //动态添加组件setting-panel-editor
+  addWidgetEditor(PERegister, app, PEFactory)
 }
