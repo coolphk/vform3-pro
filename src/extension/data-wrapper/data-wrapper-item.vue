@@ -1,6 +1,6 @@
 <template>
   <container-item-wrapper :widget="widget">
-    <div :key="widget.id" v-show="!widget.options.hidden" class="sub-form-container">
+    <div :key="widget.id" v-show="!widget.options.hidden" cl="sub-form-container">
       <template v-if="!!widget.widgetList && (widget.widgetList.length > 0)">
         <template v-for="(subWidget, swIdx) in widget.widgetList">
           <template v-if="'container' === subWidget.category">
@@ -32,7 +32,7 @@
 import i18n from "@/utils/i18n";
 import FieldComponents from "@/components/form-designer/form-widget/field-widget";
 import {loadBussinessSource} from "@/api/bussiness-source";
-import {filterPostParam, traverseObj} from "@/utils/data-adapter";
+import {assembleBussinessParams, filterPostParam, traverseObj} from "@/utils/data-adapter";
 import ContainerItemWrapper from "@/components/form-render/container-item/container-item-wrapper";
 import containerItemMixin from "@/components/form-render/container-item/containerItemMixin";
 import refMixin from "@/components/form-render/refMixin";
@@ -67,23 +67,22 @@ export default {
   methods: {
     /**
      * 根据valueSource获取表单数据并赋值，
-     * @param scriptParams
+     *
      */
-    setFormDataWithValueSource(scriptParams) {
-      console.log('setFormDataWithValueSource', scriptParams);
+    // setFormDataWithValueSource(scriptParams) {
+    loadDataFromBussiness() {
+      // console.log('setFormDataWithValueSource');
       const vs = this.widget?.options?.valueSource
       const formData = {}
       traverseObj(vs.bindMap, (Scripts_ID, value) => {
-        loadBussinessSource({
-          Scripts_ID,
-          currentPage: 1,
-          pageSize: 10,
-          ...scriptParams[Scripts_ID]?.params
-        }).then(res => {
+        loadBussinessSource(assembleBussinessParams({
+          scriptId: Scripts_ID,
+          params: vs.bindMap[Scripts_ID].scriptParams,
+          pageSize: 1
+        })).then(res => {
           //读取数据赋值到form表单中，并给bindMap设置默认值
           traverseObj(res.Data.TableData?.[0], (key, value) => {
             if (vs.bindMap[Scripts_ID]['scriptFields'][key]) {
-              //todo 修改初始值
               vs.bindMap[Scripts_ID]['scriptFields'][key]['paramValue'] = value
             }
             if (vs.bindMap[Scripts_ID]?.['scriptFields']?.[key]?.widgetId) {

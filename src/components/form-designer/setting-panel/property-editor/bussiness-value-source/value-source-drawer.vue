@@ -552,7 +552,7 @@ function onBusTableSort({prop, order}: { prop: string, order: string }) {
  * @param value
  */
 function onCascaderChange(row: ScriptParamData, value: string[]) {
-  //有值代表是新选中状态,否则代表取消选中状态
+  //有值代表是新选中状态,否则代表取消选中状态 todo 联动组件代码待修改
   if (value) {
     props.designer.formWidget.getWidgetRef(value[0]).widget.options.onTableRowClick =
         `setTimeout(()=>{

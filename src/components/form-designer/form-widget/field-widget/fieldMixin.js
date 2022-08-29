@@ -211,7 +211,15 @@ export default {
         || (this.field.type === 'select') || (this.field.type === 'cascader')) {
         /* 首先处理数据源选项加载 */
         const bussinessSource = this.field.options.bussinessSource
+        // 表单回显赋值时，如果是绑定数据源的组件，则读取数据源，并找出匹配对象进行赋值
         if (!!bussinessSource?.currentNodeKey) {
+          /**
+           * 用关联组件的值替换scriptParam的TestVALUE
+           */
+          bussinessSource.scriptParams.map(param => {
+            const linkWidget = this.getWidgetRef(param.linkWidgetId[0])
+            param.Param_TestVALUE = linkWidget.fieldModel[linkWidget.field.options.valueKey]
+          })
           loadBussinessSource(assembleBussinessParams({
             scriptId: bussinessSource.currentNodeKey,
             params: bussinessSource.scriptParams,

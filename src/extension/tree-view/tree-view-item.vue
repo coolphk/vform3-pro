@@ -49,20 +49,23 @@ export default defineComponent({
     }
   },
   created() {
-    if (this.compOptionModal.bussinessSource?.currentNodeKey) {
-      loadBussinessSource(assembleBussinessParams({
-        scriptId: this.widget!.options.bussinessSource!.currentNodeKey,
-        currentPage: this.currentPage,
-        params: this.widget!.options.bussinessSource!.scriptParams
-      })).then((res => {
-        this.widget!.options.treeData = unFlatten(res.Data.TableData, this.widget!.options.valueKey, undefined, this.widget!.options.rootParentValue, this.widget!.options.parentKey)
-      }))
-    }
+    this.loadDataFromBussiness()
   },
   methods: {
     handleOnNodeClick(data: any, node: Node) {
       new Function('data', 'node', 'value', this.widget!.options.onNodeClick).call(this, data, node, data[this.widget!.options.valueKey])
-    }
+    },
+    loadDataFromBussiness() {
+      if (this.compOptionModal.bussinessSource?.currentNodeKey) {
+        loadBussinessSource(assembleBussinessParams({
+          scriptId: this.widget!.options.bussinessSource!.currentNodeKey,
+          currentPage: this.currentPage,
+          params: this.widget!.options.bussinessSource!.scriptParams
+        })).then((res => {
+          this.widget!.options.treeData = unFlatten(res.Data.TableData, this.widget!.options.valueKey, undefined, this.widget!.options.rootParentValue, this.widget!.options.parentKey)
+        }))
+      }
+    },
   }
 })
 

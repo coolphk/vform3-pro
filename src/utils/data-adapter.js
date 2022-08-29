@@ -43,15 +43,29 @@ export function transferData(object) {
   }
 }
 
+/**
+ * params分为两种数据类型，数组属于ScriptParamData[]，对象为bindMap->scriptParms
+ * @param scriptId
+ * @param params
+ * @param pageSize
+ * @param currentPage
+ * @returns {{Scripts_ID, pageSize: number, currentPage: number}}
+ */
 export function assembleBussinessParams({scriptId, params, pageSize = 10, currentPage = 1}) {
   const data = {
     "Scripts_ID": scriptId,
     currentPage,
     pageSize,
   }
-  params.forEach(item => {
-    data[item.Param_Name] = item.Param_TestVALUE
-  })
+  if (isArray(params)) {
+    params.forEach(item => {
+      data[item.Param_Name] = item.Param_TestVALUE
+    })
+  } else if (isObj(params)) {
+    traverseObj(params, (key, value) => {
+      data[key] = value.defaultValue
+    })
+  }
   return data
 }
 

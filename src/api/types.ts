@@ -40,7 +40,7 @@ export interface ScriptParam {
   ROWNR: string
   procedureId: string,
   procedureName: string,
-  linkWidgetId?: string
+  linkWidgetId?: string[]
 }
 
 

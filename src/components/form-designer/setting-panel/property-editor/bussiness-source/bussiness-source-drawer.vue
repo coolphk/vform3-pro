@@ -46,13 +46,14 @@
           </el-table-column>
           <el-table-column prop="linkWidgetId" label="关联组件" width="200">
             <template #default="{row,$index}">
-              <el-select style="width: 180px"
-                         clearable
-                         :model-value="row.linkWidgetId"
-                         @change="onScriptLinkWidgetChange(row,$index,$event)"
-              >
-                <el-option v-for="(item) in fieldWidgetList" :value="item.id" :label="item.label"></el-option>
-              </el-select>
+              <!--              <el-select style="width: 180px"
+                                       clearable
+                                       :model-value="row.linkWidgetId"
+                                       @change="onScriptLinkWidgetChange(row,$index,$event)"
+                            >
+                              <el-option v-for="(item) in fieldWidgetList" :value="item.id" :label="item.label"></el-option>
+                            </el-select>-->
+              <link-widget :designer="designer" :selected-widget="selectedWidget" :row="row"/>
             </template>
           </el-table-column>
           <el-table-column prop="Param_BusiDes" label="业务说明"/>
@@ -108,9 +109,10 @@ import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams, getWidgetEventByType, unFlatten} from "@/utils/data-adapter.js";
 import ContextMenu from "@/components/context-menu/index.vue"
-import {getAllFieldWidgets, isTable} from "@/utils/util.js";
+import {isTable} from "@/utils/util.js";
 import {LoadBussinessRes, ScriptParam, ScriptTreeRes} from "@/api/types";
 import {TableColumnCtx} from "element-plus/lib/components/table/src/table-column/defaults";
+import LinkWidget from "@/components/link-widget/index.vue"
 
 
 interface TreeExpandedHistory {
@@ -137,7 +139,7 @@ const props = defineProps<{
 const tree$ = ref()
 const busTable$ = ref()
 const showDataSource = ref(false)
-const fieldWidgetList = getAllFieldWidgets(props.designer.widgetList).filter((item: any) => item.id !== props.selectedWidget.id)
+
 const expanedNodes = reactive<TreeExpandedHistory[]>([])
 const treeData = ref<ScriptTreeRes[]>([])
 const scriptParamTableData = ref<ScriptParam[]>([])  //存储过程参数集合
@@ -367,12 +369,12 @@ function onScriptLinkWidgetChange(row: ScriptParam, index: number, linkWidgetId:
     }
     //如果有row.linkWidgetId代表以前关联过别的组件，需要把原关联组件的代码删除掉
     if (row.linkWidgetId) {
-      deleteLinkWidgetCode(row.linkWidgetId, regexp)
+      deleteLinkWidgetCode(row.linkWidgetId[0], regexp)
     }
   } else {
-    deleteLinkWidgetCode(row.linkWidgetId!, regexp)
+    deleteLinkWidgetCode(row.linkWidgetId![0], regexp)
   }
-  row.linkWidgetId = linkWidgetId
+  row.linkWidgetId![0] = linkWidgetId
 }
 
 function getMenuOptionsByWidget() {
