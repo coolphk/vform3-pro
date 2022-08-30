@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, {AxiosInstance} from "axios";
 import {ElMessage} from "element-plus";
 import {AxiosRequestOptions} from "@/api/types";
 // import store from "@/store";
@@ -9,7 +9,7 @@ let defaultOptions: AxiosRequestOptions = {
   showLoading: false
 }
 
-const service = axios.create({
+let service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
   // baseURL: import.meta.env.VITE_APP_BASE_API, // 超时
   baseURL: (import.meta.env.VITE_APP_BASE_HOST) as string + import.meta.env.VITE_APP_BASE_API, // 超时
@@ -58,13 +58,8 @@ export function get<R>(url: string, params?: any, options?: AxiosRequestOptions)
   return service.get<void, R>(url, {params})
 }
 
-export function updateServiceOptions({baseURL, auth}: {
-  baseURL?: string,
-  auth: string
-}) {
-  baseURL && (service.defaults.baseURL = baseURL)
-  auth && (service.defaults.headers.common['Authorization'] = auth)
-  // service.defaults.headers=
+export function injectAppAxios(axios: AxiosInstance) {
+  service = axios
 }
 
 export default service
