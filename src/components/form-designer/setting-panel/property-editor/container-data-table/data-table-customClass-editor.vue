@@ -7,7 +7,7 @@
       <el-input v-model="optionModel.tableHeight"></el-input>
     </el-form-item>
     <el-form-item :label="i18nt('designer.setting.refreshWidget')">
-      <el-select v-model="optionModel.refreshWidget">
+      <el-select v-model="optionModel.refreshWidget" clearable>
         <el-option v-for="(item) in compRefreshWidgets" :key="item.value" :value="item.value"
                    :label="item.label"></el-option>
       </el-select>
@@ -311,6 +311,7 @@ import i18n from "@/utils/i18n"
 import {deepClone, generateId, traverseAllWidgets} from "@/utils/util"
 import Sortable from "sortablejs"
 import CodeEditor from '@/components/code-editor/index'
+import LinkWidgetUtils from "@/utils/linkWidgetUtils";
 
 export default {
   name: "data-table-customClass-editor",
@@ -406,7 +407,6 @@ export default {
     compRefreshWidgets() {
       const refreshWidgets = []
       traverseAllWidgets(this.designer.widgetList, (widget) => {
-        console.log(111, widget);
         if (widget.type === 'button') {
           refreshWidgets.push({
             label: `${widget.options.label}-${widget.id}`,
@@ -415,6 +415,22 @@ export default {
         }
       })
       return refreshWidgets
+    }
+  },
+  watch: {
+    ['optionModel.refreshWidget'](newValue, oldValue) {
+      const linkWidgetUtils = new LinkWidgetUtils({
+        designer: this.designer,
+        selectedWidget: this.selectedWidget,
+        linkWidgetId: newValue,
+        oldLinkWidgetId: oldValue
+      })
+      if (oldValue) {
+        linkWidgetUtils.deleteOldLWCode()
+      }
+      if (newValue) {
+        linkWidgetUtils.addOrUpdateLinkWidgetCode()
+      }
     }
   },
   created() {

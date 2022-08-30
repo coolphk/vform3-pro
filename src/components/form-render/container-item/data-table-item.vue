@@ -72,6 +72,7 @@ import containerItemMixin from "@/components/form-render/container-item/containe
 import {getDSByName, overwriteObj, runDataSourceRequest} from "@/utils/util"
 import {loadBussinessSource} from "@/api/bussiness-source"
 import {assembleBussinessParams} from "@/utils/data-adapter";
+import {setLinkWidgetValueToScriptParams} from "@/utils/linkWidgetUtils";
 
 export default {
   name: "DataTableItem",
@@ -276,6 +277,15 @@ export default {
      * 从业务数据源加载数据
      */
     loadDataFromBussiness() {
+      /* 首先处理数据源选项加载 */
+      const bussinessSource = this.widget.options.bussinessSource
+      // 表单回显赋值时，如果是绑定数据源的组件，则读取数据源，并找出匹配对象进行赋值
+      if (!!bussinessSource?.currentNodeKey) {
+        /**
+         * 用关联组件的值替换scriptParam的TestVALUE
+         */
+        setLinkWidgetValueToScriptParams(bussinessSource,this.getWidgetRef(param?.linkWidgetId?.[0]))
+      }
       loadBussinessSource(assembleBussinessParams({
         scriptId: this.widget.options.bussinessSource.currentNodeKey,
         currentPage: this.currentPage,

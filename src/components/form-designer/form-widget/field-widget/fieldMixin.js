@@ -2,6 +2,7 @@ import {deepClone, getDSByName, overwriteObj, runDataSourceRequest, translateOpt
 import FormValidators from '@/utils/validators'
 import {loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams, isObj} from "@/utils/data-adapter";
+import {setLinkWidgetValueToScriptParams} from "@/utils/linkWidgetUtils";
 
 export default {
   inject: ['refList', 'getFormConfig', 'globalOptionData', 'globalModel', 'getOptionData', 'getGlobalDsv', 'getReadMode',/*'getDataWrapperBindMap'*/],
@@ -216,10 +217,7 @@ export default {
           /**
            * 用关联组件的值替换scriptParam的TestVALUE
            */
-          bussinessSource.scriptParams.map(param => {
-            const linkWidget = this.getWidgetRef(param.linkWidgetId[0])
-            param.Param_TestVALUE = linkWidget.fieldModel[linkWidget.field.options.valueKey]
-          })
+          setLinkWidgetValueToScriptParams(bussinessSource, this.getWidgetRef(param?.linkWidgetId?.[0]))
           loadBussinessSource(assembleBussinessParams({
             scriptId: bussinessSource.currentNodeKey,
             params: bussinessSource.scriptParams,
