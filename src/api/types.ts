@@ -1,4 +1,6 @@
-export interface AxiosRequestOptions {
+import {AxiosRequestConfig} from "axios";
+
+export interface AxiosRequestOptions extends AxiosRequestConfig{
   showTips?: boolean,
   showLoading?: boolean
 }

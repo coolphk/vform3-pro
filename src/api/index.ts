@@ -58,8 +58,13 @@ export function get<R>(url: string, params?: any, options?: AxiosRequestOptions)
   return service.get<void, R>(url, {params})
 }
 
-export function changeServiceBaseURL(baseURL: string) {
-  service.defaults.baseURL = baseURL
+export function updateServiceOptions({baseURL, auth}: {
+  baseURL?: string,
+  auth: string
+}) {
+  baseURL && (service.defaults.baseURL = baseURL)
+  auth && (service.defaults.headers.common['Authorization'] = auth)
+  // service.defaults.headers=
 }
 
 export default service
