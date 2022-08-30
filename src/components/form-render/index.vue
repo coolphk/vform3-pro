@@ -723,7 +723,7 @@ export default {
     },
     async getBussinessData() {
       const formData = await this.getFormData()
-      debugger
+      // debugger
       const postData = useTransferFormDataToPostData(formData, this.widgetList)
       traverseObj(postData, (procedureId, procedure) => {
         getProcedureParams(procedure.procedureName, "", 1).then(res => {

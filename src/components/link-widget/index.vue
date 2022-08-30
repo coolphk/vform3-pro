@@ -50,14 +50,14 @@ function onScriptLinkWidgetChange(linkWidgetId: string[]) {
     const lwUtils = new LinkWidgetUtils({
       designer: props.designer,
       selectedWidget: props.selectedWidget,
-      linkWidgetId: linkWidgetId[0],
-      oldLinkWidgetId: props.row.linkWidgetId![0]
+      linkWidgetId: linkWidgetId?.[0],
+      oldLinkWidgetId: props.row?.linkWidgetId?.[0]
     })
+    if (props.row.linkWidgetId?.[0]) {
+      lwUtils.deleteOldLWCode()
+    }
     if (linkWidgetId?.[0]) {
-      lwUtils.deleteOldLWCode()
       lwUtils.addOrUpdateLinkWidgetCode()
-    } else {
-      lwUtils.deleteOldLWCode()
     }
   }
   props.row.linkWidgetId = linkWidgetId

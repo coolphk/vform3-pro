@@ -15,7 +15,7 @@ import ContainerItems from '@/components/form-render/container-item/index'
 import {addDirective} from '@/utils/directive'
 import {installI18n} from '@/utils/i18n'
 import {loadExtension} from '@/extension/extension-loader'
-import {changeServiceBaseURL} from "@/api";
+import {updateServiceOptions} from "@/api";
 
 
 VFormDesigner.install = function (app, options) {
@@ -52,7 +52,7 @@ const components = [
 
 const install = (app, options) => {
   console.log('install VForm');
-  changeServiceBaseURL(options.baseURL)
+  updateServiceOptions(options)
   addDirective(app)
   installI18n(app)
   loadExtension(app)

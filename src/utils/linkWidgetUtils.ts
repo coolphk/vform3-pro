@@ -8,8 +8,8 @@ type Template = {
 type ConstructorType = {
   designer: any,
   selectedWidget: any,
-  linkWidgetId: string,
-  oldLinkWidgetId: string
+  linkWidgetId?: string,
+  oldLinkWidgetId?: string
 }
 export default class LinkWidgetUtils {
   private designer: any;
@@ -20,8 +20,8 @@ export default class LinkWidgetUtils {
   constructor({designer, selectedWidget, linkWidgetId, oldLinkWidgetId}: ConstructorType) {
     this.designer = designer
     this.selectedWidget = selectedWidget
-    this.linkWidget = this.getLinkWidget(linkWidgetId)
-    this.oldLinkWidget = this.getLinkWidget(oldLinkWidgetId)
+    linkWidgetId && (this.linkWidget = this.getLinkWidget(linkWidgetId))
+    oldLinkWidgetId && (this.oldLinkWidget = this.getLinkWidget(oldLinkWidgetId))
   }
 
   /**
@@ -30,7 +30,7 @@ export default class LinkWidgetUtils {
   deleteOldLWCode() {
     //获取旧组件的事件代码
     const originalLW = this.oldLinkWidget
-    debugger
+    // debugger
     if (originalLW) {
       const oldCode = originalLW.options[getWidgetEventByType(originalLW.type)]
       const oldRes = this.getCodeTemplateWithLWTypeAndCWType(originalLW.type, this.selectedWidget.type)
@@ -63,33 +63,9 @@ export default class LinkWidgetUtils {
     }
   }
 
-  /**
-   * 获取关联组件调用loadBussiness方法的组件，表格为按钮，其他组件为关联组件
-   */
-
-  /*private getLinkWidgetHandleWidget(linkWidgetId: string) {
-    let handleWidget
-    switch (this.selectedWidget.type) {
-      /!*case 'data-table':
-        // case 'tree-view':
-        if (props.selectedWidget.options.refreshWidget === '') {
-          ElMessage.error({
-            message: '请先选择关联刷新组件'
-          })
-          nextTick(() => props.row.linkWidgetId = [])
-          // setTimeout(() => props.row.linkWidgetId = [])
-          return
-        }
-        handleWidget = getLinkWidget(props.selectedWidget.options.refreshWidget)
-        break*!/
-      default:
-        handleWidget = this.getLinkWidget(linkWidgetId)
-    }
-    return handleWidget;
-  }*/
 
   private getLinkWidget(id: string) {
-    return this.designer.formWidget.getWidgetRef(id, false)?.field
+    return this.designer.formWidget.getWidgetRef(id, false)?.field ?? this.designer.formWidget.getWidgetRef(id, false)?.widget
   }
 
   /**
@@ -100,22 +76,25 @@ export default class LinkWidgetUtils {
    * @param CWType 当前选中组件
    */
   private getCodeTemplateWithLWTypeAndCWType(LWType: string, CWType: string): Template {
-    const selectedWidgetFunctionStr = this.getSelectedWidgetTriggerFunction(this.selectedWidget.type)
+    let selectedWidgetFunctionStr = this.getSelectedWidgetTriggerFunction(this.selectedWidget.type)
     const res: Template = {
       codeTemplate: '',
       regTemplate: undefined
     }
     switch (LWType + '_' + CWType) {
+      case 'data-table_data-wrapper':
+        selectedWidgetFunctionStr = 'loadDataFromBussiness'
+        break
       case 'select_select':
       case `button_data-table`:
       case 'button_data-wrapper':
-        res.codeTemplate = `const triggerWidget = this.getWidgetRef("${this.selectedWidget.id}");\n` +
-          `triggerWidget.${selectedWidgetFunctionStr}();\n`
-        res.regTemplate = new RegExp(`const.*${this.selectedWidget.id}.*\\ntriggerWidget.${selectedWidgetFunctionStr}\\(\\);\\n*`)
         break;
       default:
         break;
     }
+    res.codeTemplate = `const triggerWidget = this.getWidgetRef("${this.selectedWidget.id}");\n` +
+      `triggerWidget.${selectedWidgetFunctionStr}();\n`
+    res.regTemplate = new RegExp(`const.*${this.selectedWidget.id}.*\\ntriggerWidget.${selectedWidgetFunctionStr}\\(\\);\\n*`)
     return res
   }
 
@@ -123,7 +102,7 @@ export default class LinkWidgetUtils {
    * 获取当前组件被调用的方法(关联组件事件执行时，回调当前组件的方法)
    */
   private getSelectedWidgetTriggerFunction(type: string) {
-    debugger
+    // debugger
     let strFunction = ""
     switch (type) {
       case 'select':

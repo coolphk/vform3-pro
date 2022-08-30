@@ -90,7 +90,6 @@ export default {
             }
           })
           this.getFormRef().setFormData(formData)
-          console.log(vs.bindMap)
         })
       })
     },

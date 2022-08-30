@@ -35,8 +35,8 @@
           <el-table-column label="关联组件" width="200">
             <template #default="{row}">
               <el-cascader style="width: 160px"
-                           v-model="row.linkWidget"
                            clearable
+                           :model-value="row.linkWidget"
                            :options="paramBindWidgets"
                            @change="onCascaderChange(row,$event)"
               />
@@ -174,6 +174,7 @@ import {
   ScriptResponse
 } from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/types";
 import {ExecProcedureParam, ScriptParam, ScriptTreeRes} from "@/api/types";
+import LinkWidgetUtils from "@/utils/linkWidgetUtils";
 
 
 const props = defineProps<{
@@ -415,7 +416,7 @@ function pagination(pageNo: number, pageSize: number, array: BussinessData[]) {
 
 
 function loadDataFinished(vsData: ScriptTreeRes) {
-  console.log('vsData', vsData);
+  // console.log('vsData', vsData);
   loadScriptsParams(vsData)
 }
 
@@ -553,7 +554,7 @@ function onBusTableSort({prop, order}: { prop: string, order: string }) {
  */
 function onCascaderChange(row: ScriptParamData, value: string[]) {
   //有值代表是新选中状态,否则代表取消选中状态 todo 联动组件代码待修改
-  if (value) {
+  /*if (value) {
     props.designer.formWidget.getWidgetRef(value[0]).widget.options.onTableRowClick =
         `setTimeout(()=>{
   this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
@@ -563,7 +564,20 @@ function onCascaderChange(row: ScriptParamData, value: string[]) {
     }
   })
 })`
+  }*/
+  const linkUtils = new LinkWidgetUtils({
+    designer: props.designer,
+    selectedWidget: props.selectedWidget,
+    linkWidgetId: value?.[0],
+    oldLinkWidgetId: row?.linkWidget?.[0]
+  })
+  if (row?.linkWidget?.[0]) {
+    linkUtils.deleteOldLWCode()
   }
+  if (value?.[0]) {
+    linkUtils.addOrUpdateLinkWidgetCode()
+  }
+  row.linkWidget = value
 }
 </script>
 
