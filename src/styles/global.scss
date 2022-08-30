@@ -11,7 +11,7 @@ $--color-primary: #409EFF;
 
 .form-widget-list {
 
-  .ghost{
+  .ghost {
     content: '';
     font-size: 0;
     height: 3px;
@@ -25,7 +25,7 @@ $--color-primary: #409EFF;
 }
 
 .el-form-item {
-  .el-rate{
+  .el-rate {
     margin-top: 8px;
   }
 }
@@ -35,7 +35,7 @@ $--color-primary: #409EFF;
     line-height: 36px !important;
   }
 
-  .el-rate{
+  .el-rate {
     margin-top: 8px;
   }
 }
@@ -45,7 +45,7 @@ $--color-primary: #409EFF;
     line-height: 32px !important;
   }
 
-  .el-rate{
+  .el-rate {
     margin-top: 6px;
   }
 }
@@ -55,7 +55,7 @@ $--color-primary: #409EFF;
     line-height: 28px !important;
   }
 
-  .el-rate{
+  .el-rate {
     margin-top: 4px;
   }
 }
@@ -66,15 +66,21 @@ $--color-primary: #409EFF;
 }
 
 .readonly-mode-form .el-form-item__content {
-  background-color: #f1f2f3;  /* 只读查看状态-默认底色 */
+  background-color: #f1f2f3; /* 只读查看状态-默认底色 */
 }
 
-input[type="password"]::-ms-reveal {  /* 隐藏IE/Edge原生的密码查看按钮 */
+input[type="password"]::-ms-reveal { /* 隐藏IE/Edge原生的密码查看按钮 */
   display: none;
 }
 
 .auto-full-width.el-date-editor.el-input, .auto-full-width.el-date-editor.el-input__inner {
   width: 100% !important;
+}
+
+.contianer-title {
+  width: 100%;
+  background: #056016;
+  color: #eeeeee;
 }
 
 /* 滚动条样式 begin */
@@ -104,9 +110,9 @@ input[type="password"]::-ms-reveal {  /* 隐藏IE/Edge原生的密码查看按�
   background-color: rgba(#101F1C, 0.85);
 }
 
-* {//Firefox浏览器滚动条样式
+* { //Firefox浏览器滚动条样式
   scrollbar-color: #e5e5e5 #f7f7f9; //滚动条轨道颜色、滚动条滑块的颜色
-  scrollbar-width: thin;     //thin模式下滚动条两端的三角按钮会消失
+  scrollbar-width: thin; //thin模式下滚动条两端的三角按钮会消失
 }
 
 

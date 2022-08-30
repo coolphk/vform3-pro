@@ -4,6 +4,9 @@
 
     <div :key="widget.id" class="sub-form-container"
          :class="{'selected': selected}" @click.stop="selectWidget(widget)">
+      <div class="contianer-title">
+        弹出窗体{{ widget.id }}
+      </div>
       <draggable :list="widget.widgetList" item-key="id"
                  v-bind="{group:'dragGroup', ghostClass: 'ghost',animation: 200}"
                  tag="transition-group" :component-data="{name: 'fade'}"
@@ -70,8 +73,7 @@ export default {
   mounted() {
     //
   },
-  methods: {
-  }
+  methods: {}
 }
 </script>
 

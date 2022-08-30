@@ -217,7 +217,8 @@ export default {
           /**
            * 用关联组件的值替换scriptParam的TestVALUE
            */
-          setLinkWidgetValueToScriptParams(bussinessSource, this.getWidgetRef(param?.linkWidgetId?.[0]))
+
+          setLinkWidgetValueToScriptParams(bussinessSource,this.getWidgetRef)
           loadBussinessSource(assembleBussinessParams({
             scriptId: bussinessSource.currentNodeKey,
             params: bussinessSource.scriptParams,

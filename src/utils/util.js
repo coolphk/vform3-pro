@@ -211,7 +211,7 @@ export function traverseAllWidgets(widgetList, handler) {
       })
     } else if (w.type === 'sub-form') {
       traverseAllWidgets(w.widgetList, handler)
-    } else if (w.category === 'container' && w.widgetList.length > 0) {  //自定义容器
+    } else if (w.category === 'container' && w?.widgetList?.length > 0) {  //自定义容器
       traverseAllWidgets(w.widgetList, handler)
     }
   })

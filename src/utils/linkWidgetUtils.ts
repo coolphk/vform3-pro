@@ -2,8 +2,6 @@ import {getWidgetEventByType} from "@/utils/data-adapter.js";
 import {VFormBussinessSource} from "@/components/form-designer/widget-panel/types";
 
 type Template = {
-  LWType: string,
-  CWType: string,
   codeTemplate: string | undefined
   regTemplate: RegExp | undefined
 }
@@ -101,33 +99,31 @@ export default class LinkWidgetUtils {
    * @param LWType 关联组件
    * @param CWType 当前选中组件
    */
-  private getCodeTemplateWithLWTypeAndCWType(LWType: string, CWType: string): Pick<Template, 'codeTemplate' | 'regTemplate'> {
+  private getCodeTemplateWithLWTypeAndCWType(LWType: string, CWType: string): Template {
     const selectedWidgetFunctionStr = this.getSelectedWidgetTriggerFunction(this.selectedWidget.type)
-    const codeTemplates = [{
-      LWType: 'select',
-      CWType: 'select',
-      codeTemplate: `const triggerWidget = this.getWidgetRef("${this.selectedWidget.id}");\n` +
-        `triggerWidget.${selectedWidgetFunctionStr}();\n`,
-      regTemplate: new RegExp(`const.*${this.selectedWidget.id}.*\\ntriggerWidget.${selectedWidgetFunctionStr}\\(\\);\\n*`)
-
-    }, {
-      LWType: 'button',
-      CWType: 'data-table',
-      codeTemplate: `const triggerWidget = this.getWidgetRef('${this.selectedWidget.id}');\n` +
-        `triggerWidget.${selectedWidgetFunctionStr}();\n`,
-      regTemplate: new RegExp(`const.*${this.selectedWidget.id}.*\\ntriggerWidget.${selectedWidgetFunctionStr}\\(\\);\\n*`)
-    }]
-    const foundItem = codeTemplates.find((item) => item.LWType === LWType && item.CWType === CWType)
-    return {
-      codeTemplate: foundItem?.codeTemplate,
-      regTemplate: foundItem?.regTemplate
+    const res: Template = {
+      codeTemplate: '',
+      regTemplate: undefined
     }
+    switch (LWType + '_' + CWType) {
+      case 'select_select':
+      case `button_data-table`:
+      case 'button_data-wrapper':
+        res.codeTemplate = `const triggerWidget = this.getWidgetRef("${this.selectedWidget.id}");\n` +
+          `triggerWidget.${selectedWidgetFunctionStr}();\n`
+        res.regTemplate = new RegExp(`const.*${this.selectedWidget.id}.*\\ntriggerWidget.${selectedWidgetFunctionStr}\\(\\);\\n*`)
+        break;
+      default:
+        break;
+    }
+    return res
   }
 
   /**
    * 获取当前组件被调用的方法(关联组件事件执行时，回调当前组件的方法)
    */
   private getSelectedWidgetTriggerFunction(type: string) {
+    debugger
     let strFunction = ""
     switch (type) {
       case 'select':
@@ -136,6 +132,9 @@ export default class LinkWidgetUtils {
       case 'data-table':
       case 'tree-view':
         strFunction = "loadDataFromBussiness"
+        break
+      case 'data-wrapper':
+        strFunction = 'saveDataWrapper'
         break
       case 'edit-table':
         break
@@ -162,10 +161,11 @@ export default class LinkWidgetUtils {
 /**
  * 用关联组件的值替换scriptParam的TestVALUE
  * @param bussinessSource
- * @param linkWidget
+ * @param getWidgetRef
  */
-export function setLinkWidgetValueToScriptParams(bussinessSource: VFormBussinessSource, linkWidget: any) {
+export function setLinkWidgetValueToScriptParams(bussinessSource: VFormBussinessSource, getWidgetRef: Function) {
   bussinessSource.scriptParams.map(param => {
+    const linkWidget = getWidgetRef(param.linkWidgetId?.[0])
     linkWidget && (param.Param_TestVALUE = linkWidget.fieldModel[linkWidget.field.options.valueKey])
   })
 }

@@ -14,7 +14,7 @@
 
     <div :key="widget.id" class="sub-form-container"
          :class="{'selected': selected}" @click.stop="selectWidget(widget)">
-      <div style="width: 100%;background: #2c91ff;color: #eeeeee">
+      <div class="contianer-title">
         数据容器{{ widget.id }}
       </div>
       <draggable :list="widget.widgetList" item-key="id"
