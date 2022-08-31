@@ -2,13 +2,19 @@
 
   <container-item-wrapper v-show="!widget.options.hidden" :widget="widget">
 
-    <el-table ref="dataTable" :data="widget.options.tableData" :class="[customClass]"
-              :height="widget.options.tableHeight" :style="{'width': widget.options.tableWidth}"
-              :border="widget.options.border" :show-summary="widget.options.showSummary"
+    <el-table ref="dataTable"
+              :data="widget.options.tableData"
+              :class="[customClass]"
+              :height="widget.options.tableHeight"
+              :style="{'width': widget.options.tableWidth}"
+              :border="widget.options.border"
+              :show-summary="widget.options.showSummary"
               :size="widgetSize" :stripe="widget.options.stripe"
+              highlight-current-row
               @selection-change="handleSelectionChange"
               @sort-change="handleSortChange"
               @row-click="hanldeTableRowClick"
+              @current-change="onCurrentChange"
               :cell-style="{padding: widget.options.rowSpacing + 'px 0'}">
 
       <el-table-column v-if="widget.options.showIndex" type="index" width="50" fixed="left"></el-table-column>
@@ -71,7 +77,7 @@ import refMixin from "@/components/form-render/refMixin"
 import containerItemMixin from "@/components/form-render/container-item/containerItemMixin"
 import {getDSByName, overwriteObj, runDataSourceRequest} from "@/utils/util"
 import {loadBussinessSource} from "@/api/bussiness-source"
-import {assembleBussinessParams} from "@/utils/data-adapter";
+import {assembleBussinessParams, traverseObj} from "@/utils/data-adapter";
 import {setLinkWidgetValueToScriptParams} from "@/utils/linkWidgetUtils";
 
 export default {
@@ -105,24 +111,7 @@ export default {
   inject: ['refList', 'sfRefList', 'globalModel', 'getFormConfig', 'getGlobalDsv'],
   data() {
     return {
-      tableData: [{
-        date: '2016-05-02',
-        name: '王小虎1',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-04',
-        name: '王小虎2',
-        address: '上海市普陀区金沙江路 1517 弄'
-      }, {
-        date: '2016-05-01',
-        name: '王小虎3',
-        address: '上海市普陀区金沙江路 1519 弄'
-      }, {
-        date: '2016-05-03',
-        name: '王小虎4',
-        address: '上海市普陀区金沙江路 1516 弄'
-      }],
-
+      tableData: [],
       selectedIndices: [],
       pageSize: this.widget.options.pagination.pageSize,
       currentPage: this.widget.options.pagination.currentPage,
@@ -167,21 +156,6 @@ export default {
       this.designer.setSelected(widget)
     },
 
-    /*    renderHeader(h, {column, $index}) {//debugger
-          //console.log('column=====', column)
-          let colCount = 0;
-          if (this.widget.options.showIndex) {
-            colCount++;
-          }
-          if (this.widget.options.showCheckBox) {
-            colCount++;
-          }
-
-          //this.$set(column, "formatS", this.widget.options.tableColumns[$index-colCount].formatS)
-          // column.formatS = this.widget.options.tableColumns[$index - colCount].formatS
-
-          return column.label;
-        },*/
 
     formatter(row, column, cellValue) {
       return cellValue;
@@ -192,33 +166,6 @@ export default {
       if (!!formatter.formatS) {
         const func = new Function('row', 'column', 'cellValue', 'rowIndex', formatter.formatS)
         return func(row, column, cellValue, rowIndex)
-
-        /*switch (column.formatS) {
-          case 'd1':
-            return formatDate1(cellValue);
-          case 'd2':
-            return formatDate2(cellValue);
-          case 'd3':
-            return formatDate3(cellValue);
-          case 'd4':
-            return formatDate4(cellValue);
-          case 'd5':
-            return formatDate5(cellValue);
-          case 'n1':
-            return formatNumber1(cellValue);
-          case 'n2':
-            return formatNumber2(cellValue);
-          case 'n3':
-            return formatNumber3(cellValue);
-          case 'n4':
-            return formatNumber4(cellValue);
-          case 'n5':
-            return formatNumber5(cellValue);
-          case 'n6':
-            return formatNumber6(cellValue);
-          case 'n7':
-            return formatNumber7(cellValue);
-        }*/
       }
       return cellValue;
     },
@@ -284,7 +231,7 @@ export default {
         /**
          * 用关联组件的值替换scriptParam的TestVALUE
          */
-        setLinkWidgetValueToScriptParams(bussinessSource,this.getWidgetRef)
+        setLinkWidgetValueToScriptParams(bussinessSource, this.getWidgetRef)
       }
       loadBussinessSource(assembleBussinessParams({
         scriptId: this.widget.options.bussinessSource.currentNodeKey,
@@ -457,8 +404,16 @@ export default {
       return this.selectedIndices
     },
 
-    //--------------------- 以上为组件支持外部调用的API方法 end ------------------//
+    setBindMapScriptParams(row, triggerWidget) {
+      traverseObj(triggerWidget.options.valueSource.bindMap, (key, value) => {
 
+      })
+    },
+    //--------------------- 以上为组件支持外部调用的API方法 end ------------------//
+    onCurrentChange(currentRow) {
+      this.widget.options['currentRow'] = currentRow
+      // console.log('onCurrentChange', currentRow);
+    }
   }
 }
 </script>

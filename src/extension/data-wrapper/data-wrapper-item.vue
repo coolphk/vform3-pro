@@ -40,6 +40,7 @@ import emitter from "@/utils/emitter";
 import {traverseFieldWidgets} from "@/utils/util";
 import {execProcedure, getProcedureParams} from "@/api/data-schema";
 import {ElMessage} from "element-plus";
+import {setLinkWidgetValueToBindMapScriptParamsWith} from "@/utils/linkWidgetUtils";
 
 export default {
   name: "data-wrapper-item",
@@ -74,19 +75,20 @@ export default {
       // console.log('setFormDataWithValueSource');
       const vs = this.widget?.options?.valueSource
       const formData = {}
-      traverseObj(vs.bindMap, (Scripts_ID, value) => {
+      traverseObj(vs.bindMap, (Scripts_ID, bindvalue) => {
+        setLinkWidgetValueToBindMapScriptParamsWith(bindvalue, this.getWidgetRef)
         loadBussinessSource(assembleBussinessParams({
           scriptId: Scripts_ID,
-          params: vs.bindMap[Scripts_ID].scriptParams,
+          params: bindvalue.scriptParams,
           pageSize: 1
         })).then(res => {
           //读取数据赋值到form表单中，并给bindMap设置默认值
           traverseObj(res.Data.TableData?.[0], (key, value) => {
-            if (vs.bindMap[Scripts_ID]['scriptFields'][key]) {
-              vs.bindMap[Scripts_ID]['scriptFields'][key]['paramValue'] = value
+            if (bindvalue['scriptFields'][key]) {
+              bindvalue['scriptFields'][key]['paramValue'] = value
             }
-            if (vs.bindMap[Scripts_ID]?.['scriptFields']?.[key]?.widgetId) {
-              formData[vs.bindMap[Scripts_ID]['scriptFields'][key].widgetId] = value
+            if (bindvalue?.['scriptFields']?.[key]?.widgetId) {
+              formData[bindvalue['scriptFields'][key].widgetId] = value
             }
           })
           this.getFormRef().setFormData(formData)

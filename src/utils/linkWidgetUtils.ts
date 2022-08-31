@@ -1,5 +1,6 @@
-import {getWidgetEventByType, isObj} from "@/utils/data-adapter.js";
+import {getWidgetEventByType, isObj, traverseObj} from "@/utils/data-adapter.js";
 import {VFormBussinessSource} from "@/components/form-designer/widget-panel/types";
+import {BindMapScriptParam, BindMapValue} from "@/extension/data-wrapper/data-wrapper-schema";
 
 type Template = {
   codeTemplate: string | undefined
@@ -151,6 +152,22 @@ export function setLinkWidgetValueToScriptParams(bussinessSource: VFormBussiness
         param.Param_TestVALUE = linkWidget.getValue()[linkWidget.options.valueKey]
       } else {
         param.Param_TestVALUE = linkWidget.getValue()
+      }
+    }
+  })
+}
+
+export function setLinkWidgetValueToBindMapScriptParamsWith(bindValue: BindMapValue, getWidgetRef: Function) {
+  traverseObj(bindValue.scriptParams, (paramKey: string, param: BindMapScriptParam) => {
+    if (param.linkWidget.length > 0) {
+      const linkWidgetRef = getWidgetRef(param.linkWidget?.[0])
+      const linkWidget = linkWidgetRef.widget
+      if (linkWidget) {
+        if (linkWidget.type === 'data-table') {
+          param.defaultValue = linkWidget.options?.currentRow?.[param.linkWidget?.[1]]
+        } else {
+          param.defaultValue = linkWidgetRef.getValue()
+        }
       }
     }
   })

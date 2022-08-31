@@ -53,23 +53,29 @@ export interface BindMapFieldParams {
   defaultValue: string
 }
 
-export interface BindMap {
-  [key: string]: { //脚本id
-    scriptFields: {
-      [key: string]: { //脚本参数id
-        widgetId?: string, //绑定控件id
-        params: Array<BindMapFieldParams> //存储过程参数
-      }
-    }
-    scriptName: string, //脚本名称
-    scriptParams: {  //脚本参数
-      [key: string]: //参数名
-        {
-          defaultValue: string, //参数默认值
-          linkWidget: Array<string> //关联控件
-        }
-    }
+export interface BindMapScriptField {
+  //脚本参数id
+  widgetId?: string, //绑定控件id
+  params: Array<BindMapFieldParams> //存储过程参数
+}
+
+export interface BindMapScriptParam {
+  defaultValue: string, //参数默认值
+  linkWidget: Array<string> //关联控件
+}
+
+export interface BindMapValue {
+  scriptFields: {
+    [key: string]: BindMapScriptField
   }
+  scriptName: string, //脚本名称
+  scriptParams: {  //脚本参数
+    [key: string]: BindMapScriptParam//参数名
+  }
+}
+
+export interface BindMap {
+  [key: string]: BindMapValue //脚本id
 }
 
 const dataWrapperWidget: DataWrapper = {

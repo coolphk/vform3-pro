@@ -140,7 +140,7 @@
         />
         <!--        <iframe src="https://zuobiao.keyaark.cn/pages/dicom-detail/dicom-view-qrcode?hospitalId=1652260589&studyNumber=58243"  />-->
         <div v-if="mode === 'development'">
-          {{ bussinessData }}
+          <!--          {{ bussinessData }}-->
           <hr/>
           {{ optionModel.valueSource.bindMap }}
         </div>
@@ -260,6 +260,7 @@ watch(paramData, (newValue, oldValue) => {
   // console.log('watch paramData', newValue);
   newValue.map(param => {
     compBindMap.value[param.scriptId]['scriptParams'] = {
+      ...compBindMap.value?.[param.scriptId]?.['scriptParams'],
       [param.Param_Name]: {
         defaultValue: param.Param_TestVALUE,
         linkWidget: param?.linkWidget ?? []
