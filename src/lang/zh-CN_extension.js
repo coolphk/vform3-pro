@@ -27,8 +27,8 @@ export default {
       labelKey: '标签字段',
       valueKey: '值字段',
       expandOnClickNode: '点击标签展开节点',
-      parentKey: '父级ID字段'
+      parentKey: '父级ID字段',
+      height: '高度(带单位)'
     },
-
   }
 }

@@ -1,4 +1,4 @@
-import {getWidgetEventByType} from "@/utils/data-adapter.js";
+import {getWidgetEventByType, isObj} from "@/utils/data-adapter.js";
 import {VFormBussinessSource} from "@/components/form-designer/widget-panel/types";
 
 type Template = {
@@ -145,6 +145,13 @@ export default class LinkWidgetUtils {
 export function setLinkWidgetValueToScriptParams(bussinessSource: VFormBussinessSource, getWidgetRef: Function) {
   bussinessSource.scriptParams.map(param => {
     const linkWidget = getWidgetRef(param.linkWidgetId?.[0])
-    linkWidget && (param.Param_TestVALUE = linkWidget.fieldModel[linkWidget.field.options.valueKey])
+    if (linkWidget) {
+      const value = linkWidget?.getValue()
+      if (linkWidget?.field.options.valueKey && isObj(value)) {
+        param.Param_TestVALUE = linkWidget.getValue()[linkWidget.options.valueKey]
+      } else {
+        param.Param_TestVALUE = linkWidget.getValue()
+      }
+    }
   })
 }

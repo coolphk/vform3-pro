@@ -46,17 +46,17 @@
         <el-button v-if="showToolButton('exportJsonButton')" link @click="exportJson">
           {{ i18nt('designer.toolbar.exportJson') }}
         </el-button>
-<!--        <el-button v-if="showToolButton('exportCodeButton')" link @click="exportCode">
-          {{ i18nt('designer.toolbar.exportCode') }}
-        </el-button>
-        <el-button v-if="showToolButton('generateSFCButton')" link @click="generateSFC">
-          <svg-icon icon-class="vue-sfc"/>
-          {{ i18nt('designer.toolbar.generateSFC') }}
-        </el-button>
-        <el-button v-if="showToolButton('dataSourceButton')" link @click="showDataSource">
-          <svg-icon icon-class="vue-sfc"/>
-          {{ i18nt('designer.toolbar.dataSchema') }}
-        </el-button>-->
+        <!--        <el-button v-if="showToolButton('exportCodeButton')" link @click="exportCode">
+                  {{ i18nt('designer.toolbar.exportCode') }}
+                </el-button>
+                <el-button v-if="showToolButton('generateSFCButton')" link @click="generateSFC">
+                  <svg-icon icon-class="vue-sfc"/>
+                  {{ i18nt('designer.toolbar.generateSFC') }}
+                </el-button>
+                <el-button v-if="showToolButton('dataSourceButton')" link @click="showDataSource">
+                  <svg-icon icon-class="vue-sfc"/>
+                  {{ i18nt('designer.toolbar.dataSchema') }}
+                </el-button>-->
         <template v-for="(idx, slotName) in $slots">
           <slot :name="slotName"></slot>
         </template>
@@ -450,7 +450,7 @@ export default {
           this.buildTreeNodeOfWidget(wChild, curNode.children)
         })
       } else if (widget.category === 'container') {  //自定义容器
-        widget.widgetList.map(wChild => {
+        widget?.widgetList?.map(wChild => {
           this.buildTreeNodeOfWidget(wChild, curNode.children)
         })
       }

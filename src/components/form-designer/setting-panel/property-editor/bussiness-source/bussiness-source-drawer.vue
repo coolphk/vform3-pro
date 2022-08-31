@@ -46,13 +46,6 @@
           </el-table-column>
           <el-table-column prop="linkWidgetId" label="关联组件" width="200">
             <template #default="{row,$index}">
-              <!--              <el-select style="width: 180px"
-                                       clearable
-                                       :model-value="row.linkWidgetId"
-                                       @change="onScriptLinkWidgetChange(row,$index,$event)"
-                            >
-                              <el-option v-for="(item) in fieldWidgetList" :value="item.id" :label="item.label"></el-option>
-                            </el-select>-->
               <link-widget :designer="designer" :selected-widget="selectedWidget" :row="row"/>
             </template>
           </el-table-column>

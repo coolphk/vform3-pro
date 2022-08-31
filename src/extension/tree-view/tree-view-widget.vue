@@ -4,6 +4,7 @@
     <div :key="widget.id" class="sub-form-container"
          :class="{'selected': selected}" @click.stop="selectWidget(widget)">
       <el-tree
+          :style="{maxHeight: widget.options.height,height:widget.options.height,overflow: 'auto'}"
           :class="compClass"
           :data="compTreeData"
           empty-text="请点击预览查看数据"

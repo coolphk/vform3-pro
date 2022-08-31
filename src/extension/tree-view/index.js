@@ -23,7 +23,11 @@ export default {
       PEFactory.createInputTextEditor('parentKey', 'extension.setting.parentKey'))
     PERegister.registerCPEditor(app, 'tree-view-expandOnClickNode', 'tree-view-expandOnClickNode-editor',
       PEFactory.createBooleanEditor('expandOnClickNode', 'extension.setting.expandOnClickNode'))
+    PERegister.registerCPEditor(app, 'tree-view-height', 'tree-view-height-editor',
+      PEFactory.createInputTextEditor('height', 'extension.setting.height'))
+
     PERegister.registerEPEditor(app, 'tree-view-onNodeClick', 'tree-view-onNodeClick-editor',
       PEFactory.createEventHandlerEditor('onNodeClick', ['data', 'node','value']))
+
   }
 }

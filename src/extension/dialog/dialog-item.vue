@@ -56,6 +56,9 @@ export default {
   methods: {
     show() {
       this.widget.options.visible = true
+    },
+    close() {
+      this.widget.options.visible = false
     }
   }
 }

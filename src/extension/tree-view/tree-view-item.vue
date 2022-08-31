@@ -1,7 +1,9 @@
 <template>
   <container-item-wrapper v-show="!widget.options.hidden" :widget="widget">
     <div :key="widget.id" style="padding-top: 5px">
+      <!--      <div style="height: 100px">-->
       <el-tree
+          :style="{maxHeight: widget.options.height,height:widget.options.height,overflow: 'auto'}"
           :expand-on-click-node="compOptionModal.expandOnClickNode"
           :class="compClass"
           :data="compOptionModal.treeData"
@@ -9,6 +11,7 @@
           @node-click="handleOnNodeClick"
       ></el-tree>
     </div>
+    <!--    </div>-->
   </container-item-wrapper>
 </template>
 
