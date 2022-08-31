@@ -34,6 +34,10 @@ const cascaderProps = {
 }
 const fieldWidgetList = getAllFieldWidgets(props.designer.widgetList)
     .filter((item: any) => item.id != props.selectedWidget.id)
+    .map((item: any) => ({
+      ...item,
+      label: item.label + '-' + item.id
+    }))
 
 /**
  * 根据当前组件与所选关联组件的类型设置代码

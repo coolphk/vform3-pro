@@ -284,7 +284,6 @@ function loadTableData(scriptId: string, params: any) {
     pageSize: compPageSize.value
   })).then(res => {
     bussinessData.value = res.Data.TableData
-    debugger
     tableColumns.value = res.Data.TableHeaders
   })
 }

@@ -138,7 +138,7 @@ export const loadRemoteScript = function (srcPath, callback) {  /*加载远程js
 
 export function traverseFieldWidgets(widgetList, handler) {
   widgetList.map(w => {
-    if (w.formItemFlag) {
+    if (w.formItemFlag || w.tableFlag) {
       handler(w)
     } else if (w.type === 'grid') {
       w.cols.map(col => {

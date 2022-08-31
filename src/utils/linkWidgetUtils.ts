@@ -70,7 +70,7 @@ export default class LinkWidgetUtils {
   }
 
   /**
-   * 根据法关联组件与当前选中组件获取需要设置的代码
+   * 根据法关联组件与当前选中组件获取需要触发的函数
    * (codeTemplate含义)当关联组件事件被触发时，用关联组件的值替换当前选中组件的scriptParams中对应的参数。
    * 然后调用当前选中组件的读取业务数据方法(loadBussiness)
    * @param LWType 关联组件
