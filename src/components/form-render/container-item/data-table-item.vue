@@ -270,7 +270,7 @@ export default {
           customFn.call(this, row, column, rowIndex)
         }
       } catch (error) {
-        console.log(`${this.widget.id}--hanldeTableRowClick出现错误`)
+        console.error(`${this.widget.id}--hanldeTableRowClick出现错误`)
         throw new error
       }
     },
