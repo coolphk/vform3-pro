@@ -168,7 +168,11 @@ export const getWidgetEventByType = (type) => {
     'time': onChange,
     'date': onChange,
     'switch': onChange,
-    'button': 'onClick'
+    'button': 'onClick',
+    'tree-view': 'onNodeClick'
+  }
+  if (eventMap[type] === undefined) {
+    throw new Error(`${type}当前组件未支持绑定`)
   }
   return eventMap[type]
 }

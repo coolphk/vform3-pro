@@ -36,7 +36,7 @@ export default class LinkWidgetUtils {
     if (originalLW) {
       const oldCode = originalLW.options[getWidgetEventByType(originalLW.type)]
       const oldRes = this.getCodeTemplateWithLWTypeAndCWType(originalLW.type, this.selectedWidget.type)
-      const oldMatched = oldCode.match(oldRes.regTemplate)
+      const oldMatched = oldCode?.match(oldRes.regTemplate)
       if (oldMatched) {
         originalLW.options[getWidgetEventByType(originalLW.type)] = oldCode.replace(oldRes.regTemplate, "")
       }
