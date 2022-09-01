@@ -190,7 +190,7 @@ export function traverseContainWidgets(widgetList, handler) {
 }
 
 export function traverseAllWidgets(widgetList, handler) {
-  widgetList.map(w => {
+  widgetList?.map(w => {
     handler(w)
 
     if (w.type === 'grid') {

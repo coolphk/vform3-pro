@@ -1,3 +1,5 @@
+import {deleteAllLinkWidgetCode} from "@/utils/linkWidgetUtils";
+
 export default {
   inject: ['getFormConfig'],
   computed: {
@@ -80,6 +82,7 @@ export default {
         }
 
         this.$nextTick(() => {
+          deleteAllLinkWidgetCode(this.parentList[0].widgetList, this.designer)
           this.parentList.splice(this.indexOfParentList, 1)
           //if (!!nextSelected) {
           this.designer.setSelected(nextSelected)

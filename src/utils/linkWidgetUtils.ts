@@ -1,7 +1,7 @@
 import {getFieldOrWidget, getWidgetEventByType, isArray, isObj, traverseObj} from "@/utils/data-adapter.js";
-import {BindMapScriptParam, BindMapScriptParams} from "@/extension/data-wrapper/data-wrapper-schema";
+import {BindMapScriptParam, BindMapScriptParams, BindMapValue} from "@/extension/data-wrapper/data-wrapper-schema";
 import {ScriptParam} from "@/api/types";
-import {isTable} from "@/utils/util.js";
+import {isTable, traverseAllWidgets} from "@/utils/util.js";
 
 type Template = {
   codeTemplate: string | undefined
@@ -116,38 +116,39 @@ export default class LinkWidgetUtils {
     return strFunction
   }
 
-/*  private getScriptParamsStrByType(type: string) {
-    let codeStr
-    switch (type) {
-      case 'data-wrapper': {
-        codeStr = 'valueSource[row.scriptId].scriptParams'
-        break
+  /*  private getScriptParamsStrByType(type: string) {
+      let codeStr
+      switch (type) {
+        case 'data-wrapper': {
+          codeStr = 'valueSource[row.scriptId].scriptParams'
+          break
+        }
+        case 'select' : {
+          codeStr = 'bussinessSource.scriptParams'
+          break
+        }
       }
-      case 'select' : {
-        codeStr = 'bussinessSource.scriptParams'
-        break
-      }
-    }
-    return codeStr
-  }*/
+      return codeStr
+    }*/
 }
 
 /**
  * 用关联组件的值替换scriptParam的TestVALUE
  * @param scriptParams
  * @param getWidgetRef
+ * @param callback
  */
 // export function setLinkWidgetValueToScriptParams(bussinessSource: VFormBussinessSource, getWidgetRef: Function) {
-export function setLinkWidgetValueToScriptParams(scriptParams: ScriptParam[] | BindMapScriptParams, getWidgetRef: Function) {
+export function setLinkWidgetValueToScriptParams(scriptParams: ScriptParam[] | BindMapScriptParams, getWidgetRef: Function, callback: Function = setValueTotParam) {
   if (isArray(scriptParams)) {
     scriptParams = scriptParams as ScriptParam[];
     scriptParams.map((param: ScriptParam) => {
-      setValueTotParam(param, getWidgetRef)
+      callback(param, getWidgetRef)
     })
   } else if (isObj(scriptParams)) {
     scriptParams = scriptParams as BindMapScriptParams
     traverseObj(scriptParams, (paramKey: string, param: BindMapScriptParam) => {
-      setValueTotParam(param, getWidgetRef)
+      callback(param, getWidgetRef)
     })
   }
 }
@@ -191,4 +192,33 @@ function getWidgetValue(linkWidgetRef: any) {
   } else {
     return value
   }
+}
+
+export function deleteAllLinkWidgetCode(wigetList: Array<any>, designer: any) {
+  let lkUtils = null
+  traverseAllWidgets(wigetList, (widget: any) => {
+    if (widget.options.bussinessSource?.scriptParams?.length > 0) {
+      setLinkWidgetValueToScriptParams(widget.options.bussinessSource?.scriptParams, designer.getWidgetRef, (param: any, getWidgetRef: Function) => {
+        lkUtils = new LinkWidgetUtils({
+          designer,
+          selectedWidget: widget,
+          oldLinkWidgetId: param?.linkWidgetId[0]
+        })
+        lkUtils.deleteOldLWCode()
+      })
+    }
+    if (widget.options?.valueSource?.bindMap) {
+      traverseObj(widget.options?.valueSource?.bindMap, (Scripts_ID: string, bindvalue: BindMapValue) => {
+        setLinkWidgetValueToScriptParams(bindvalue.scriptParams, designer.getWidgetRef, (param: any, getWidgetRef: Function) => {
+          lkUtils = new LinkWidgetUtils({
+            designer,
+            selectedWidget: widget,
+            oldLinkWidgetId: param?.linkWidgetId[0]
+          })
+          lkUtils.deleteOldLWCode()
+        })
+      })
+    }
+    lkUtils = null
+  })
 }

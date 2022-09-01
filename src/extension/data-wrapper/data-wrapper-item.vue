@@ -77,7 +77,6 @@ export default {
       const formData = {}
       traverseObj(vs.bindMap, (Scripts_ID, bindvalue) => {
         setLinkWidgetValueToScriptParams(bindvalue.scriptParams, this.getWidgetRef)
-        debugger
         loadBussinessSource(assembleBussinessParams({
           scriptId: Scripts_ID,
           params: bindvalue.scriptParams,
