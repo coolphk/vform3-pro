@@ -231,7 +231,7 @@ export default {
         /**
          * 用关联组件的值替换scriptParam的TestVALUE
          */
-        setLinkWidgetValueToScriptParams(bussinessSource, this.getWidgetRef)
+        setLinkWidgetValueToScriptParams(bussinessSource.scriptParams, this.getWidgetRef)
       }
       loadBussinessSource(assembleBussinessParams({
         scriptId: this.widget.options.bussinessSource.currentNodeKey,
@@ -264,9 +264,14 @@ export default {
       }
     },
     hanldeTableRowClick(row, column, rowIndex) {
-      if (!!this.widget.options.onTableRowClick) {
-        let customFn = new Function('data', 'column', 'rowIndex', this.widget.options.onTableRowClick)
-        customFn.call(this, row, column, rowIndex)
+      try {
+        if (!!this.widget.options.onTableRowClick) {
+          let customFn = new Function('data', 'column', 'rowIndex', this.widget.options.onTableRowClick)
+          customFn.call(this, row, column, rowIndex)
+        }
+      } catch (error) {
+        console.log(`${this.widget.id}--hanldeTableRowClick出现错误`)
+        throw new error
       }
     },
     //--------------------- 以下为组件支持外部调用的API方法 begin ------------------//

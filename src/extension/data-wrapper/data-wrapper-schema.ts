@@ -61,7 +61,12 @@ export interface BindMapScriptField {
 
 export interface BindMapScriptParam {
   defaultValue: string, //参数默认值
-  linkWidget: Array<string> //关联控件
+  linkWidgetId: string[] //关联控件
+}
+
+export interface BindMapScriptParams {
+  //参数名
+  [key: string]: BindMapScriptParam
 }
 
 export interface BindMapValue {
@@ -69,9 +74,7 @@ export interface BindMapValue {
     [key: string]: BindMapScriptField
   }
   scriptName: string, //脚本名称
-  scriptParams: {  //脚本参数
-    [key: string]: BindMapScriptParam//参数名
-  }
+  scriptParams: BindMapScriptParams //脚本参数
 }
 
 export interface BindMap {

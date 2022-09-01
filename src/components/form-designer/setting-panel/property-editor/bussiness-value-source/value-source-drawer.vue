@@ -34,12 +34,13 @@
           <el-table-column prop="Param_BusiDes" label="业务说明" width="150"/>
           <el-table-column label="关联组件" width="200">
             <template #default="{row}">
-              <el-cascader style="width: 160px"
-                           clearable
-                           :model-value="row.linkWidget"
-                           :options="paramBindWidgets"
-                           @change="onCascaderChange(row,$event)"
-              />
+              <!--              <el-cascader style="width: 160px"
+                                         clearable
+                                         :model-value="row.linkWidget"
+                                         :options="paramBindWidgets"
+                                         @change="onCascaderChange(row,$event)"
+                            />-->
+              <link-widget :designer="designer" :selected-widget="selectedWidget" :row="row"/>
 
             </template>
           </el-table-column>
@@ -174,6 +175,7 @@ import {
   ScriptResponse
 } from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/types";
 import {ExecProcedureParam, ScriptParam, ScriptTreeRes} from "@/api/types";
+import LinkWidget from "@/components/link-widget/index.vue"
 import LinkWidgetUtils from "@/utils/linkWidgetUtils";
 
 
@@ -263,7 +265,7 @@ watch(paramData, (newValue, oldValue) => {
       ...compBindMap.value?.[param.scriptId]?.['scriptParams'],
       [param.Param_Name]: {
         defaultValue: param.Param_TestVALUE,
-        linkWidget: param?.linkWidget ?? []
+        linkWidgetId: param?.linkWidgetId ?? []
       }
     }
   })
@@ -274,12 +276,12 @@ watch(bussinessData, (newValue, oldValue) => {
     if (!compBindMap.value[row.scriptId]) {
       buildBindMap(row.scriptId, row.scriptName)
     }
-    // console.log(222, compBindMap.value);
-    if (row.params.length > 0) {
+    if (row.params.length > 0 || row.widgetId) {
       // console.log(newValue);
       compBindMap.value[row.scriptId].scriptFields[row.label] = {
         widgetId: row.widgetId,
         params: row.params.map(item => {
+          //修改已绑定参数颜色
           vDataTarget$.value.changeBoundProcedureStyle(item, true)
           return {
             ...filterPostParam(item),
@@ -332,7 +334,7 @@ function loadScriptsParams(script: ScriptTreeRes) {
       paramData.value.push({
         scriptName: scriptName,
         scriptId: scriptId,
-        linkWidget: bindMapParam?.linkWidget.length > 0 ? bindMapParam.linkWidget : [],
+        linkWidgetId: bindMapParam?.linkWidgetId.length > 0 ? bindMapParam.linkWidgetId : [],
         Param_TestVALUE: param.Param_TestVALUE,//数据刷新时，如果绑定关系中有参数有默认值，则使用默认值
         Param_Name: param.Param_Name
       })
@@ -341,9 +343,13 @@ function loadScriptsParams(script: ScriptTreeRes) {
   })
 }
 
+/**
+ * 建立绑定关系
+ * @param scriptId
+ * @param scriptName
+ */
 function buildBindMap(scriptId: string, scriptName: string) {
   if (isEmptyObj(compBindMap.value)) {
-    console.log('buildBindMap');
     compBindMap.value = {
       [scriptId]: {
         scriptName: scriptName,
@@ -555,17 +561,6 @@ function onBusTableSort({prop, order}: { prop: string, order: string }) {
  */
 function onCascaderChange(row: ScriptParamData, value: string[]) {
   //有值代表是新选中状态,否则代表取消选中状态 todo 联动组件代码待修改
-  /*if (value) {
-    props.designer.formWidget.getWidgetRef(value[0]).widget.options.onTableRowClick =
-        `setTimeout(()=>{
-  this.refList['${props.selectedWidget.id}'].setFormDataWithValueSource({
-    ${row.scriptId}:{
-      scriptName:'${row.scriptName}',
-      params:{${row.Param_Name}:data['${value[1]}']}
-    }
-  })
-})`
-  }*/
   const linkUtils = new LinkWidgetUtils({
     designer: props.designer,
     selectedWidget: props.selectedWidget,

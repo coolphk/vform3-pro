@@ -124,9 +124,7 @@ import PropertyEditors from './property-editor/index'
 import FormSetting from './form-setting'
 import DataSourceSetting from './data-source-setting'
 import WidgetProperties from './propertyRegister'
-import {
-  addWindowResizeHandler,
-} from "@/utils/util"
+import {addWindowResizeHandler,} from "@/utils/util"
 import i18n from "@/utils/i18n"
 import emitter from "@/utils/emitter";
 import {propertyRegistered} from "@/components/form-designer/setting-panel/propertyRegister";
@@ -220,7 +218,6 @@ export default {
   },
   created() {
     this.on$('editEventHandler', (eventParams) => {
-      //debugger
       this.editEventHandler(eventParams[0], eventParams[1])
     })
 

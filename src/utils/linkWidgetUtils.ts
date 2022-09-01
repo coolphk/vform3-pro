@@ -1,6 +1,7 @@
-import {getWidgetEventByType, isObj, traverseObj} from "@/utils/data-adapter.js";
-import {VFormBussinessSource} from "@/components/form-designer/widget-panel/types";
-import {BindMapScriptParam, BindMapValue} from "@/extension/data-wrapper/data-wrapper-schema";
+import {getFieldOrWidget, getWidgetEventByType, isArray, isObj, traverseObj} from "@/utils/data-adapter.js";
+import {BindMapScriptParam, BindMapScriptParams} from "@/extension/data-wrapper/data-wrapper-schema";
+import {ScriptParam} from "@/api/types";
+import {isTable} from "@/utils/util.js";
 
 type Template = {
   codeTemplate: string | undefined
@@ -48,6 +49,9 @@ export default class LinkWidgetUtils {
   addOrUpdateLinkWidgetCode() {
     //获取当前选中的关联组件
     const linkWidget = this.linkWidget
+    /*if (isTable(this.selectedWidget.type) && !isTable(linkWidget.type)) {
+      return
+    }*/
     if (linkWidget) {
       //根据当前组件与当前关联组件获取匹配正则与代码模板
       const res = this.getCodeTemplateWithLWTypeAndCWType(linkWidget.type, this.selectedWidget.type)
@@ -82,16 +86,8 @@ export default class LinkWidgetUtils {
       codeTemplate: '',
       regTemplate: undefined
     }
-    switch (LWType + '_' + CWType) {
-      case 'data-table_data-wrapper':
-        selectedWidgetFunctionStr = 'loadDataFromBussiness'
-        break
-      case 'select_select':
-      case `button_data-table`:
-      case 'button_data-wrapper':
-        break;
-      default:
-        break;
+    if (LWType === 'button' && CWType === 'data-wrapper') {
+      selectedWidgetFunctionStr = 'saveDataWrapper'
     }
     res.codeTemplate = `const triggerWidget = this.getWidgetRef("${this.selectedWidget.id}");\n` +
       `triggerWidget.${selectedWidgetFunctionStr}();\n`
@@ -111,10 +107,8 @@ export default class LinkWidgetUtils {
         break
       case 'data-table':
       case 'tree-view':
-        strFunction = "loadDataFromBussiness"
-        break
       case 'data-wrapper':
-        strFunction = 'saveDataWrapper'
+        strFunction = "loadDataFromBussiness"
         break
       case 'edit-table':
         break
@@ -122,7 +116,7 @@ export default class LinkWidgetUtils {
     return strFunction
   }
 
-  private getScriptParamsStrByType(type: string) {
+/*  private getScriptParamsStrByType(type: string) {
     let codeStr
     switch (type) {
       case 'data-wrapper': {
@@ -135,40 +129,66 @@ export default class LinkWidgetUtils {
       }
     }
     return codeStr
-  }
+  }*/
 }
 
 /**
  * 用关联组件的值替换scriptParam的TestVALUE
- * @param bussinessSource
+ * @param scriptParams
  * @param getWidgetRef
  */
-export function setLinkWidgetValueToScriptParams(bussinessSource: VFormBussinessSource, getWidgetRef: Function) {
-  bussinessSource.scriptParams.map(param => {
-    const linkWidget = getWidgetRef(param.linkWidgetId?.[0])
-    if (linkWidget) {
-      const value = linkWidget?.getValue()
-      if (linkWidget?.field.options.valueKey && isObj(value)) {
-        param.Param_TestVALUE = linkWidget.getValue()[linkWidget.options.valueKey]
-      } else {
-        param.Param_TestVALUE = linkWidget.getValue()
-      }
-    }
-  })
+// export function setLinkWidgetValueToScriptParams(bussinessSource: VFormBussinessSource, getWidgetRef: Function) {
+export function setLinkWidgetValueToScriptParams(scriptParams: ScriptParam[] | BindMapScriptParams, getWidgetRef: Function) {
+  if (isArray(scriptParams)) {
+    scriptParams = scriptParams as ScriptParam[];
+    scriptParams.map((param: ScriptParam) => {
+      setValueTotParam(param, getWidgetRef)
+    })
+  } else if (isObj(scriptParams)) {
+    scriptParams = scriptParams as BindMapScriptParams
+    traverseObj(scriptParams, (paramKey: string, param: BindMapScriptParam) => {
+      setValueTotParam(param, getWidgetRef)
+    })
+  }
 }
 
-export function setLinkWidgetValueToBindMapScriptParamsWith(bindValue: BindMapValue, getWidgetRef: Function) {
-  traverseObj(bindValue.scriptParams, (paramKey: string, param: BindMapScriptParam) => {
-    if (param.linkWidget.length > 0) {
-      const linkWidgetRef = getWidgetRef(param.linkWidget?.[0])
-      const linkWidget = linkWidgetRef.widget
-      if (linkWidget) {
-        if (linkWidget.type === 'data-table') {
-          param.defaultValue = linkWidget.options?.currentRow?.[param.linkWidget?.[1]]
+/**
+ * 把linkWidget的值取出设置到scriptParams中
+ * @param param
+ * @param getWidgetRef
+ */
+export function setValueTotParam(param: BindMapScriptParam | ScriptParam, getWidgetRef: Function) {
+  if (param?.linkWidgetId && param.linkWidgetId.length > 0) {
+    const linkWidgetRef = getWidgetRef(param.linkWidgetId?.[0])
+    const linkWidget = getFieldOrWidget(linkWidgetRef)
+    if (linkWidget) {
+      if (param.hasOwnProperty('defaultValue')) {
+        if (isTable(linkWidget.type)) {
+          (<BindMapScriptParam>param).defaultValue = linkWidget.options?.currentRow?.[param.linkWidgetId?.[1]]
         } else {
-          param.defaultValue = linkWidgetRef.getValue()
+          (<BindMapScriptParam>param).defaultValue = getWidgetValue(linkWidgetRef)
+        }
+      } else {
+        if (isTable(linkWidget.type)) {
+          (<ScriptParam>param).Param_TestVALUE = linkWidget.options?.currentRow?.[param.linkWidgetId?.[1]]
+        } else {
+          (<ScriptParam>param).Param_TestVALUE = getWidgetValue(linkWidgetRef)
         }
       }
     }
-  })
+  }
+}
+
+/**
+ * 获取组件值，如果是对象并且绑定valueKey获取 obj[valueKey]
+ * @param linkWidgetRef
+ */
+function getWidgetValue(linkWidgetRef: any) {
+  const value = linkWidgetRef?.getValue()
+  const linkWidget = getFieldOrWidget(linkWidgetRef)
+  if (linkWidget?.options.valueKey && isObj(value)) {
+    return value?.[linkWidget.options.valueKey]
+  } else {
+    return value
+  }
 }

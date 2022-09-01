@@ -40,7 +40,7 @@ import emitter from "@/utils/emitter";
 import {traverseFieldWidgets} from "@/utils/util";
 import {execProcedure, getProcedureParams} from "@/api/data-schema";
 import {ElMessage} from "element-plus";
-import {setLinkWidgetValueToBindMapScriptParamsWith} from "@/utils/linkWidgetUtils";
+import {setLinkWidgetValueToScriptParams} from "@/utils/linkWidgetUtils";
 
 export default {
   name: "data-wrapper-item",
@@ -76,7 +76,8 @@ export default {
       const vs = this.widget?.options?.valueSource
       const formData = {}
       traverseObj(vs.bindMap, (Scripts_ID, bindvalue) => {
-        setLinkWidgetValueToBindMapScriptParamsWith(bindvalue, this.getWidgetRef)
+        setLinkWidgetValueToScriptParams(bindvalue.scriptParams, this.getWidgetRef)
+        debugger
         loadBussinessSource(assembleBussinessParams({
           scriptId: Scripts_ID,
           params: bindvalue.scriptParams,

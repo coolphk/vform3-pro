@@ -114,7 +114,7 @@ const props = defineProps<{
 const showDataTargetDialog = ref(false)
 const showLoading = ref(false)
 const showProcedureListLoading = ref(false)
-const showCheckBox = ref(!isTable(props.selectedWidget?.type))
+const showCheckBox = ref(!isTable(props.selectedWidget))
 const procedureList = ref<Procedure[]>()
 const selectedProcedure = ref<Procedure>(props.optionModel.dataTarget.selectedProcedure)
 //展开的节点

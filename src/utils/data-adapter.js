@@ -172,3 +172,11 @@ export const getWidgetEventByType = (type) => {
   }
   return eventMap[type]
 }
+
+export function getFieldOrWidget(widget) {
+  if (widget?.field) {
+    return widget.field
+  } else {
+    return widget.widget
+  }
+}

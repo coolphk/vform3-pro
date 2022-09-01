@@ -100,7 +100,7 @@
 
 import {computed, reactive, ref, watch} from "vue";
 import {getScriptsParams, getScriptTree, loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams, getWidgetEventByType, unFlatten} from "@/utils/data-adapter.js";
+import {assembleBussinessParams, unFlatten} from "@/utils/data-adapter.js";
 import ContextMenu from "@/components/context-menu/index.vue"
 import {isTable} from "@/utils/util.js";
 import {LoadBussinessRes, ScriptParam, ScriptTreeRes} from "@/api/types";
@@ -329,45 +329,6 @@ function headerCellStyle({column}: {
 
 function onClickExpaned(node: TreeExpandedHistory) {
   props.optionModel.bussinessSource['expandedKeys'] = node.expanedKeys
-}
-
-
-function onScriptLinkWidgetChange(row: ScriptParam, index: number, linkWidgetId: string) {
-  function getLinkWidget(id: string) {
-    return props.designer.formWidget.getWidgetRef(id).field
-  }
-
-  function deleteLinkWidgetCode(id: string, regexp: RegExp) {
-    const linkWidget = getLinkWidget(id)
-    const linkWidgetEventCode = linkWidget.options[getWidgetEventByType(linkWidget.type)]
-    if (linkWidgetEventCode.match(regexp) !== null) {
-      linkWidget.options[getWidgetEventByType(linkWidget.type)] = linkWidgetEventCode.replace(regexp, '')
-    }
-  }
-
-  const regexp = new RegExp(`const\\s*linkWidget\\s*.*\\("${props.selectedWidget.id}"\\);\\n(.*\\n){3}.*setValue\\(""\\);\\n?`)
-  let linkWidget, codeTemplate, linkWidgetEventCode;
-  //如果有linkWidgetId代表是change操作,否则为clear操作,change操作需要删除原关联组件的代码，并且判断当前选中关联组件以前是否选中过，
-  //如果选中过则进行替换，否则进行添加操作
-  if (linkWidgetId) {
-    linkWidget = getLinkWidget(linkWidgetId) //获取关联组件
-    //要生成的代码
-    codeTemplate = `const linkWidget = this.getWidgetRef("${props.selectedWidget.id}");\nconst foundParam = linkWidget.field.options.bussinessSource.scriptParams.find(item => item.linkWidgetId === this.field.id);\nfoundParam.Param_TestVALUE = value[this.field.options.valueKey];\nlinkWidget.initOptionItems();\nlinkWidget.setValue("");\n`
-    linkWidgetEventCode = linkWidget.options[getWidgetEventByType(linkWidget.type)] //关联组件原代码
-    //如果关联组件源代码可以匹配到，则使用替换，否则使用增加
-    if (linkWidgetEventCode.match(regexp) !== null) {
-      linkWidget.options[getWidgetEventByType(linkWidget.type)] = linkWidgetEventCode.replace(regexp, codeTemplate)
-    } else {
-      linkWidget.options[getWidgetEventByType(linkWidget.type)] = linkWidgetEventCode + codeTemplate
-    }
-    //如果有row.linkWidgetId代表以前关联过别的组件，需要把原关联组件的代码删除掉
-    if (row.linkWidgetId) {
-      deleteLinkWidgetCode(row.linkWidgetId[0], regexp)
-    }
-  } else {
-    deleteLinkWidgetCode(row.linkWidgetId![0], regexp)
-  }
-  row.linkWidgetId![0] = linkWidgetId
 }
 
 function getMenuOptionsByWidget() {

@@ -71,7 +71,7 @@ export interface ScriptResponse {
 export interface ScriptParamData {
   scriptName: string,
   scriptId: string,
-  linkWidget: string[],
+  linkWidgetId: string[],
   Param_TestVALUE: string
   Param_Name: string
 }
