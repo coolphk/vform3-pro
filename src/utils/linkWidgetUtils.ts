@@ -194,6 +194,11 @@ function getWidgetValue(linkWidgetRef: any) {
   }
 }
 
+/***
+ * 删除组件时一起删除关联组件的代码
+ * @param wigetList
+ * @param designer
+ */
 export function deleteAllLinkWidgetCode(wigetList: Array<any>, designer: any) {
   let lkUtils = null
   traverseAllWidgets(wigetList, (widget: any) => {

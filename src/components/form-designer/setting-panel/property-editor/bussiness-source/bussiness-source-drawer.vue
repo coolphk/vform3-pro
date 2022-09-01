@@ -149,17 +149,32 @@ const compSelectedColumns = computed({
   get: () => {
     return props.optionModel?.tableColumns.map((item: any) => item.prop)
   },
-  set: (values) => {
+  set: (values: any[]) => {
     //设置table的列
-    props.optionModel && (props.optionModel.tableColumns = values?.map((prop: string, index: number) => ({
-          columnId: ++index,
-          prop,
-          "label": prop,
-          "width": "100",
-          "show": true,
-          "align": "center"
-        })
-    ))
+    const tableColumns = props.optionModel.tableColumns
+    //如果原tableColumns大于当前选中列数，代表是去除，否则代表添加
+    if (tableColumns.length > values.length) {
+      tableColumns.some((column: any, index: number) => {
+        if (!values.find(value => value === column.prop)) {
+          tableColumns.splice(index, 1)
+          return true
+        }
+      })
+    } else {
+      values.some((prop: string, index: number) => {
+        if (!tableColumns.find((column: any) => column.prop === prop)) {
+          tableColumns.push({
+            columnId: index,
+            prop,
+            "label": prop,
+            "width": "100",
+            "show": true,
+            "align": "center"
+          })
+          return true
+        }
+      })
+    }
   }
 })
 
