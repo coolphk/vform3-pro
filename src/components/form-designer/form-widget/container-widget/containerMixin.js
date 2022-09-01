@@ -82,7 +82,7 @@ export default {
         }
 
         this.$nextTick(() => {
-          deleteAllLinkWidgetCode(this.parentList[0].widgetList, this.designer)
+          deleteAllLinkWidgetCode(this.designer)
           this.parentList.splice(this.indexOfParentList, 1)
           //if (!!nextSelected) {
           this.designer.setSelected(nextSelected)

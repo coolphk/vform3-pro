@@ -334,7 +334,7 @@ function loadScriptsParams(script: ScriptTreeRes) {
       paramData.value.push({
         scriptName: scriptName,
         scriptId: scriptId,
-        linkWidgetId: bindMapParam?.linkWidgetId.length > 0 ? bindMapParam.linkWidgetId : [],
+        linkWidgetId: bindMapParam?.linkWidgetId?.length > 0 ? bindMapParam.linkWidgetId : [],
         Param_TestVALUE: param.Param_TestVALUE,//数据刷新时，如果绑定关系中有参数有默认值，则使用默认值
         Param_Name: param.Param_Name
       })
@@ -565,15 +565,15 @@ function onCascaderChange(row: ScriptParamData, value: string[]) {
     designer: props.designer,
     selectedWidget: props.selectedWidget,
     linkWidgetId: value?.[0],
-    oldLinkWidgetId: row?.linkWidget?.[0]
+    oldLinkWidgetId: row?.linkWidgetId?.[0]
   })
-  if (row?.linkWidget?.[0]) {
+  if (row?.linkWidgetId?.[0]) {
     linkUtils.deleteOldLWCode()
   }
   if (value?.[0]) {
     linkUtils.addOrUpdateLinkWidgetCode()
   }
-  row.linkWidget = value
+  row.linkWidgetId = value
 }
 </script>
 

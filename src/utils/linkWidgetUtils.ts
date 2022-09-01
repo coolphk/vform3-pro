@@ -196,12 +196,13 @@ function getWidgetValue(linkWidgetRef: any) {
 
 /***
  * 删除组件时一起删除关联组件的代码
- * @param wigetList
  * @param designer
  */
-export function deleteAllLinkWidgetCode(wigetList: Array<any>, designer: any) {
+export function deleteAllLinkWidgetCode(designer: any) {
   let lkUtils = null
-  traverseAllWidgets(wigetList, (widget: any) => {
+  // debugger
+  traverseAllWidgets(designer.widgetList, (widget: any) => {
+    // debugger
     if (widget.options.bussinessSource?.scriptParams?.length > 0) {
       setLinkWidgetValueToScriptParams(widget.options.bussinessSource?.scriptParams, designer.getWidgetRef, (param: any, getWidgetRef: Function) => {
         lkUtils = new LinkWidgetUtils({
