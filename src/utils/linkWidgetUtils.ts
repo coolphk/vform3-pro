@@ -185,32 +185,25 @@ function getWidgetValue(linkWidgetRef: any) {
  * @param designer
  */
 export function deleteAllLinkWidgetCode(designer: any) {
-  let lkUtils = null
   // debugger
+  const callback = (widget: any) => (param: any, getWidgetRef: Function) => {
+    let lkUtils = new LinkWidgetUtils({
+      designer,
+      selectedWidget: widget,
+      oldLinkWidgetId: param?.linkWidgetId?.[0]
+    })
+    lkUtils.deleteOldLWCode()
+    param?.linkWidgetId && (param.linkWidgetId = [])
+  }
   traverseAllWidgets(designer.widgetList, (widget: any) => {
     // debugger
     if (widget.options.bussinessSource?.scriptParams?.length > 0) {
-      setLinkWidgetValueToScriptParams(widget.options.bussinessSource?.scriptParams, designer.getWidgetRef, (param: any, getWidgetRef: Function) => {
-        lkUtils = new LinkWidgetUtils({
-          designer,
-          selectedWidget: widget,
-          oldLinkWidgetId: param?.linkWidgetId[0]
-        })
-        lkUtils.deleteOldLWCode()
-      })
+      setLinkWidgetValueToScriptParams(widget.options.bussinessSource?.scriptParams, designer.getWidgetRef, callback(widget))
     }
     if (widget.options?.valueSource?.bindMap) {
       traverseObj(widget.options?.valueSource?.bindMap, (Scripts_ID: string, bindvalue: BindMapValue) => {
-        setLinkWidgetValueToScriptParams(bindvalue.scriptParams, designer.getWidgetRef, (param: any, getWidgetRef: Function) => {
-          lkUtils = new LinkWidgetUtils({
-            designer,
-            selectedWidget: widget,
-            oldLinkWidgetId: param?.linkWidgetId[0]
-          })
-          lkUtils.deleteOldLWCode()
-        })
+        setLinkWidgetValueToScriptParams(bindvalue.scriptParams, designer.getWidgetRef, callback(widget))
       })
     }
-    lkUtils = null
   })
 }
