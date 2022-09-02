@@ -115,7 +115,7 @@ export default {
       selectedIndices: [],
       pageSize: this.widget.options.pagination.pageSize,
       currentPage: this.widget.options.pagination.currentPage,
-
+      fieldModel: {}
     }
   },
   computed: {
