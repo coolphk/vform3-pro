@@ -5,3 +5,8 @@ Data-table表格选列时重置表格列问题
 删除组件同时删除关联组件代码
 1.0.1
 fix():修复绑定事件 luanhao
+1.0.2
+feat(designer render):修改注入axios方法 luanhao 3 分钟 之前
+feat(linkWidget):删除组件时去掉绑定关系中scriptParms中的linkWidgetId luanhao 今天 13:54
+fix(linkWidget):组件方法变更时代码出现undefined bug luanhao 今天 13:54
+feat(tree-view):将tree-view nodeclick换为onChange luanhao 今天 9:19
