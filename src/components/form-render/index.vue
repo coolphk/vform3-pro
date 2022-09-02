@@ -59,6 +59,7 @@ import i18n, {changeLocale} from "@/utils/i18n"
 import {execProcedure, getProcedureParams} from "@/api/data-schema";
 import {filterPostParam, traverseObj} from "@/utils/data-adapter";
 import useTransferFormDataToPostData from "@/components/form-render/composible/useTransferFormDataToPostData";
+import {injectAppAxios} from "@/api";
 
 export default {
   name: "VFormRender",
@@ -100,6 +101,9 @@ export default {
       type: Object,
       default: () => {
       },
+    },
+    appAxios: {
+      type: Object
     },
     router: {
       type: Object,
@@ -178,6 +182,7 @@ export default {
     //
   },
   created() {
+    injectAppAxios(this.appAxios)
     this.buildFormModel(!this.formJsonObj ? null : this.formJsonObj.widgetList)
     this.initFormObject()
   },

@@ -61,7 +61,7 @@ export default defineComponent({
   },
   created() {
     this.initRefList()
-    this.initFieldModel()
+    // this.initFieldModel()
     this.loadDataFromBussiness()
   },
   methods: {

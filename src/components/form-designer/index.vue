@@ -85,6 +85,7 @@ import {MOCK_CASE_URL, VARIANT_FORM_VERSION} from "@/utils/config"
 import i18n, {changeLocale} from "@/utils/i18n"
 import axios from 'axios'
 import SvgIcon from "@/components/svg-icon/index"
+import {injectAppAxios} from "@/api";
 
 export default {
   name: "VFormDesigner",
@@ -103,7 +104,7 @@ export default {
       type: Object,
       default: null,
     },
-
+    appAxios: '',
     /* 禁止显示的组件名称数组 */
     bannedWidgets: {
       type: Array,
@@ -194,6 +195,7 @@ export default {
 
   },
   created() {
+    injectAppAxios(this.appAxios)
     this.vsCodeFlag = getQueryParam('vscode') == 1
     this.caseName = getQueryParam('case')
   },
@@ -428,6 +430,9 @@ export default {
       return this.$refs['formRef'].getSelectedWidgetRef()
     },
 
+    setAppAxios(axiosInstance) {
+      injectAppAxios(axiosInstance)
+    }
     //TODO: 增加更多方法！！
 
   }

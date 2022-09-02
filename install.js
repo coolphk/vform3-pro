@@ -1,5 +1,3 @@
-import axios from 'axios'
-
 import VFormDesigner from '@/components/form-designer/index.vue'
 import VFormRender from '@/components/form-render/index.vue'
 
@@ -15,7 +13,6 @@ import ContainerItems from '@/components/form-render/container-item/index'
 import {addDirective} from '@/utils/directive'
 import {installI18n} from '@/utils/i18n'
 import {loadExtension} from '@/extension/extension-loader'
-import {injectAppAxios} from "@/api";
 
 
 VFormDesigner.install = function (app, options) {
@@ -52,7 +49,6 @@ const components = [
 
 const install = (app, options) => {
   console.log('install VForm');
-  injectAppAxios(options.axios)
   addDirective(app)
   installI18n(app)
   loadExtension(app)
@@ -68,7 +64,7 @@ const install = (app, options) => {
     app.component(component.name, component)
   })
 
-  window.axios = axios
+  // window.axios = axios
 }
 
 if (typeof window !== 'undefined' && window.Vue) { /* script方式引入时赋值axios！！ */
