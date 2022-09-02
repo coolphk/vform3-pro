@@ -182,7 +182,7 @@ export default {
     //
   },
   created() {
-    injectAppAxios(this.appAxios)
+    this.appAxios && injectAppAxios(this.appAxios)
     this.buildFormModel(!this.formJsonObj ? null : this.formJsonObj.widgetList)
     this.initFormObject()
   },

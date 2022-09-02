@@ -195,7 +195,7 @@ export default {
 
   },
   created() {
-    injectAppAxios(this.appAxios)
+    this.appAxios && injectAppAxios(this.appAxios)
     this.vsCodeFlag = getQueryParam('vscode') == 1
     this.caseName = getQueryParam('case')
   },
