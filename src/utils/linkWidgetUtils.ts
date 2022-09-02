@@ -5,7 +5,7 @@ import {isTable, traverseAllWidgets} from "@/utils/util.js";
 
 type Template = {
   codeTemplate: string | undefined
-  regTemplate: RegExp | undefined
+  regTemplate: RegExp | null
 }
 type ConstructorType = {
   designer: any,
@@ -59,7 +59,7 @@ export default class LinkWidgetUtils {
       const linkWidgetCode = linkWidget.options[getWidgetEventByType(linkWidget.type)]
 
       //当前关联组件代码是否包含
-      const matched = linkWidgetCode.match(res.regTemplate)
+      const matched = linkWidgetCode?.match(res.regTemplate)
       if (matched) {
         linkWidget.options[getWidgetEventByType(linkWidget.type)] = linkWidgetCode.replace(res.regTemplate, res.codeTemplate)
       } else {
@@ -84,8 +84,9 @@ export default class LinkWidgetUtils {
     let selectedWidgetFunctionStr = this.getSelectedWidgetTriggerFunction(this.selectedWidget.type)
     const res: Template = {
       codeTemplate: '',
-      regTemplate: undefined
+      regTemplate: null
     }
+    //如果关联组件是按钮，并且当前组件是data-wrapper证明是保存
     if (LWType === 'button' && CWType === 'data-wrapper') {
       selectedWidgetFunctionStr = 'saveDataWrapper'
     }
@@ -115,21 +116,6 @@ export default class LinkWidgetUtils {
     }
     return strFunction
   }
-
-  /*  private getScriptParamsStrByType(type: string) {
-      let codeStr
-      switch (type) {
-        case 'data-wrapper': {
-          codeStr = 'valueSource[row.scriptId].scriptParams'
-          break
-        }
-        case 'select' : {
-          codeStr = 'bussinessSource.scriptParams'
-          break
-        }
-      }
-      return codeStr
-    }*/
 }
 
 /**

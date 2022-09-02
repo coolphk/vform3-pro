@@ -8,7 +8,7 @@
           :class="compClass"
           :data="compOptionModal.treeData"
           :props="compProp"
-          @node-click="handleOnNodeClick"
+          @current-change="handleOnChange"
       ></el-tree>
     </div>
     <!--    </div>-->
@@ -21,6 +21,8 @@ import {loadBussinessSource} from "@/api/bussiness-source";
 import {assembleBussinessParams, unFlatten} from "@/utils/data-adapter.js";
 import ContainerItemMixin from "@/components/form-render/container-item/containerItemMixin.js";
 import refMixin from "@/components/form-render/refMixin.js";
+import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin.js";
+
 import {TreeView, TreeViewOptions} from "@/extension/tree-view/tree-view-schema";
 import {defineComponent, PropType} from "vue";
 import Node from "element-plus/lib/components/tree/src/model/node";
@@ -30,12 +32,18 @@ export default defineComponent({
   components: {
     ContainerItemWrapper
   },
-  mixins: [ContainerItemMixin, refMixin],
+  mixins: [ContainerItemMixin, refMixin, fieldMixin],
   inject: ['refList', 'sfRefList', 'globalModel', 'getFormConfig', 'getGlobalDsv'],
   props: {
     widget: {
       type: Object as PropType<TreeView>,
       require: true
+    }
+  },
+  data() {
+    return {
+      field: this.widget,
+      fieldModel: null
     }
   },
   computed: {
@@ -52,11 +60,14 @@ export default defineComponent({
     }
   },
   created() {
+    this.initRefList()
+    this.initFieldModel()
     this.loadDataFromBussiness()
   },
   methods: {
-    handleOnNodeClick(data: any, node: Node) {
-      new Function('data', 'node', 'value', this.widget!.options.onNodeClick).call(this, data, node, data[this.widget!.options.valueKey])
+    handleOnChange(data: any, node: Node) {
+      this.fieldModel = data
+      new Function('data', 'node', this.widget!.options.onChange).call(this, data, node)
     },
     loadDataFromBussiness() {
       if (this.compOptionModal.bussinessSource?.currentNodeKey) {

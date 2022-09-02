@@ -28,6 +28,8 @@ export default {
 
     PERegister.registerEPEditor(app, 'tree-view-onNodeClick', 'tree-view-onNodeClick-editor',
       PEFactory.createEventHandlerEditor('onNodeClick', ['data', 'node','value']))
+    PERegister.registerEPEditor(app, 'tree-view-onChange', 'tree-view-onChange-editor',
+      PEFactory.createEventHandlerEditor('onChange', ['data', 'node']))
 
   }
 }

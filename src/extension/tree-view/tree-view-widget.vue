@@ -52,9 +52,8 @@ export default {
       return this.widget.options.customClass || ''
     },
     compTreeData() {
-      const aa = unFlatten(this.treeArray, 'BHK01', undefined, 0, 'BHK01A')
-      console.log(111, aa);
-      return aa
+       unFlatten(this.treeArray, 'BHK01', undefined, 0, 'BHK01A')
+
     },
     compClass() {
       return {

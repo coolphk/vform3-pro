@@ -13,7 +13,8 @@ export interface TreeViewOptions extends VFormWidgetOptions {
   parentKey: string, //父子关系节点名
   rootParentValue: unknown  //根节点的parentId值
   expandOnClickNode: boolean
-  onNodeClick: string
+  onNodeClick?: string
+  onChange: string
   height: string
 }
 
@@ -38,7 +39,8 @@ const treeView: TreeView = {
     parentKey: '',
     rootParentValue: '',
     expandOnClickNode: false,
-    onNodeClick: '',
+    // onNodeClick: '',
+    onChange: '',
     height: '',
     bussinessSource: {
       currentNodeKey: "",//当前选中的节点

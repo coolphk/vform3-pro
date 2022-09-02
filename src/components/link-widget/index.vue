@@ -40,7 +40,6 @@ const fieldWidgetList = getAllFieldWidgets(props.designer.widgetList)
         ...item,
         label: item.label + '-' + item.id,
         children: isTable(widget.type) ? widget.options.tableColumns.map((column: any) => {
-          console.log(111, column)
           return {
             label: column.label,
             id: column.prop
@@ -48,8 +47,6 @@ const fieldWidgetList = getAllFieldWidgets(props.designer.widgetList)
         }) : []
       }
     })
-
-console.log(222, fieldWidgetList);
 
 /**
  * 根据当前组件与所选关联组件的类型设置代码

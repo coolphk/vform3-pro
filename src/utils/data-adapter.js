@@ -169,7 +169,7 @@ export const getWidgetEventByType = (type) => {
     'date': onChange,
     'switch': onChange,
     'button': 'onClick',
-    'tree-view': 'onNodeClick'
+    'tree-view': onChange
   }
   if (eventMap[type] === undefined) {
     throw new Error(`${type}当前组件未支持绑定`)
@@ -181,6 +181,6 @@ export function getFieldOrWidget(widget) {
   if (widget?.field) {
     return widget.field
   } else {
-    return widget.widget
+    return widget?.widget
   }
 }

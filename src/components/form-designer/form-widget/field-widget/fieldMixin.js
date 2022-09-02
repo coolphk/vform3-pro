@@ -218,7 +218,7 @@ export default {
            * 用关联组件的值替换scriptParam的TestVALUE
            */
 
-          setLinkWidgetValueToScriptParams(bussinessSource,this.getWidgetRef)
+          setLinkWidgetValueToScriptParams(bussinessSource, this.getWidgetRef)
           loadBussinessSource(assembleBussinessParams({
             scriptId: bussinessSource.currentNodeKey,
             params: bussinessSource.scriptParams,
@@ -534,6 +534,7 @@ export default {
         this.initFileList()
         // console.log(this.field)
         this.syncUpdateFormModel(newValue)
+        //不知道为合要触发组件事件，暂时注销
         // this.emitFieldDataChange(newValue, oldValue)
       }
     },
