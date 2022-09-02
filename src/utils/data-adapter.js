@@ -158,6 +158,7 @@ export function changeBindMapToProcedureIdAsKey(bindMap) {
 export const getWidgetEventByType = (type) => {
   const onChange = 'onChange'
   const eventMap = {
+    'button': 'onClick',
     'data-table': 'onTableRowClick',
     'input': onChange,
     'textarea': onChange,
@@ -168,7 +169,6 @@ export const getWidgetEventByType = (type) => {
     'time': onChange,
     'date': onChange,
     'switch': onChange,
-    'button': 'onClick',
     'tree-view': onChange
   }
   if (eventMap[type] === undefined) {

@@ -55,15 +55,15 @@ export default class LinkWidgetUtils {
     if (linkWidget) {
       //根据当前组件与当前关联组件获取匹配正则与代码模板
       const res = this.getCodeTemplateWithLWTypeAndCWType(linkWidget.type, this.selectedWidget.type)
-      //当前关联组件的事件代码
-      const linkWidgetCode = linkWidget.options[getWidgetEventByType(linkWidget.type)]
 
+      //当前关联组件的事件代码
+      const linkWidgetCode = linkWidget.options[getWidgetEventByType(linkWidget.type)] ?? ""
       //当前关联组件代码是否包含
       const matched = linkWidgetCode?.match(res.regTemplate)
       if (matched) {
         linkWidget.options[getWidgetEventByType(linkWidget.type)] = linkWidgetCode.replace(res.regTemplate, res.codeTemplate)
       } else {
-        linkWidget.options[getWidgetEventByType(linkWidget.type)] += res.codeTemplate
+        linkWidget.options[getWidgetEventByType(linkWidget.type)] = linkWidgetCode + res.codeTemplate
       }
     }
   }
