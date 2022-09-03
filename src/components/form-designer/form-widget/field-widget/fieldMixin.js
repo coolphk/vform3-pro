@@ -1,7 +1,7 @@
 import {deepClone, getDSByName, overwriteObj, runDataSourceRequest, translateOptionItems} from "@/utils/util"
 import FormValidators from '@/utils/validators'
 import {loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams, isObj} from "@/utils/data-adapter";
+import {assembleBussinessParams} from "@/utils/data-adapter";
 import {setLinkWidgetValueToScriptParams} from "@/utils/linkWidgetUtils";
 
 export default {
@@ -380,13 +380,13 @@ export default {
       this.emit$('field-value-changed', [newValue, oldValue])
 
       /* 必须用dispatch向指定父组件派发消息！！ */
-      if (isObj(newValue)) {
+      /*if (isObj(newValue)) {
         this.dispatch('VFormRender', 'fieldChange',
           [this.field.options.name, newValue[this.field.options.valueKey], oldValue[this.field.options.valueKey], this.subFormName, this.subFormRowIndex])
-      } else {
-        this.dispatch('VFormRender', 'fieldChange',
-          [this.field.options.name, newValue, oldValue, this.subFormName, this.subFormRowIndex])
-      }
+      } else {*/
+      this.dispatch('VFormRender', 'fieldChange',
+        [this.field.options.name, newValue, oldValue, this.subFormName, this.subFormRowIndex])
+      // }
     },
 
     syncUpdateFormModel(value) {
@@ -406,11 +406,11 @@ export default {
     },
 
     handleChangeEvent(value) {
-      if (isObj(value)) {
-        this.syncUpdateFormModel(value[this.field.options.valueKey])
-      } else {
+      /*if (isObj(value)) {
         this.syncUpdateFormModel(value)
-      }
+      } else {*/
+      this.syncUpdateFormModel(value)
+      // }
       this.emitFieldDataChange(value, this.oldFieldValue)
 
       //number组件一般不会触发focus事件，故此处需要手工赋值oldFieldValue！！
@@ -520,13 +520,13 @@ export default {
         let oldValue = deepClone(this.fieldModel)
         if (this.field.options?.bussinessSource?.currentNodeKey) {
           const bussinessSource = this.field.options.bussinessSource
-          const valueKey = this.field.options.valueKey
+          const {labelKey, valueKey} = this.field.options
           loadBussinessSource(assembleBussinessParams({
             scriptId: bussinessSource.currentNodeKey,
             params: bussinessSource.scriptParams,
             pageSize: bussinessSource.pageSize
           })).then(res => {
-            this.fieldModel = res.Data.TableData.find((item => item[valueKey] == newValue))
+            this.fieldModel = res.Data.TableData.find((item => item[valueKey] === newValue[valueKey] && item[labelKey] === newValue[labelKey]))
           })
         } else {
           this.fieldModel = newValue

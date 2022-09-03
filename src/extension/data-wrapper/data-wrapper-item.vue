@@ -99,7 +99,12 @@ export default {
     getChildWidgetsValue() {
       const formModel = {}
       traverseFieldWidgets(this.widget.widgetList, (widget) => {
-        formModel[widget.id] = this.formModel[widget.id]
+        if (widget.options.valueKey) {
+          formModel[widget.id] = this.formModel[widget.id][widget.options.valueKey]
+        } else {
+          formModel[widget.id] = this.formModel[widget.id]
+        }
+
       })
       console.log(this.formModel, formModel);
       return formModel
@@ -113,11 +118,12 @@ export default {
       /**
        * 从表单中的组件取值，如果没有和绑定关系匹配的组件则获取绑定关系默认值
        * @param formData
-       * @param sv
+       * @param widgetId
        * @returns {*}
        */
-      function getParamVALUE(formData, sv) {
-        return formData[sv.widgetId] ? formData[sv.widgetId] : sv.paramValue
+      function getParamVALUE(formData, widgetId) {
+        // return formData[sv.widgetId] ? formData[sv.widgetId] : sv.paramValue
+        return formData?.[widgetId]
       }
 
       const wrapperData = this.getChildWidgetsValue()
@@ -130,10 +136,11 @@ export default {
               //替换params值，用来生成最后exec接口的params参数。
               params: postData?.[param.procedureId]?.params ? [...postData[param.procedureId].params, {
                 ...param,
-                Param_TestVALUE: getParamVALUE(wrapperData, sv) || param.defaultValue || param.Param_TestVALUE
+                Param_TestVALUE: getParamVALUE(wrapperData, sv.widgetId) || param.defaultValue || sv.paramValue || param.Param_TestVALUE
+                //赋值顺序，1、绑定关系中的控件值，2、绑定关系默认值 3、当前存储过程对应参数值 4、绑定关系中存储过程对应参数值
               }] : [{
                 ...param,
-                Param_TestVALUE: getParamVALUE(wrapperData, sv) || param.defaultValue || param.Param_TestVALUE
+                Param_TestVALUE: getParamVALUE(wrapperData, sv.widgetId) || param.defaultValue || sv.paramValue || param.Param_TestVALUE
               }],
             }
           })
