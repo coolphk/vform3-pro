@@ -75,15 +75,17 @@ import i18n from "@/utils/i18n"
 import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
 import refMixin from "@/components/form-render/refMixin"
 import containerItemMixin from "@/components/form-render/container-item/containerItemMixin"
+import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
 import {getDSByName, overwriteObj, runDataSourceRequest} from "@/utils/util"
 import {loadBussinessSource} from "@/api/bussiness-source"
 import {assembleBussinessParams, traverseObj} from "@/utils/data-adapter";
 import {setLinkWidgetValueToScriptParams} from "@/utils/linkWidgetUtils";
 
+
 export default {
   name: "DataTableItem",
   componentName: 'ContainerItem',  //必须固定为ContainerItem，用于接收父级组件的broadcast事件
-  mixins: [emitter, i18n, refMixin, containerItemMixin],
+  mixins: [emitter, i18n, refMixin, containerItemMixin, fieldMixin],
   components: {
     ContainerItemWrapper,
     ...FieldComponents,
@@ -271,7 +273,7 @@ export default {
         }
       } catch (error) {
         console.error(`${this.widget.id}--hanldeTableRowClick出现错误`)
-        throw new error
+        throw error
       }
     },
     //--------------------- 以下为组件支持外部调用的API方法 begin ------------------//
@@ -416,8 +418,7 @@ export default {
     },
     //--------------------- 以上为组件支持外部调用的API方法 end ------------------//
     onCurrentChange(currentRow) {
-      this.widget.options['currentRow'] = currentRow
-      // console.log('onCurrentChange', currentRow);
+      this.fieldModel = currentRow
     }
   }
 }

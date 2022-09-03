@@ -1,7 +1,7 @@
 import {getFieldOrWidget, getWidgetEventByType, isArray, isObj, traverseObj} from "@/utils/data-adapter.js";
 import {BindMapScriptParam, BindMapScriptParams, BindMapValue} from "@/extension/data-wrapper/data-wrapper-schema";
 import {ScriptParam} from "@/api/types";
-import {isTable, traverseAllWidgets} from "@/utils/util.js";
+import {traverseAllWidgets} from "@/utils/util.js";
 
 type Template = {
   codeTemplate: string | undefined
@@ -150,17 +150,9 @@ export function setValueTotParam(param: BindMapScriptParam | ScriptParam, getWid
     const linkWidget = getFieldOrWidget(linkWidgetRef)
     if (linkWidget) {
       if (param.hasOwnProperty('defaultValue')) {
-        if (isTable(linkWidget.type)) {
-          (<BindMapScriptParam>param).defaultValue = linkWidget.options?.currentRow?.[param.linkWidgetId?.[1]]
-        } else {
-          (<BindMapScriptParam>param).defaultValue = getWidgetValue(linkWidgetRef)
-        }
+        (<BindMapScriptParam>param).defaultValue = getWidgetValue(linkWidgetRef, param.linkWidgetId?.[1])
       } else {
-        if (isTable(linkWidget.type)) {
-          (<ScriptParam>param).Param_TestVALUE = linkWidget.options?.currentRow?.[param.linkWidgetId?.[1]]
-        } else {
-          (<ScriptParam>param).Param_TestVALUE = getWidgetValue(linkWidgetRef)
-        }
+        (<ScriptParam>param).Param_TestVALUE = getWidgetValue(linkWidgetRef, param.linkWidgetId?.[1])
       }
     }
   }
@@ -169,12 +161,17 @@ export function setValueTotParam(param: BindMapScriptParam | ScriptParam, getWid
 /**
  * 获取组件值，如果是对象并且绑定valueKey获取 obj[valueKey]
  * @param linkWidgetRef
+ * @param paramLinkId1
  */
-function getWidgetValue(linkWidgetRef: any) {
+function getWidgetValue(linkWidgetRef: any, paramLinkId1: string) {
   const value = linkWidgetRef?.getValue()
   const linkWidget = getFieldOrWidget(linkWidgetRef)
-  if (linkWidget?.options.valueKey && isObj(value)) {
-    return value?.[linkWidget.options.valueKey]
+  if (isObj(value)) {
+    if (linkWidget?.options.valueKey) { //如果有valueKey，代表是下拉等
+      return value?.[linkWidget.options.valueKey]
+    } else if (paramLinkId1) { //代表是表格
+      return value?.[paramLinkId1]
+    }
   } else {
     return value
   }
