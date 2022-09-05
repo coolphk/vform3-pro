@@ -64,8 +64,15 @@ export default {
   },
   mounted() {
     // this.setFormDataWithValueSource(this.params)
+    this.handleOnMounted()
   },
   methods: {
+    handleOnMounted() {
+      if (!!this.widget.options.onMounted) {
+        let mountFunc = new Function(this.widget.options.onMounted)
+        mountFunc.call(this)
+      }
+    },
     /**
      * 根据valueSource获取表单数据并赋值，
      *

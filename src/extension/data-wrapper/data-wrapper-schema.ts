@@ -91,6 +91,7 @@ const dataWrapperWidget: DataWrapper = {
     label: 'data-wrapper',
     hidden: false,
     submit: '',
+    onMounted: '',
     valueSource: { //脚本相关
       dataTarget: {
         expandedKeys: [],
