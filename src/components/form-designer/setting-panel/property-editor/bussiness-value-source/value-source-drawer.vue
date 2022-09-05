@@ -161,7 +161,7 @@
 
 import {computed, defineProps, reactive, ref, watch} from "vue";
 import {getScriptsParams, loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams, filterPostParam, traverseObj} from "@/utils/data-adapter.js";
+import {assembleBussinessParams, filterBindRowParam, traverseObj} from "@/utils/data-adapter.js";
 import {isEmptyObj, traverseFieldWidgets} from "@/utils/util.js";
 import useBindParam
   from "@/components/form-designer/setting-panel/property-editor/bussiness-value-source/useBindParam.js";
@@ -284,7 +284,7 @@ watch(bussinessData, (newValue, oldValue) => {
           //修改已绑定参数颜色
           vDataTarget$.value.changeBoundProcedureStyle(item, true)
           return {
-            ...filterPostParam(item),
+            ...filterBindRowParam(item),
             Param_TestVALUE: row.value,
             defaultValue: item.defaultValue,
             procedureId: item.procedureId,

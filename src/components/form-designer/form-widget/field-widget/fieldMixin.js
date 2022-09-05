@@ -1,7 +1,7 @@
 import {deepClone, getDSByName, overwriteObj, runDataSourceRequest, translateOptionItems} from "@/utils/util"
 import FormValidators from '@/utils/validators'
 import {loadBussinessSource} from "@/api/bussiness-source";
-import {assembleBussinessParams} from "@/utils/data-adapter";
+import {assembleBussinessParams, isObj} from "@/utils/data-adapter";
 import {setLinkWidgetValueToScriptParams} from "@/utils/linkWidgetUtils";
 
 export default {
@@ -526,7 +526,11 @@ export default {
             params: bussinessSource.scriptParams,
             pageSize: bussinessSource.pageSize
           })).then(res => {
-            this.fieldModel = res.Data.TableData.find((item => item[valueKey] === newValue[valueKey] && item[labelKey] === newValue[labelKey]))
+            if (isObj(newValue)) {
+              this.fieldModel = res.Data.TableData.find((item => item[valueKey] === newValue[valueKey] && item[labelKey] === newValue[labelKey]))
+            } else {
+              this.fieldModel = res.Data.TableData.find((item => item[valueKey] === newValue))
+            }
           })
         } else {
           this.fieldModel = newValue

@@ -6,6 +6,7 @@ export interface VFormWidgetOptions {
   hidden: boolean,
   customClass: '',
   bussinessSource?: VFormBussinessSource
+  onMounted?:string
 }
 
 export interface VFormWidget {

@@ -108,6 +108,15 @@ export function filterPostParam(param) {
   }
 }
 
+export function filterBindRowParam(param) {
+  return {
+    "Param_ID": param.Param_ID,
+    "Param_Name": param.Param_Name,
+    "Param_TestVALUE": param.Param_TestVALUE,
+    "Parent_ID": param.Parent_ID,
+  }
+}
+
 export function getKeyByValue(obj, value) {
   return Object.keys(obj).find(key => obj[key] = value)
 }
