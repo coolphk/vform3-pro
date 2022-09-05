@@ -105,6 +105,8 @@ export default {
 
     getChildWidgetsValue() {
       const formModel = {}
+
+
       traverseFieldWidgets(this.widget.widgetList, (widget) => {
         if (widget.options.valueKey) {
           formModel[widget.id] = this.formModel[widget.id][widget.options.valueKey]
